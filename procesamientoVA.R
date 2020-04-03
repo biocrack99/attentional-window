@@ -540,6 +540,6 @@ df_datos <- ldply (list_datos, data.frame)
 
 #4- Agrego los nombres de los observadores a la lista del gaze
 
-
+names(list_gaze) <- c("aaf",  "afb",  "agm", "cic", "jjr", "lrc", "mab", "mdn", "msz", "nga", "pab", "at", "lfa", "lms", "mcm", "aaf",  "afb",  "agm", "cic", "jjr", "lrc", "mab", "mdn", "msz", "nga", "pab", "at", "lfa", "lms", "mcm")
 
 
