@@ -1,6 +1,5 @@
-##Script Grafico con coordenadas polar 
-#Grafico el ancho de la ventana teorico segun un ajuste lineal
-#a los datos de cada observador 
+##Script para ordenar y cargor los datos de los archivos obtenidos
+##durante el experimento de Ventana Atencional
 
 #cargo librerias
 library(tidyverse)
@@ -14,7 +13,7 @@ library(plyr)
 N <- 30
 list_datos <- vector("list", N)
 list_gaze <- vector ("list", N)
-
+Ntrials <- 336
 
 #Cargo los datos de la ventana atencional antes del entrenamiento del ILAV
 #ubico el directorio donde se encuentran los archivos
@@ -30,7 +29,7 @@ files <- list.files(pattern = "*.csv", full.names = T)
 #Cargo los datos de esos archivos en una tabla y uno las filas
 for (i in seq_along(files))  {
   
-  tbl <- sapply(files[1], read_csv, simplify=FALSE) %>% 
+  tbl <- sapply(files[i], read_csv, simplify=FALSE) %>% 
     bind_rows()
   
 
@@ -56,7 +55,7 @@ for (i in seq_along(files))  {
         
       }
     
-      else if (1 < j && j <= 334){    
+      else if (1 < j && j <= (Ntrials -2)){    
       
         ls_gaze_x[[j]] <- as.double(df_gaze$XGaze.mm[(index[j] + 1):index[(j+1)]])
       
@@ -170,7 +169,7 @@ files <- list.files(pattern = "*.mat", full.names = T)
 
 for (i in seq_along(files))  {
   
-  matlabFile  <- readMat(files[1])
+  matlabFile  <- readMat(files[i])
   varNames    <- names(matlabFile$estructura.datos[,,1])
   datList     <- matlabFile$estructura.datos
   #datList    <- lapply(datList, unlist, use.names=FALSE)
@@ -535,8 +534,12 @@ for (i in seq_along(list_datos)){
   
 }
 
-#2- Creo un dataframe con la lista de datos
+#3- Creo un dataframe con la lista de datos
 
 df_datos <- ldply (list_datos, data.frame)
 
-df_gaze  <- ldply(list_gaze, data.frame)
+#4- Agrego los nombres de los observadores a la lista del gaze
+
+
+
+
