@@ -71,6 +71,16 @@ for (i in seq_along(files))  {
       }
     
     }
+  
+  
+  #Omito los valores NA en la lista del gaze
+  for (l in seq_along(ls_gaze_x)){
+  
+  ls_gaze_x[[l]] <- na.omit(ls_gaze_x[[l]])
+  ls_gaze_y[[l]] <- na.omit(ls_gaze_y[[l]])
+  
+  }
+  
   #Omit los valores NA
   df_gaze <- na.omit(df_gaze)
   df_gaze <- df_gaze[!grepl("Direccion", df_gaze$Direccion),]
@@ -307,6 +317,16 @@ for (i in seq_along(files))  {
     }
     
   }
+  
+  #Omito los valores NA en la lista del gaze
+  for (l in seq_along(ls_gaze_x)){
+    
+    ls_gaze_x[[l]] <- na.omit(ls_gaze_x[[l]])
+    ls_gaze_y[[l]] <- na.omit(ls_gaze_y[[l]])
+    
+  }
+  
+  
   #Omit los valores NA
   df_gaze <- na.omit(df_gaze)
   df_gaze <- df_gaze[!grepl("Direccion", df_gaze$Direccion),]
