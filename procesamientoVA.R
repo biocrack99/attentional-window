@@ -42,11 +42,12 @@ for (i in seq_along(files))  {
   #Busco las filas donde se separa cada trial
   index <- which(df_gaze$Direccion == "Direccion")
   #Genero dos listas con los gazes en x y en y en cada trial
-  ls_gaze_x <- vector("list", length(index))
-  ls_gaze_y <- vector("list", length(index))
-  for (j in seq_along(index)){
+  ls_gaze_x <- vector("list", Ntrials)
+  ls_gaze_y <- vector("list", Ntrials)
   
-      if (j == 1){
+  for (j in seq_along(ls_gaze_x)){
+  
+    if (j == 1){
         
         ls_gaze_x[[j]] <- as.double(df_gaze$XGaze.mm[1:index[j]])
         
@@ -55,23 +56,22 @@ for (i in seq_along(files))  {
         
       }
     
-      else if (1 < j && j <= (Ntrials -2)){    
+    else if (1 < j && j <= 335) {    
       
-        ls_gaze_x[[j]] <- as.double(df_gaze$XGaze.mm[(index[j] + 1):index[(j+1)]])
+        ls_gaze_x[[j]] <- as.double(df_gaze$XGaze.mm[(index[j-1] + 1):index[(j)]])
       
-        ls_gaze_y[[j]] <- as.double(df_gaze$YGaze.mm[(index[j] + 1):index[(j+1)]])
+        ls_gaze_y[[j]] <- as.double(df_gaze$YGaze.mm[(index[j-1] + 1):index[(j)]])
       }
       
-      else {
+    else  { 
         
-        ls_gaze_x[[j]] <- as.double(df_gaze$XGaze.mm[(index[j] + 1):length(df_gaze$XGaze_mm)])
+            ls_gaze_x[[j]] <- as.double(df_gaze$XGaze.mm[(index[j-1] + 1):(length(df_gaze$XGaze.mm))])
         
-        ls_gaze_y[[j]] <- as.double(df_gaze$YGaze.mm[(index[j] + 1):length(df_gaze$YGaze_mm)])
+            ls_gaze_y[[j]] <- as.double(df_gaze$YGaze.mm[(index[j-1] + 1):(length(df_gaze$XGaze.mm))])
         
       }
     
     }
-  
   
   #Omito los valores NA en la lista del gaze
   for (l in seq_along(ls_gaze_x)){
@@ -89,11 +89,25 @@ for (i in seq_along(files))  {
   df_gaze$Direccion <- as.numeric(df_gaze$Direccion)
   df_gaze <- df_gaze[,-(3:4)]
   
-  for (k in seq_along(df_gaze$Direccion)){
+  for (k in seq_along(ls_gaze_x)){
     
-    df_gaze$XGaze.mm[k] <-  ls_gaze_x[k]
-    df_gaze$YGaze.mm[k] <-  ls_gaze_y[k]
-  }
+    if (k == 1) {
+                  
+      df_gaze$XGaze.mm[[k]] <-  ls_gaze_x[[k]][201:299]
+      df_gaze$YGaze.mm[[k]] <-  ls_gaze_y[[k]][201:299]
+      
+    }
+    
+    else{
+      
+      df_gaze$XGaze.mm[[k]] <-  ls_gaze_x[[k]][1:99]
+      df_gaze$YGaze.mm[[k]] <-  ls_gaze_y[[k]][1:99]
+      
+    }
+      
+      
+    
+      }
   
   
 #--------------------------------------------------------------------------
@@ -288,9 +302,10 @@ for (i in seq_along(files))  {
   #Busco las filas donde se separa cada trial
   index <- which(df_gaze$Direccion == "Direccion")
   #Genero dos listas con los gazes en x y en y en cada trial
-  ls_gaze_x <- vector("list", length(index))
-  ls_gaze_y <- vector("list", length(index))
-  for (j in seq_along(index)){
+  ls_gaze_x <- vector("list", Ntrials)
+  ls_gaze_y <- vector("list", Ntrials)
+  
+  for (j in seq_along(ls_gaze_x)){
     
     if (j == 1){
       
@@ -301,18 +316,18 @@ for (i in seq_along(files))  {
       
     }
     
-    else if (1 < j && j <= 334){    
+    else if (1 < j && j <= 335) {    
       
-      ls_gaze_x[[j]] <- as.double(df_gaze$XGaze.mm[(index[j] + 1):index[(j+1)]])
+      ls_gaze_x[[j]] <- as.double(df_gaze$XGaze.mm[(index[j-1] + 1):index[(j)]])
       
-      ls_gaze_y[[j]] <- as.double(df_gaze$YGaze.mm[(index[j] + 1):index[(j+1)]])
+      ls_gaze_y[[j]] <- as.double(df_gaze$YGaze.mm[(index[j-1] + 1):index[(j)]])
     }
     
-    else {
+    else  { 
       
-      ls_gaze_x[[j]] <- as.double(df_gaze$XGaze.mm[(index[j] + 1):length(df_gaze$XGaze_mm)])
+      ls_gaze_x[[j]] <- as.double(df_gaze$XGaze.mm[(index[j-1] + 1):(length(df_gaze$XGaze.mm))])
       
-      ls_gaze_y[[j]] <- as.double(df_gaze$YGaze.mm[(index[j] + 1):length(df_gaze$YGaze_mm)])
+      ls_gaze_y[[j]] <- as.double(df_gaze$YGaze.mm[(index[j-1] + 1):(length(df_gaze$XGaze.mm))])
       
     }
     
@@ -326,7 +341,6 @@ for (i in seq_along(files))  {
     
   }
   
-  
   #Omit los valores NA
   df_gaze <- na.omit(df_gaze)
   df_gaze <- df_gaze[!grepl("Direccion", df_gaze$Direccion),]
@@ -335,12 +349,25 @@ for (i in seq_along(files))  {
   df_gaze$Direccion <- as.numeric(df_gaze$Direccion)
   df_gaze <- df_gaze[,-(3:4)]
   
-  for (k in seq_along(df_gaze$Direccion)){
+  for (k in seq_along(ls_gaze_x)){
     
-    df_gaze$XGaze.mm[k] <-  ls_gaze_x[k]
-    df_gaze$YGaze.mm[k] <-  ls_gaze_y[k]
+    if (k == 1) {
+      
+      df_gaze$XGaze.mm[[k]] <-  ls_gaze_x[[k]][201:299]
+      df_gaze$YGaze.mm[[k]] <-  ls_gaze_y[[k]][201:299]
+      
+    }
+    
+    else{
+      
+      df_gaze$XGaze.mm[[k]] <-  ls_gaze_x[[k]][1:99]
+      df_gaze$YGaze.mm[[k]] <-  ls_gaze_y[[k]][1:99]
+      
+    }
+    
+    
+    
   }
-  
   
 #--------------------------------------------------------------------------
   #Creo una tabla sin las columnas del gaze
