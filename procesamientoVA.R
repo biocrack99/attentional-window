@@ -530,7 +530,7 @@ for (i in seq_along(files))  {
 }
 
 #Elimino las variables
-#rm(list=setdiff(ls(), "list_datos")) 
+rm(list=setdiff(ls(), c("list_datos", "list_gaze"))) 
 ###############################################################################
 #PROCESAMIENTO
 
@@ -589,4 +589,28 @@ df_datos <- ldply (list_datos, data.frame)
 
 names(list_gaze) <- c("aaf",  "afb",  "agm", "cic", "jjr", "lrc", "mab", "mdn", "msz", "nga", "pab", "at", "lfa", "lms", "mcm", "aaf",  "afb",  "agm", "cic", "jjr", "lrc", "mab", "mdn", "msz", "nga", "pab", "at", "lfa", "lms", "mcm")
 
+#5- Comparo para cada obsevador el gaze de cada trial con el gaze del primer
+#trial que se toma como referencia.
 
+#5.1 Para un observador
+
+ggplot() + geom_point(aes(x = vt_ref_gaze_x, y = vt_ref_gaze_y)) +
+
+geom_point(aes(x = list_gaze[[1]]$XGaze.mm[[2]], y = list_gaze[[1]]$YGaze.mm[[2]], colour = "red")) +
+
+  geom_point(aes(x = list_gaze[[1]]$XGaze.mm[[3]], y = list_gaze[[1]]$YGaze.mm[[3]], colour = "blue")) + 
+
+  geom_point(aes(x = list_gaze[[1]]$XGaze.mm[[4]], y = list_gaze[[1]]$YGaze.mm[[4]], colour = "green")) 
+
+                                                                                                                                                                                                                                                       
+
+
+
+
+
+for (i in seq_along(1:336)) {
+  
+  
+  
+  
+}
