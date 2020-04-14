@@ -200,9 +200,23 @@ for (i in seq_along(files))  {
   data_mat    <- as.data.frame(datList)
   #names(data_mat) <- varNames
   datos <- as.data.frame(t(data_mat))
-  #veo que tipos de datos tengo
-  #glimpse(datos)
-  #sapply(datos,mode)
+  #corto los datos del gaze 
+  for (k in seq_along(1:Ntrials)){
+    
+    if (k == 1) {
+      
+      datos$XGaze.mm[[k]] <-  datos$XGaze.mm[[k]][101:184]
+      datos$YGaze.mm[[k]] <-  datos$YGaze.mm[[k]][101:184]
+      
+    }
+    
+    else{
+      
+      datos$XGaze.mm[[k]] <-  datos$XGaze.mm[[k]][1:84]
+      datos$YGaze.mm[[k]] <-  datos$YGaze.mm[[k]][1:84]
+      
+    }
+  }
   #convierto de list a numeric
   datos[c(varNames[1:6])] <-sapply(datos[c(varNames[1:6])], as.numeric)
   #redondeo los datos de la separacion
@@ -461,9 +475,23 @@ for (i in seq_along(files))  {
   data_mat    <- as.data.frame(datList)
   #names(data_mat) <- varNames
   datos <- as.data.frame(t(data_mat))
-  #veo que tipos de datos tengo
-  glimpse(datos)
-  sapply(datos,mode)
+  #corto los datos del gaze
+  for (k in seq_along(1:Ntrials)){
+    
+    if (k == 1) {
+      
+      datos$XGaze.mm[[k]] <-  datos$XGaze.mm[[k]][101:184]
+      datos$YGaze.mm[[k]] <-  datos$YGaze.mm[[k]][101:184]
+      
+    }
+    
+    else{
+      
+      datos$XGaze.mm[[k]] <-  datos$XGaze.mm[[k]][1:84]
+      datos$YGaze.mm[[k]] <-  datos$YGaze.mm[[k]][1:84]
+      
+    }
+  }
   #convierto de list a numeric
   datos[c(varNames[1:6])] <-sapply(datos[c(varNames[1:6])], as.numeric)
   #creo data frame sin los datos del gaze
@@ -530,7 +558,7 @@ for (i in seq_along(files))  {
 }
 
 #Elimino las variables
-rm(list=setdiff(ls(), c("list_datos", "list_gaze"))) 
+rm(list=setdiff(ls(), c("list_datos", "list_gaze", "Ntrials"))) 
 ###############################################################################
 #PROCESAMIENTO
 
