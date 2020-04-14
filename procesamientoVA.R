@@ -93,15 +93,15 @@ for (i in seq_along(files))  {
     
     if (k == 1) {
                   
-      df_gaze$XGaze.mm[[k]] <-  ls_gaze_x[[k]][201:299]
-      df_gaze$YGaze.mm[[k]] <-  ls_gaze_y[[k]][201:299]
+      df_gaze$XGaze.mm[[k]] <-  ls_gaze_x[[k]][101:184]
+      df_gaze$YGaze.mm[[k]] <-  ls_gaze_y[[k]][101:184]
       
     }
     
     else{
       
-      df_gaze$XGaze.mm[[k]] <-  ls_gaze_x[[k]][1:99]
-      df_gaze$YGaze.mm[[k]] <-  ls_gaze_y[[k]][1:99]
+      df_gaze$XGaze.mm[[k]] <-  ls_gaze_x[[k]][1:84]
+      df_gaze$YGaze.mm[[k]] <-  ls_gaze_y[[k]][1:84]
       
     }
       
@@ -353,15 +353,15 @@ for (i in seq_along(files))  {
     
     if (k == 1) {
       
-      df_gaze$XGaze.mm[[k]] <-  ls_gaze_x[[k]][201:299]
-      df_gaze$YGaze.mm[[k]] <-  ls_gaze_y[[k]][201:299]
+      df_gaze$XGaze.mm[[k]] <-  ls_gaze_x[[k]][101:184]
+      df_gaze$YGaze.mm[[k]] <-  ls_gaze_y[[k]][101:184]
       
     }
     
     else{
       
-      df_gaze$XGaze.mm[[k]] <-  ls_gaze_x[[k]][1:99]
-      df_gaze$YGaze.mm[[k]] <-  ls_gaze_y[[k]][1:99]
+      df_gaze$XGaze.mm[[k]] <-  ls_gaze_x[[k]][1:84]
+      df_gaze$YGaze.mm[[k]] <-  ls_gaze_y[[k]][1:84]
       
     }
     
@@ -593,24 +593,22 @@ names(list_gaze) <- c("aaf",  "afb",  "agm", "cic", "jjr", "lrc", "mab", "mdn", 
 #trial que se toma como referencia.
 
 #5.1 Para un observador
+ 
 
-ggplot() + geom_point(aes(x = vt_ref_gaze_x, y = vt_ref_gaze_y)) +
-
-geom_point(aes(x = list_gaze[[1]]$XGaze.mm[[2]], y = list_gaze[[1]]$YGaze.mm[[2]], colour = "red")) +
-
-  geom_point(aes(x = list_gaze[[1]]$XGaze.mm[[3]], y = list_gaze[[1]]$YGaze.mm[[3]], colour = "blue")) + 
-
-  geom_point(aes(x = list_gaze[[1]]$XGaze.mm[[4]], y = list_gaze[[1]]$YGaze.mm[[4]], colour = "green")) 
-
-                                                                                                                                                                                                                                                       
-
-
-
-
+#5.2 Creo vector para los valores p del test
+vr_pvalor_x <- vector("numeric", 336)
+vr_pvalor_y <- vector("numeric", 336)
 
 for (i in seq_along(1:336)) {
   
+kw <- kruskal.test(list_gaze[[1]]$XGaze.mm[[1]], list_gaze[[1]]$XGaze.mm[[i]])
+vr_pvalor_x[i] <- kw$p.value
+kw <- kruskal.test(list_gaze[[1]]$YGaze.mm[[1]], list_gaze[[1]]$YGaze.mm[[i]])
+vr_pvalor_y[i] <- kw$p.value
+
+    
   
-  
-  
+
 }
+
+
