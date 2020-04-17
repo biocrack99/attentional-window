@@ -620,23 +620,64 @@ names(list_gaze) <- c("aaf",  "afb",  "agm", "cic", "jjr", "lrc", "mab", "mdn", 
 #5- Comparo para cada obsevador el gaze de cada trial con el gaze del primer
 #trial que se toma como referencia.
 
-#5.1 Para un observador
- 
+#5.1
+#Calculo la media del XGaze y del YGaze del primer trial
+#Calculo la distancia de cada punto del Gaze de los sucesivo trials con
+#respecto a la media del primer trial.
+vr_num_Dist <- rep(NaN, 84)
+cst_DIST <- 16
+cst_NPOINTS <- 84
+vr_TrialOK <- rep(NaN, Ntrials)
+num_XGazeREF <- rep(NaN, Ntrials)
+num_YGazeREF <- rep(NaN, Ntrials)
 
-#5.2 Creo vector para los valores p del test
-vr_pvalor_x <- vector("numeric", 336)
-vr_pvalor_y <- vector("numeric", 336)
-
-for (i in seq_along(1:336)) {
+for (j in seq_along(list_gaze)){ 
   
-kw <- kruskal.test(list_gaze[[1]]$XGaze.mm[[1]], list_gaze[[1]]$XGaze.mm[[i]])
-vr_pvalor_x[i] <- kw$p.value
-kw <- kruskal.test(list_gaze[[1]]$YGaze.mm[[1]], list_gaze[[1]]$YGaze.mm[[i]])
-vr_pvalor_y[i] <- kw$p.value
+  num_XGazeREF[j] <- mean(list_gaze[[j]]$XGaze.mm[[1]])
+  num_YGazeREF[j] <- mean(list_gaze[[j]]$YGaze.mm[[1]])
 
-    
+for (k in seq_along(vr_TrialOK)){
+
+for (i in seq_along(vr_num_DistX)){
   
+  Xdist <- (list_gaze[[j]]$XGaze.mm[[k]][i] - num_XGazeREF[j])^2
+  Ydist <- (list_gaze[[j]]$YGaze.mm[[k]][i] - num_YGazeREF[j])^2
+  
+  vr_num_Dist[i]  <- sqrt(sum(Xdist,Ydist)) 
+  
+}
+#Determino el porcentaje de  puntos caen adentro de la zona de fijacion dada por el tamaño de la cruz en mm
+  aceptado <- c(vr_num_Dist <= cst_DIST)
+  porcentaje <- ((sum(aceptado == TRUE))/cst_NPOINTS)*100
+  vr_TrialOK[k] <- porcentaje
 
 }
+  list_gaze[[j]]$TRialOK <- vr_TrialOK
+
+  
+}
+  
+  
+#Funcion para generar un circulo 
+#circleFun <- function(center = c(0,0),diameter = 1, npoints = 100){
+#  r = diameter / 2
+#  tt <- seq(0,2*pi,length.out = npoints)
+#  xx <- center[1] + r * cos(tt)
+#  yy <- center[2] + r * sin(tt)
+#  return(data.frame(x = xx, y = yy))
+#}
+
+#dat <- circleFun(c(mean(list_gaze[[18]]$XGaze.mm[[1]]),mean(list_gaze[[18]]$YGaze.mm[[1]])),16,npoints = 100)
 
 
+#
+#geom_path will do open circles, geom_polygon will do filled circles
+#p <- ggplot() + 
+#  
+#  geom_point(aes(x=list_gaze[[18]]$XGaze.mm[[1]],y=list_gaze[[18]]$YGaze.mm[[1]] )) +
+   
+#  geom_path(data = dat, aes(x,y)) +
+  
+#  geom_point(aes(x=list_gaze[[18]]$XGaze.mm[[300]],y=list_gaze[[18]]$YGaze.mm[[300]], colour = "red" ))
+
+#p
