@@ -638,7 +638,7 @@ for (j in seq_along(list_gaze)){
 
 for (k in seq_along(vr_TrialOK)){
 
-for (i in seq_along(vr_num_DistX)){
+for (i in seq_along(vr_num_Dist)){
   
   Xdist <- (list_gaze[[j]]$XGaze.mm[[k]][i] - num_XGazeREF[j])^2
   Ydist <- (list_gaze[[j]]$YGaze.mm[[k]][i] - num_YGazeREF[j])^2
