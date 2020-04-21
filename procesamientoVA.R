@@ -14,7 +14,7 @@ N <- 30
 list_datos <- vector("list", N)
 list_gaze <- vector ("list", N)
 Ntrials <- 336
-
+Obs <- c("aaf", "afb", "agm", "cic", "jjr", "lrc", "mab", "mdn", "msz", "nga", "pab", "at",  "lfa", "lms", "mcm") 
 #Cargo los datos de la ventana atencional antes del entrenamiento del ILAV
 #ubico el directorio donde se encuentran los archivos
 setwd(paste("D:/Dropbox/Posdoc",
@@ -615,7 +615,7 @@ df_datos <- ldply (list_datos, data.frame)
 
 #4- Agrego los nombres de los observadores a la lista del gaze
 
-names(list_gaze) <- c("aaf",  "afb",  "agm", "cic", "jjr", "lrc", "mab", "mdn", "msz", "nga", "pab", "at", "lfa", "lms", "mcm", "aaf",  "afb",  "agm", "cic", "jjr", "lrc", "mab", "mdn", "msz", "nga", "pab", "at", "lfa", "lms", "mcm")
+names(list_gaze) <- c("pre_aaf",  "pre_afb",  "pre_agm", "pre_cic", "pre_jjr", "pre_lrc", "pre_mab", "pre_mdn", "pre_msz", "pre_nga", "pre_pab", "pre_at", "pre_lfa", "pre_lms", "pre_mcm", "pos_aaf",  "pos_afb",  "pos_agm", "pos_cic", "pos_jjr", "pos_lrc", "pos_mab", "pos_mdn", "pos_msz", "pos_nga", "pos_pab", "pos_at", "pos_lfa", "pos_lms", "pos_mcm")
 
 #5- Comparo para cada obsevador el gaze de cada trial con el gaze del primer
 #trial que se toma como referencia.
@@ -628,8 +628,8 @@ vr_num_Dist <- rep(NaN, 84)
 cst_DIST <- 16
 cst_NPOINTS <- 84
 vr_TrialOK <- rep(NaN, Ntrials)
-num_XGazeREF <- rep(NaN, Ntrials)
-num_YGazeREF <- rep(NaN, Ntrials)
+num_XGazeREF <- rep(NaN, 30)
+num_YGazeREF <- rep(NaN, 30)
 
 for (j in seq_along(list_gaze)){ 
   
@@ -646,7 +646,7 @@ for (i in seq_along(vr_num_Dist)){
   vr_num_Dist[i]  <- sqrt(sum(Xdist,Ydist)) 
   
 }
-#Determino el porcentaje de  puntos caen adentro de la zona de fijacion dada por el tamaño de la cruz en mm
+#Determino el porcentaje de  puntos caen adentro de la zona de fijacion dada por el tamaño de la cruz de fijacion en mm
   aceptado <- c(vr_num_Dist <= cst_DIST)
   porcentaje <- ((sum(aceptado == TRUE))/cst_NPOINTS)*100
   vr_TrialOK[k] <- porcentaje
@@ -656,7 +656,25 @@ for (i in seq_along(vr_num_Dist)){
 
   
 }
+
+#5.2 
+#Grafico un panel con los porcentajes del gaze que caen dentro de la zona de fijacion antes y despues del entrenamiento
+df_porcentaje <- ldply(list_gaze, data.frame)
+df_porcentaje <- df_porcentaje[,-c(1,7)] 
+df_porcentaje$Observador <- rep(rep(Obs,each = 336), 2)
+df_porcentaje$Condicion <- rep(c("pre", "pos"),each = (10080/2))
+df_porcentaje$Ntrials <- rep(1:336, 30)
+
+
+ggplot(data = df_porcentaje, aes(x= Ntrials , y= TRialOK)) + geom_point(aes(color = Condicion), alpha = 0.5) +
+  facet_wrap( ~ Observador, scales="free_x")
+
+df_tempo <- data.frame(Ntrials = rep(1:336, 2), Obervador = "nga", Condicion = rep(c("pre", "pos"), each=336), Porcentaje = c(list_gaze$pre_nga$TRialOK, list_gaze$pos_nga$TRialOK))
   
+ggplot(df_tempo, aes(x = Ntrials)) + geom_point(aes(y = Porcentaje, color = Condicion))
+                                                
+p <- ggplot(list_gaze, aes(x = 1:336, y = porcentaje )) + geom_point()
+
   
 #Funcion para generar un circulo 
 #circleFun <- function(center = c(0,0),diameter = 1, npoints = 100){
