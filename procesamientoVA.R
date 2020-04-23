@@ -14,7 +14,7 @@ N <- 30
 list_datos <- vector("list", N)
 list_gaze <- vector ("list", N)
 Ntrials <- 336
-Obs <- c("aaf", "afb", "agm", "cic", "jjr", "lrc", "mab", "mdn", "msz", "nga", "pab", "at",  "lfa", "lms", "mcm") 
+
 #Cargo los datos de la ventana atencional antes del entrenamiento del ILAV
 #ubico el directorio donde se encuentran los archivos
 setwd(paste("D:/Dropbox/Posdoc",
@@ -625,7 +625,7 @@ names(list_gaze) <- c("pre_aaf",  "pre_afb",  "pre_agm", "pre_cic", "pre_jjr", "
 #Calculo la distancia de cada punto del Gaze de los sucesivo trials con
 #respecto a la media del primer trial.
 vr_num_Dist <- rep(NaN, 84)
-cst_DIST <- 16
+cst_DIST <- 40
 cst_NPOINTS <- 84
 vr_TrialOK <- rep(NaN, Ntrials)
 num_XGazeREF <- rep(NaN, 30)
@@ -658,7 +658,8 @@ for (i in seq_along(vr_num_Dist)){
 }
 
 #5.2 
-#Grafico un panel con los porcentajes del gaze que caen dentro de la zona de fijacion antes y despues del entrenamiento
+#Grafico un panel con los porcentajes del gaze que caen dentro de la zona de #fijacion antes y despues del entrenamiento
+Obs <- c("aaf", "afb", "agm", "cic", "jjr", "lrc", "mab", "mdn", "msz", "nga", "pab", "at",  "lfa", "lms", "mcm") 
 df_porcentaje <- ldply(list_gaze, data.frame)
 df_porcentaje <- df_porcentaje[,-c(1,7)] 
 df_porcentaje$Observador <- rep(rep(Obs,each = 336), 2)
@@ -666,16 +667,13 @@ df_porcentaje$Condicion <- rep(c("pre", "pos"),each = (10080/2))
 df_porcentaje$Ntrials <- rep(1:336, 30)
 
 
-ggplot(data = df_porcentaje, aes(x= Ntrials , y= TRialOK)) + geom_point(aes(color = Condicion), alpha = 0.5) +
+ggplot(data = df_porcentaje, aes(x= Ntrials , y= TRialOK)) + geom_point(aes(color = Condicion), alpha = 0.5) +  geom_text(aes( x= 1, y = 100, label = "Referencia", hjust = -0.2), size = 3) +
   facet_wrap( ~ Observador, scales="free_x")
 
 df_tempo <- data.frame(Ntrials = rep(1:336, 2), Obervador = "nga", Condicion = rep(c("pre", "pos"), each=336), Porcentaje = c(list_gaze$pre_nga$TRialOK, list_gaze$pos_nga$TRialOK))
   
-ggplot(df_tempo, aes(x = Ntrials)) + geom_point(aes(y = Porcentaje, color = Condicion))
+ggplot(df_tempo, aes(x = Ntrials)) + geom_point(aes(y = Porcentaje, color = Condicion)) + geom_text(aes( x= Ntrials[1], y = Porcentaje[1], label = "Referencia", hjust = -0.2), size = 3)
                                                 
-p <- ggplot(list_gaze, aes(x = 1:336, y = porcentaje )) + geom_point()
-
-  
 #Funcion para generar un circulo 
 #circleFun <- function(center = c(0,0),diameter = 1, npoints = 100){
 #  r = diameter / 2
