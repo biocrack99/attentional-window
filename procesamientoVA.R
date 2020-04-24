@@ -32,7 +32,6 @@ for (i in seq_along(files))  {
   tbl <- sapply(files[i], read_csv, simplify=FALSE) %>% 
     bind_rows()
   
-
 # GAZE --------------------------------------------------------------------
   #Creo un data frame con los datos del gaze en cada trial
   tbl_gaze <- tbl[, (5:8)]
@@ -670,30 +669,23 @@ df_porcentaje$Ntrials <- rep(1:336, 30)
 ggplot(data = df_porcentaje, aes(x= Ntrials , y= TRialOK)) + geom_point(aes(color = Condicion), alpha = 0.5) +  geom_text(aes( x= 1, y = 100, label = "Referencia", hjust = -0.2), size = 3) +
   facet_wrap( ~ Observador, scales="free_x")
 
-df_tempo <- data.frame(Ntrials = rep(1:336, 2), Obervador = "nga", Condicion = rep(c("pre", "pos"), each=336), Porcentaje = c(list_gaze$pre_nga$TRialOK, list_gaze$pos_nga$TRialOK))
+#Creo un data frame para ver los datos de cada observador en un gráfico
+df_tempo <- data.frame(Ntrials = rep(1:336, 2), Obervador = "aaf", Condicion = rep(c("pre", "pos"), each=336), Porcentaje = c(list_gaze$pre_aaf$TRialOK, list_gaze$pos_aaf$TRialOK))
   
-ggplot(df_tempo, aes(x = Ntrials)) + geom_point(aes(y = Porcentaje, color = Condicion)) + geom_text(aes( x= Ntrials[1], y = Porcentaje[1], label = "Referencia", hjust = -0.2), size = 3)
+ggplot(df_tempo, aes(x = Ntrials)) + geom_point(aes(y = Porcentaje > 25, color = Condicion)) + geom_text(aes( x= Ntrials[1], y = Porcentaje[1], label = "Referencia pre", hjust = -0.2), size = 3) + geom_text(aes( x= Ntrials[1], y = Porcentaje[337], label = "Referencia pos", hjust = -0.2, vjust = 2), size = 3) + geom_point(aes(x = Ntrials[1], y = Porcentaje[337]), size = 3)
                                                 
-#Funcion para generar un circulo 
-#circleFun <- function(center = c(0,0),diameter = 1, npoints = 100){
-#  r = diameter / 2
-#  tt <- seq(0,2*pi,length.out = npoints)
-#  xx <- center[1] + r * cos(tt)
-#  yy <- center[2] + r * sin(tt)
-#  return(data.frame(x = xx, y = yy))
-#}
+#5.3
+#Origino una lista de indices para cara observador con los trials aceptados para el procesamiento posterior
 
-#dat <- circleFun(c(mean(list_gaze[[18]]$XGaze.mm[[1]]),mean(list_gaze[[18]]$YGaze.mm[[1]])),16,npoints = 100)
+list_index <- vector("list", 30)
+names(list_index) <- c("pre_aaf",  "pre_afb",  "pre_agm", "pre_cic", "pre_jjr", "pre_lrc", "pre_mab", "pre_mdn", "pre_msz", "pre_nga", "pre_pab", "pre_at", "pre_lfa", "pre_lms", "pre_mcm", "pos_aaf",  "pos_afb",  "pos_agm", "pos_cic", "pos_jjr", "pos_lrc", "pos_mab", "pos_mdn", "pos_msz", "pos_nga", "pos_pab", "pos_at", "pos_lfa", "pos_lms", "pos_mcm")
 
-
-#
-#geom_path will do open circles, geom_polygon will do filled circles
-#p <- ggplot() + 
-#  
-#  geom_point(aes(x=list_gaze[[18]]$XGaze.mm[[1]],y=list_gaze[[18]]$YGaze.mm[[1]] )) +
-   
-#  geom_path(data = dat, aes(x,y)) +
+#Obtengo los triasl que tienen un porcentaje mayor al 40 de los puntos del gaze dentro de la zona de fijacion
+for (i in seq_along(list_gaze)){
   
-#  geom_point(aes(x=list_gaze[[18]]$XGaze.mm[[300]],y=list_gaze[[18]]$YGaze.mm[[300]], colour = "red" ))
+ list_index[[i]] <- which(list_gaze[[i]]$TRialOK >= 40) 
+  
+}
 
-#p
+
+
