@@ -11,6 +11,7 @@ library(plyr)
 
 #Lista para guardar los datos segun la cantidad de obsevadores
 N <- 30
+list_datosRaw <- vector("list", N)
 list_datos <- vector("list", N)
 list_gaze <- vector ("list", N)
 Ntrials <- 336
@@ -165,10 +166,12 @@ for (i in seq_along(files))  {
   averages <- datos %>% group_by( Direccion, Separacion) %>% 
     dplyr::summarise(n = n(), nYes = sum(correctas), nNo = n - nYes, p = nYes / n)
   
-  averages$observadores <- substr(files[i], 3,5) 
-  
+  averages$observadores <- substr(files[1], 3,5) 
+  #datos crudos
+  list_datosRaw[i] <- list(datos)
+  #datos promedio
   list_datos[i] <- list(averages)
-  
+  #datos del gaze
   list_gaze[i] <- list(df_gaze)#, df_gaze$Separacion, ls_gaze_x, ls_gaze_y )
 
   }
@@ -238,7 +241,8 @@ for (i in seq_along(files))  {
   #enseñar el estimulo al obsevador y para tener una referencia a la 
   #hora de la fijacion en los demas trials
   tabla_total = tabla_total[-1,]
-  
+  #Cambio nombres de columnas
+  colnames(tabla_total)[c(1,2,3,4)] <- c("Cantidad_TGC_1", "Cantidad_TGC_2", "Respuesta_A", "Respuesta_B")
   #obtengo el n de cada presentacion
   n <- c(sum(tabla_total$Direccion == 0 & tabla_total$Separacion == 3),
          sum(tabla_total$Direccion == 0 & tabla_total$Separacion == 5),
@@ -274,6 +278,10 @@ for (i in seq_along(files))  {
     dplyr::summarise(n = n(), nYes = sum(correctas), nNo = n - nYes, p = nYes / n)
   #genero columna para los observadores
   averages$observadores <- substr(files[i], 3,5) 
+  
+  #lista de los datos crudos
+  list_datosRaw[i+11] <- list(data.frame(tabla_total))
+  
   
   #lista de los datos
   list_datos[i + 11] <- list(averages)
@@ -438,6 +446,8 @@ for (i in seq_along(files))  {
     dplyr::summarise(n = n(), nYes = sum(correctas), nNo = n - nYes, p = nYes / n)
   
   averages$observadores <- substr(files[i], 3,5) 
+  #datos crudos
+  list_datosRaw[i + 15] <- list(datos)
   
   list_datos[i + 15] <- list(averages)
   
@@ -513,6 +523,8 @@ for (i in seq_along(files))  {
   #enseñar el estimulo al obsevador y para tener una referencia a la 
   #hora de la fijacion en los demas trials
   tabla_total = tabla_total[-1,]
+  #Cambio nombres de columnas
+  colnames(tabla_total)[c(1,2,3,4)] <- c("Cantidad_TGC_1", "Cantidad_TGC_2", "Respuesta_A", "Respuesta_B")
   #obtengo el n de cada presentacion
   n <- c(sum(tabla_total$Direccion == 0 & tabla_total$Separacion == 3),
          sum(tabla_total$Direccion == 0 & tabla_total$Separacion == 5),
@@ -548,6 +560,9 @@ for (i in seq_along(files))  {
     dplyr::summarise(n = n(), nYes = sum(correctas), nNo = n - nYes, p = nYes / n)
   
   averages$observadores <- substr(files[i], 3,5) 
+  #lista de los datos crudos
+  list_datosRaw[i+26] <- list(data.frame(tabla_total))
+  
   
   list_datos[i + 26] <- list(averages)
   
@@ -557,7 +572,7 @@ for (i in seq_along(files))  {
 }
 
 #Elimino las variables
-rm(list=setdiff(ls(), c("list_datos", "list_gaze", "Ntrials"))) 
+rm(list=setdiff(ls(), c("list_datos", "list_gaze", "Ntrials", "list_datosRaw"))) 
 ###############################################################################
 #PROCESAMIENTO
 
@@ -672,7 +687,7 @@ ggplot(data = df_porcentaje, aes(x= Ntrials , y= TRialOK)) + geom_point(aes(colo
 #Creo un data frame para ver los datos de cada observador en un gráfico
 df_tempo <- data.frame(Ntrials = rep(1:336, 2), Obervador = "aaf", Condicion = rep(c("pre", "pos"), each=336), Porcentaje = c(list_gaze$pre_aaf$TRialOK, list_gaze$pos_aaf$TRialOK))
   
-ggplot(df_tempo, aes(x = Ntrials)) + geom_point(aes(y = Porcentaje > 25, color = Condicion)) + geom_text(aes( x= Ntrials[1], y = Porcentaje[1], label = "Referencia pre", hjust = -0.2), size = 3) + geom_text(aes( x= Ntrials[1], y = Porcentaje[337], label = "Referencia pos", hjust = -0.2, vjust = 2), size = 3) + geom_point(aes(x = Ntrials[1], y = Porcentaje[337]), size = 3)
+ggplot(df_tempo, aes(x = Ntrials)) + geom_point(aes(y = Porcentaje, color = Condicion)) + geom_text(aes( x= Ntrials[1], y = Porcentaje[1], label = "Referencia pre", hjust = -0.2), size = 3) + geom_text(aes( x= Ntrials[1], y = Porcentaje[337], label = "Referencia pos", hjust = -0.2, vjust = 2), size = 3) + geom_point(aes(x = Ntrials[1], y = Porcentaje[337]), size = 3)
                                                 
 #5.3
 #Origino una lista de indices para cara observador con los trials aceptados para el procesamiento posterior
@@ -680,7 +695,7 @@ ggplot(df_tempo, aes(x = Ntrials)) + geom_point(aes(y = Porcentaje > 25, color =
 list_index <- vector("list", 30)
 names(list_index) <- c("pre_aaf",  "pre_afb",  "pre_agm", "pre_cic", "pre_jjr", "pre_lrc", "pre_mab", "pre_mdn", "pre_msz", "pre_nga", "pre_pab", "pre_at", "pre_lfa", "pre_lms", "pre_mcm", "pos_aaf",  "pos_afb",  "pos_agm", "pos_cic", "pos_jjr", "pos_lrc", "pos_mab", "pos_mdn", "pos_msz", "pos_nga", "pos_pab", "pos_at", "pos_lfa", "pos_lms", "pos_mcm")
 
-#Obtengo los triasl que tienen un porcentaje mayor al 40 de los puntos del gaze dentro de la zona de fijacion
+#Obtengo los triasl que tienen un porcentaje mayor al 40% de los puntos del gaze dentro de la zona de fijacion
 for (i in seq_along(list_gaze)){
   
  list_index[[i]] <- which(list_gaze[[i]]$TRialOK >= 40) 
