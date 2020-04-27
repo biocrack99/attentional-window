@@ -132,41 +132,11 @@ for (i in seq_along(files))  {
   #enseñar el estimulo al obsevador y para tener una referencia a la 
   #hora de la fijacion en los demas trials
   datos = datos[-1,]
-  #obtengo el n de cada presentacion
-  n <- c(sum(datos$Direccion == 0 & datos$Separacion == 3),
-         sum(datos$Direccion == 0 & datos$Separacion == 5),
-         sum(datos$Direccion == 0 & datos$Separacion == 8),
-         sum(datos$Direccion == 0 & datos$Separacion == 11),
-         sum(datos$Direccion == 0 & datos$Separacion == 14),
-         sum(datos$Direccion == 0 & datos$Separacion == 17),
-         sum(datos$Direccion == 0 & datos$Separacion == 20),
-         sum(datos$Direccion == 45 & datos$Separacion == 3),
-         sum(datos$Direccion == 45 & datos$Separacion == 5),
-         sum(datos$Direccion == 45 & datos$Separacion == 8),
-         sum(datos$Direccion == 45 & datos$Separacion == 11),
-         sum(datos$Direccion == 45 & datos$Separacion == 14),
-         sum(datos$Direccion == 45 & datos$Separacion == 17),
-         sum(datos$Direccion == 45 & datos$Separacion == 20),
-         sum(datos$Direccion == 90 & datos$Separacion == 3),
-         sum(datos$Direccion == 90 & datos$Separacion == 5),
-         sum(datos$Direccion == 90 & datos$Separacion == 8),
-         sum(datos$Direccion == 90 & datos$Separacion == 11),
-         sum(datos$Direccion == 90 & datos$Separacion == 14),
-         sum(datos$Direccion == 90 & datos$Separacion == 17),
-         sum(datos$Direccion == 90 & datos$Separacion == 20),
-         sum(datos$Direccion == 135 & datos$Separacion == 3),
-         sum(datos$Direccion == 135 & datos$Separacion == 5),
-         sum(datos$Direccion == 135 & datos$Separacion == 8),
-         sum(datos$Direccion == 135 & datos$Separacion == 11),
-         sum(datos$Direccion == 135 & datos$Separacion == 14),
-         sum(datos$Direccion == 135 & datos$Separacion == 17),
-         sum(datos$Direccion == 135 & datos$Separacion == 20))
-  
   #promedios de las respuesta
   averages <- datos %>% group_by( Direccion, Separacion) %>% 
     dplyr::summarise(n = n(), nYes = sum(correctas), nNo = n - nYes, p = nYes / n)
   
-  averages$observadores <- substr(files[1], 3,5) 
+  averages$observadores <- substr(files[i], 3,5) 
   #datos crudos
   list_datosRaw[i] <- list(datos)
   #datos promedio
@@ -243,35 +213,6 @@ for (i in seq_along(files))  {
   tabla_total = tabla_total[-1,]
   #Cambio nombres de columnas
   colnames(tabla_total)[c(1,2,3,4)] <- c("Cantidad_TGC_1", "Cantidad_TGC_2", "Respuesta_A", "Respuesta_B")
-  #obtengo el n de cada presentacion
-  n <- c(sum(tabla_total$Direccion == 0 & tabla_total$Separacion == 3),
-         sum(tabla_total$Direccion == 0 & tabla_total$Separacion == 5),
-         sum(tabla_total$Direccion == 0 & tabla_total$Separacion == 8),
-         sum(tabla_total$Direccion == 0 & tabla_total$Separacion == 11),
-         sum(tabla_total$Direccion == 0 & tabla_total$Separacion == 14),
-         sum(tabla_total$Direccion == 0 & tabla_total$Separacion == 17),
-         sum(tabla_total$Direccion == 0 & tabla_total$Separacion == 20),
-         sum(tabla_total$Direccion == 45 & tabla_total$Separacion == 3),
-         sum(tabla_total$Direccion == 45 & tabla_total$Separacion == 5),
-         sum(tabla_total$Direccion == 45 & tabla_total$Separacion == 8),
-         sum(tabla_total$Direccion == 45 & tabla_total$Separacion == 11),
-         sum(tabla_total$Direccion == 45 & tabla_total$Separacion == 14),
-         sum(tabla_total$Direccion == 45 & tabla_total$Separacion == 17),
-         sum(tabla_total$Direccion == 45 & tabla_total$Separacion == 20),
-         sum(tabla_total$Direccion == 90 & tabla_total$Separacion == 3),
-         sum(tabla_total$Direccion == 90 & tabla_total$Separacion == 5),
-         sum(tabla_total$Direccion == 90 & tabla_total$Separacion == 8),
-         sum(tabla_total$Direccion == 90 & tabla_total$Separacion == 11),
-         sum(tabla_total$Direccion == 90 & tabla_total$Separacion == 14),
-         sum(tabla_total$Direccion == 90 & tabla_total$Separacion == 17),
-         sum(tabla_total$Direccion == 90 & tabla_total$Separacion == 20),
-         sum(tabla_total$Direccion == 135 & tabla_total$Separacion == 3),
-         sum(tabla_total$Direccion == 135 & tabla_total$Separacion == 5),
-         sum(tabla_total$Direccion == 135 & tabla_total$Separacion == 8),
-         sum(tabla_total$Direccion == 135 & tabla_total$Separacion == 11),
-         sum(tabla_total$Direccion == 135 & tabla_total$Separacion == 14),
-         sum(tabla_total$Direccion == 135 & tabla_total$Separacion == 17),
-         sum(tabla_total$Direccion == 135 & tabla_total$Separacion == 20))
   
   #promedios de las respuesta
   averages <- tabla_total %>% group_by( Direccion, Separacion) %>% 
@@ -411,35 +352,6 @@ for (i in seq_along(files))  {
   #enseñar el estimulo al obsevador y para tener una referencia a la 
   #hora de la fijacion en los demas trials
   datos = datos[-1,]
-  #obtengo el n de cada presentacion
-  n <- c(sum(datos$Direccion == 0 & datos$Separacion == 3),
-         sum(datos$Direccion == 0 & datos$Separacion == 5),
-         sum(datos$Direccion == 0 & datos$Separacion == 8),
-         sum(datos$Direccion == 0 & datos$Separacion == 11),
-         sum(datos$Direccion == 0 & datos$Separacion == 14),
-         sum(datos$Direccion == 0 & datos$Separacion == 17),
-         sum(datos$Direccion == 0 & datos$Separacion == 20),
-         sum(datos$Direccion == 45 & datos$Separacion == 3),
-         sum(datos$Direccion == 45 & datos$Separacion == 5),
-         sum(datos$Direccion == 45 & datos$Separacion == 8),
-         sum(datos$Direccion == 45 & datos$Separacion == 11),
-         sum(datos$Direccion == 45 & datos$Separacion == 14),
-         sum(datos$Direccion == 45 & datos$Separacion == 17),
-         sum(datos$Direccion == 45 & datos$Separacion == 20),
-         sum(datos$Direccion == 90 & datos$Separacion == 3),
-         sum(datos$Direccion == 90 & datos$Separacion == 5),
-         sum(datos$Direccion == 90 & datos$Separacion == 8),
-         sum(datos$Direccion == 90 & datos$Separacion == 11),
-         sum(datos$Direccion == 90 & datos$Separacion == 14),
-         sum(datos$Direccion == 90 & datos$Separacion == 17),
-         sum(datos$Direccion == 90 & datos$Separacion == 20),
-         sum(datos$Direccion == 135 & datos$Separacion == 3),
-         sum(datos$Direccion == 135 & datos$Separacion == 5),
-         sum(datos$Direccion == 135 & datos$Separacion == 8),
-         sum(datos$Direccion == 135 & datos$Separacion == 11),
-         sum(datos$Direccion == 135 & datos$Separacion == 14),
-         sum(datos$Direccion == 135 & datos$Separacion == 17),
-         sum(datos$Direccion == 135 & datos$Separacion == 20))
   
   #promedios de las respuesta
   averages <- datos %>% group_by( Direccion, Separacion) %>% 
@@ -525,35 +437,6 @@ for (i in seq_along(files))  {
   tabla_total = tabla_total[-1,]
   #Cambio nombres de columnas
   colnames(tabla_total)[c(1,2,3,4)] <- c("Cantidad_TGC_1", "Cantidad_TGC_2", "Respuesta_A", "Respuesta_B")
-  #obtengo el n de cada presentacion
-  n <- c(sum(tabla_total$Direccion == 0 & tabla_total$Separacion == 3),
-         sum(tabla_total$Direccion == 0 & tabla_total$Separacion == 5),
-         sum(tabla_total$Direccion == 0 & tabla_total$Separacion == 8),
-         sum(tabla_total$Direccion == 0 & tabla_total$Separacion == 11),
-         sum(tabla_total$Direccion == 0 & tabla_total$Separacion == 14),
-         sum(tabla_total$Direccion == 0 & tabla_total$Separacion == 17),
-         sum(tabla_total$Direccion == 0 & tabla_total$Separacion == 20),
-         sum(tabla_total$Direccion == 45 & tabla_total$Separacion == 3),
-         sum(tabla_total$Direccion == 45 & tabla_total$Separacion == 5),
-         sum(tabla_total$Direccion == 45 & tabla_total$Separacion == 8),
-         sum(tabla_total$Direccion == 45 & tabla_total$Separacion == 11),
-         sum(tabla_total$Direccion == 45 & tabla_total$Separacion == 14),
-         sum(tabla_total$Direccion == 45 & tabla_total$Separacion == 17),
-         sum(tabla_total$Direccion == 45 & tabla_total$Separacion == 20),
-         sum(tabla_total$Direccion == 90 & tabla_total$Separacion == 3),
-         sum(tabla_total$Direccion == 90 & tabla_total$Separacion == 5),
-         sum(tabla_total$Direccion == 90 & tabla_total$Separacion == 8),
-         sum(tabla_total$Direccion == 90 & tabla_total$Separacion == 11),
-         sum(tabla_total$Direccion == 90 & tabla_total$Separacion == 14),
-         sum(tabla_total$Direccion == 90 & tabla_total$Separacion == 17),
-         sum(tabla_total$Direccion == 90 & tabla_total$Separacion == 20),
-         sum(tabla_total$Direccion == 135 & tabla_total$Separacion == 3),
-         sum(tabla_total$Direccion == 135 & tabla_total$Separacion == 5),
-         sum(tabla_total$Direccion == 135 & tabla_total$Separacion == 8),
-         sum(tabla_total$Direccion == 135 & tabla_total$Separacion == 11),
-         sum(tabla_total$Direccion == 135 & tabla_total$Separacion == 14),
-         sum(tabla_total$Direccion == 135 & tabla_total$Separacion == 17),
-         sum(tabla_total$Direccion == 135 & tabla_total$Separacion == 20))
   
   #promedios de las respuesta
   averages <- tabla_total %>% group_by( Direccion, Separacion) %>% 
@@ -638,13 +521,13 @@ names(list_gaze) <- c("pre_aaf",  "pre_afb",  "pre_agm", "pre_cic", "pre_jjr", "
 #Calculo la media del XGaze y del YGaze del primer trial
 #Calculo la distancia de cada punto del Gaze de los sucesivo trials con
 #respecto a la media del primer trial.
+#Compara la distancia calculada con un valor constante cst_DIST
 vr_num_Dist <- rep(NaN, 84)
 cst_DIST <- 40
 cst_NPOINTS <- 84
 vr_TrialOK <- rep(NaN, Ntrials)
 num_XGazeREF <- rep(NaN, 30)
 num_YGazeREF <- rep(NaN, 30)
-
 for (j in seq_along(list_gaze)){ 
   
   num_XGazeREF[j] <- mean(list_gaze[[j]]$XGaze.mm[[1]])
@@ -685,22 +568,60 @@ ggplot(data = df_porcentaje, aes(x= Ntrials , y= TRialOK)) + geom_point(aes(colo
   facet_wrap( ~ Observador, scales="free_x")
 
 #Creo un data frame para ver los datos de cada observador en un gráfico
-df_tempo <- data.frame(Ntrials = rep(1:336, 2), Obervador = "aaf", Condicion = rep(c("pre", "pos"), each=336), Porcentaje = c(list_gaze$pre_aaf$TRialOK, list_gaze$pos_aaf$TRialOK))
+df_tempo <- data.frame(Ntrials = rep(1:336, 2), Obervador = "aaf", Condicion = rep(c("pre", "pos"), each=336), Porcentaje = c(list_gaze$pre_lms$TRialOK, list_gaze$pos_lms$TRialOK))
   
 ggplot(df_tempo, aes(x = Ntrials)) + geom_point(aes(y = Porcentaje, color = Condicion)) + geom_text(aes( x= Ntrials[1], y = Porcentaje[1], label = "Referencia pre", hjust = -0.2), size = 3) + geom_text(aes( x= Ntrials[1], y = Porcentaje[337], label = "Referencia pos", hjust = -0.2, vjust = 2), size = 3) + geom_point(aes(x = Ntrials[1], y = Porcentaje[337]), size = 3)
                                                 
 #5.3
-#Origino una lista de indices para cara observador con los trials aceptados para el procesamiento posterior
-
-list_index <- vector("list", 30)
-names(list_index) <- c("pre_aaf",  "pre_afb",  "pre_agm", "pre_cic", "pre_jjr", "pre_lrc", "pre_mab", "pre_mdn", "pre_msz", "pre_nga", "pre_pab", "pre_at", "pre_lfa", "pre_lms", "pre_mcm", "pos_aaf",  "pos_afb",  "pos_agm", "pos_cic", "pos_jjr", "pos_lrc", "pos_mab", "pos_mdn", "pos_msz", "pos_nga", "pos_pab", "pos_at", "pos_lfa", "pos_lms", "pos_mcm")
-
+#Origino una lista de indices para cadaa observador con los trials aceptados para el procesamiento posterior
 #Obtengo los triasl que tienen un porcentaje mayor al 40% de los puntos del gaze dentro de la zona de fijacion
+#Genero un data frame para cada observador con el porcentaje de respuestas correctas en cada Direccion y en cada Separacion
+list_index <- vector("list", 30)
+list_datosFinal <- vector ("list", 30)
 for (i in seq_along(list_gaze)){
   
- list_index[[i]] <- which(list_gaze[[i]]$TRialOK >= 40) 
-  
-}
+ list_index[[i]] <- which(list_gaze[[i]]$TRialOK >= 40)
+ list_datosFinal[[i]] <- slice(list_datosRaw[[i]], c(list_index[[i]][-1]))
+ list_datosFinal[[i]] <-list_datosFinal[[i]] %>% group_by( Direccion, Separacion) %>% dplyr::summarise(n = n(), nYes = sum(correctas), nNo = n - nYes, p = nYes / n)
+ list_datosFinal[[i]]$Observadores <- list_datos[[i]]$observadores[1:length(list_datosFinal[[i]]$p)]
+ list_datosFinal[[i]]$Condicion <- list_datos[[i]]$condicion[1:length(list_datosFinal[[i]]$p)]
+ list_datosFinal[[i]]$Grupo <- list_datos[[i]]$grupo[1:length(list_datosFinal[[i]]$p)]
+    
+ 
+ }
 
+#6 Grafico los resultados obtenido
+df_datosFinal <- ldply (list_datosFinal, data.frame)
 
+#6.1 Panel con Boxplot
 
+ggplot(df_datosFinal, aes(x= as.factor(Direccion), y= p)) + geom_boxplot(aes(fill=Grupo)) +
+  facet_wrap( ~ Direccion, scales="free_x")
+
+ggplot(df_datosFinal, aes(x= as.factor(Grupo), y= p)) + geom_boxplot(aes(fill=Condicion)) +
+  facet_wrap( ~ Separacion, scales="free_x")
+
+#6.2 Panel sin el grupo de hockey
+df_tempo <- df_datosFinal %>% filter(Grupo == c("cl","lt","rt"))
+
+ggplot(df_tempo, aes(x= as.factor(Direccion), y= p)) + geom_boxplot(aes(fill=Condicion)) +
+  facet_wrap( ~ Direccion, scales="free_x")
+
+ggplot(df_tempo, aes(x= as.factor(Separacion), y= p)) + geom_boxplot(aes(fill=Condicion)) +
+  facet_wrap( ~ Separacion, scales="free_x")
+
+ggplot(df_tempo, aes(x= as.factor(Separacion), y= p)) + geom_boxplot(aes(fill=Grupo, Condicion)) +
+  facet_wrap( ~ Separacion, scales="free_x")
+
+#Por grupos
+ggplot(df_datosFinal %>% filter(Grupo == "cl"), aes(x= as.factor(Separacion), y= p)) + geom_boxplot(aes(fill = Condicion)) +
+  facet_wrap( ~ Separacion, scales="free_x") + labs( y = "Respuestas Correctas", x = "Separacion [°]", title = "Grupo Control")
+
+ggplot(df_datosFinal %>% filter(Grupo == "rt"), aes(x= as.factor(Separacion), y= p)) + geom_boxplot(aes(fill = Condicion)) +
+  facet_wrap( ~ Separacion, scales="free_x") + labs( y = "Respuestas Correctas", x = "Separacion [°]", title = "Grupo Tiempo de reaccion")
+
+ggplot(df_datosFinal %>% filter(Grupo == "lt"), aes(x= as.factor(Separacion), y= p)) + geom_boxplot(aes(fill = Condicion)) +
+  facet_wrap( ~ Separacion, scales="free_x") + labs( y = "Respuestas Correctas", x = "Separacion [°]", title = "Grupo Carga")
+
+ggplot(df_datosFinal %>% filter(Grupo == "hk"), aes(x= as.factor(Separacion), y= p)) + geom_boxplot(aes(fill = Condicion)) +
+  facet_wrap( ~ Separacion, scales="free_x") + labs( y = "Respuestas Correctas", x = "Separacion [°]", title = "Grupo Hockey")
