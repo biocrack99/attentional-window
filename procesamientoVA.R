@@ -578,50 +578,107 @@ ggplot(df_tempo, aes(x = Ntrials)) + geom_point(aes(y = Porcentaje, color = Cond
 #Genero un data frame para cada observador con el porcentaje de respuestas correctas en cada Direccion y en cada Separacion
 list_index <- vector("list", 30)
 list_datosFinal <- vector ("list", 30)
+list_datosFinal_x <- vector("list", 30)
+
 for (i in seq_along(list_gaze)){
   
  list_index[[i]] <- which(list_gaze[[i]]$TRialOK >= 40)
  list_datosFinal[[i]] <- slice(list_datosRaw[[i]], c(list_index[[i]][-1]))
+ list_datosFinal_x[[i]] <- slice(list_datosRaw[[i]], c(-list_index[[i]]))
  list_datosFinal[[i]] <-list_datosFinal[[i]] %>% group_by( Direccion, Separacion) %>% dplyr::summarise(n = n(), nYes = sum(correctas), nNo = n - nYes, p = nYes / n)
+ list_datosFinal_x[[i]] <-list_datosFinal_x[[i]] %>% group_by( Direccion, Separacion) %>% dplyr::summarise(n = n(), nYes = sum(correctas), nNo = n - nYes, p = nYes / n)
+ 
  list_datosFinal[[i]]$Observadores <- list_datos[[i]]$observadores[1:length(list_datosFinal[[i]]$p)]
+ list_datosFinal_x[[i]]$Observadores <- list_datos[[i]]$observadores[1:length(list_datosFinal_x[[i]]$p)]
  list_datosFinal[[i]]$Condicion <- list_datos[[i]]$condicion[1:length(list_datosFinal[[i]]$p)]
+ list_datosFinal_x[[i]]$Condicion <- list_datos[[i]]$condicion[1:length(list_datosFinal_x[[i]]$p)]
  list_datosFinal[[i]]$Grupo <- list_datos[[i]]$grupo[1:length(list_datosFinal[[i]]$p)]
-    
+ list_datosFinal_x[[i]]$Grupo <- list_datos[[i]]$grupo[1:length(list_datosFinal_x[[i]]$p)]
+ 
  
  }
 
 #6 Grafico los resultados obtenido
 df_datosFinal <- ldply (list_datosFinal, data.frame)
+df_datosFinal_x <- ldply (list_datosFinal_x, data.frame)
+
+
 
 #6.1 Panel con Boxplot
 
-ggplot(df_datosFinal, aes(x= as.factor(Direccion), y= p)) + geom_boxplot(aes(fill=Grupo)) +
-  facet_wrap( ~ Direccion, scales="free_x")
+ggplot(df_datosFinal, aes(x= as.factor(Direccion), y= p)) + geom_boxplot(aes(fill=Grupo, Condicion)) +
+  facet_wrap( ~ Direccion, scales="free_x") + labs( y = "Respuestas Correctas", x = "Condición", title = "Todos los grupos con fijacion")
 
-ggplot(df_datosFinal, aes(x= as.factor(Grupo), y= p)) + geom_boxplot(aes(fill=Condicion)) +
-  facet_wrap( ~ Separacion, scales="free_x")
+ggplot(df_datosFinal_x, aes(x= as.factor(Direccion), y= p)) + geom_boxplot(aes(fill=Grupo, Condicion)) +
+  facet_wrap( ~ Direccion, scales="free_x") + labs( y = "Respuestas Correctas", x = "Condición", title = "Todos los grupos sin fijacion")
 
-#6.2 Panel sin el grupo de hockey
-df_tempo <- df_datosFinal %>% filter(Grupo == c("cl","lt","rt"))
+ggplot(df_datosFinal, aes(x= as.factor(Separacion), y= p)) + geom_boxplot(aes(fill=Grupo,Condicion)) +
+  facet_wrap( ~ Separacion, scales="free_x") + labs( y = "Respuestas Correctas", x = "Condición", title = "Todos los grupos con fijacion")
 
-ggplot(df_tempo, aes(x= as.factor(Direccion), y= p)) + geom_boxplot(aes(fill=Condicion)) +
-  facet_wrap( ~ Direccion, scales="free_x")
+ggplot(df_datosFinal_x, aes(x= as.factor(Separacion), y= p)) + geom_boxplot(aes(fill=Grupo,Condicion)) +
+  facet_wrap( ~ Separacion, scales="free_x") + labs( y = "Respuestas Correctas", x = "Condición", title = "Todos los grupos sin fijacion")
+
+
+#6.2 Panel sin el grupo de hockey ni el control
+df_tempo <- df_datosFinal %>% filter(Grupo == c("lt","rt"))
+df_tempo_x <- df_datosFinal_x %>% filter(Grupo == c("lt","rt"))
+
+
+ggplot(df_tempo, aes(x= as.factor(Direccion), y= p)) + geom_boxplot(aes(fill= Condicion)) +
+  facet_wrap( ~ Direccion, scales="free_x") + labs( y = "Respuestas Correctas", x = "Dirección", title = " Grupos LT y RT con fijacion")
+
+ggplot(df_tempo_x, aes(x= as.factor(Direccion), y= p)) + geom_boxplot(aes(fill= Condicion)) +
+  facet_wrap( ~ Direccion, scales="free_x") + labs( y = "Respuestas Correctas", x = "Dirección", title = " Grupos LT y RT sin fijacion")
+
 
 ggplot(df_tempo, aes(x= as.factor(Separacion), y= p)) + geom_boxplot(aes(fill=Condicion)) +
-  facet_wrap( ~ Separacion, scales="free_x")
+  facet_wrap( ~ Separacion, scales="free_x") + labs( y = "Respuestas Correctas", x = "Separacion", title = " Grupos LT y RT con fijacion")
+
+ggplot(df_tempo_x, aes(x= as.factor(Separacion), y= p)) + geom_boxplot(aes(fill=Condicion)) +
+  facet_wrap( ~ Separacion, scales="free_x") + labs( y = "Respuestas Correctas", x = "Separacion", title = " Grupos LT y RT sin fijacion")
 
 ggplot(df_tempo, aes(x= as.factor(Separacion), y= p)) + geom_boxplot(aes(fill=Grupo, Condicion)) +
-  facet_wrap( ~ Separacion, scales="free_x")
+  facet_wrap( ~ Separacion, scales="free_x") + labs( y = "Respuestas Correctas", x = "Separacion", title = " Grupos LT y RT con fijacion")
+
+ggplot(df_tempo_x, aes(x= as.factor(Separacion), y= p)) + geom_boxplot(aes(fill=Grupo, Condicion)) +
+  facet_wrap( ~ Separacion, scales="free_x") +  labs( y = "Respuestas Correctas", x = "Separacion", title = " Grupos LT y RT sin fijacion")
+
+
 
 #Por grupos
+#Grupo Control
 ggplot(df_datosFinal %>% filter(Grupo == "cl"), aes(x= as.factor(Separacion), y= p)) + geom_boxplot(aes(fill = Condicion)) +
   facet_wrap( ~ Separacion, scales="free_x") + labs( y = "Respuestas Correctas", x = "Separacion [°]", title = "Grupo Control")
+
+ggplot(df_datosFinal_x %>% filter(Grupo == "cl"), aes(x= as.factor(Separacion), y= p)) + geom_boxplot(aes(fill = Condicion)) +
+  facet_wrap( ~ Separacion, scales="free_x") + labs( y = "Respuestas Correctas", x = "Separacion [°]", title = "Grupo Control sin fijacion")
+
+
+#Grupo Tiempo de Reaccion
 
 ggplot(df_datosFinal %>% filter(Grupo == "rt"), aes(x= as.factor(Separacion), y= p)) + geom_boxplot(aes(fill = Condicion)) +
   facet_wrap( ~ Separacion, scales="free_x") + labs( y = "Respuestas Correctas", x = "Separacion [°]", title = "Grupo Tiempo de reaccion")
 
+ggplot(df_datosFinal_x %>% filter(Grupo == "rt"), aes(x= as.factor(Separacion), y= p)) + geom_boxplot(aes(fill = Condicion)) +
+  facet_wrap( ~ Separacion, scales="free_x") + labs( y = "Respuestas Correctas", x = "Separacion [°]", title = "Grupo Tiempo de reaccion sin fijacion")
+
+
+#Grupo con Carga de seguimiento
+
 ggplot(df_datosFinal %>% filter(Grupo == "lt"), aes(x= as.factor(Separacion), y= p)) + geom_boxplot(aes(fill = Condicion)) +
   facet_wrap( ~ Separacion, scales="free_x") + labs( y = "Respuestas Correctas", x = "Separacion [°]", title = "Grupo Carga")
 
+ggplot(df_datosFinal_x %>% filter(Grupo == "lt"), aes(x= as.factor(Separacion), y= p)) + geom_boxplot(aes(fill = Condicion)) +
+  facet_wrap( ~ Separacion, scales="free_x") + labs( y = "Respuestas Correctas", x = "Separacion [°]", title = "Grupo Carga sin fijacion")
+
+
+#Grupo Hockey
+
 ggplot(df_datosFinal %>% filter(Grupo == "hk"), aes(x= as.factor(Separacion), y= p)) + geom_boxplot(aes(fill = Condicion)) +
   facet_wrap( ~ Separacion, scales="free_x") + labs( y = "Respuestas Correctas", x = "Separacion [°]", title = "Grupo Hockey")
+
+ggplot(df_datosFinal_x %>% filter(Grupo == "hk"), aes(x= as.factor(Separacion), y= p)) + geom_boxplot(aes(fill = Condicion)) +
+  facet_wrap( ~ Separacion, scales="free_x") + labs( y = "Respuestas Correctas", x = "Separacion [°]", title = "Grupo Hockey sin fijacion")
+
+
+
