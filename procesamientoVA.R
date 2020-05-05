@@ -718,14 +718,23 @@ names(df_rendimiento)[7] <- c("ResPos")
 df_rendimiento <- df_rendimiento %>% mutate(Rendimiento = ResPos/ResPre)
 
 #Gráficos
-ggplot(df_rendimiento %>% filter(Grupo == "cl" , Fijacion == "NA") , aes(x= as.factor(Direccion), y= Rendimiento)) + geom_boxplot()
+#Rendimiento vs Direccion
+ggplot(df_rendimiento, aes(Direccion, Rendimiento)) + geom_boxplot(aes(fill = Grupo, Fijacion)) + geom_abline(slope = 0, intercept = 1) + facet_wrap( ~ Direccion, scales="free_x") + labs( y = "Rendimiento", x = "Fijación")
+#Rendimiento vs Separacion
+ggplot(df_rendimiento, aes(Separacion, Rendimiento)) + geom_boxplot(aes(fill = Grupo, Fijacion)) + geom_abline(slope = 0, intercept = 1) + facet_wrap( ~ Separacion, scales="free_x") + labs( y = "Rendimiento", x = "Fijación")
+#Grupo lt
+ggplot(df_rendimiento %>% filter(Grupo == "lt"), aes(as.factor(Direccion), Rendimiento)) + geom_boxplot(aes(fill = Fijacion)) + geom_abline(slope = 0, intercept = 1) + facet_wrap( ~ Direccion, scales="free_x") + labs( y = "Rendimiento", x = "Direccion")
 
-ggplot(df_rendimiento %>% filter(Grupo == "cl" , Fijacion == "NA") , aes(x= as.factor(Separacion), y= Rendimiento)) + geom_boxplot()
+ggplot(df_rendimiento %>% filter(Grupo == "lt"), aes(as.factor(Separacion), Rendimiento)) + geom_boxplot(aes(fill = Fijacion)) + geom_abline(slope = 0, intercept = 1) + facet_wrap( ~ Separacion, scales="free_x") + labs( y = "Rendimiento", x = "Separacion")
 
-ggplot(df_rendimiento %>% filter(Grupo == "lt" , Fijacion == "NA") , aes(x= as.factor(Direccion), y= Rendimiento)) + geom_boxplot()
+ggplot(df_rendimiento%>% filter(Grupo == "lt"), aes(as.factor(Fijacion), Rendimiento)) + geom_boxplot(aes(fill = Direccion)) + geom_abline(slope = 0, intercept = 1) + facet_wrap(~ Fijacion, scales="free_x") + labs( y = "Rendimiento", x = "Direccion")
 
-ggplot(df_rendimiento %>% filter(Grupo == "lt"), aes(x= as.factor(Separacion), y= Rendimiento)) + geom_boxplot(aes(fill= Fijacion))
+ggplot(df_rendimiento%>% filter(Grupo == "lt"), aes(as.factor(Fijacion), Rendimiento)) + geom_boxplot(aes(fill = as.factor(Separacion))) + geom_abline(slope = 0, intercept = 1) + facet_wrap(~ Fijacion, scales="free_x") + labs( y = "Rendimiento", x = "Separacion")
 
-ggplot(df_rendimiento %>% filter(Grupo == "lt", Fijacion == "NO"), aes(x= Separacion, y= Rendimiento)) + geom_point() + stat_smooth()
+#Fijacion
+ggplot(df_rendimiento, aes(as.factor(Fijacion), Rendimiento)) + geom_boxplot(aes(fill = Grupo)) + geom_abline(slope = 0, intercept = 1) + facet_wrap(~ Fijacion, scales="free_x") + labs( y = "Rendimiento", x = "Fijacion")
 
+ggplot(df_rendimiento, aes(as.factor(Fijacion), Rendimiento)) + geom_boxplot(aes(fill = Grupo ,Direccion)) + geom_abline(slope = 0, intercept = 1) + facet_wrap(~ Fijacion, scales="free_x") + labs( y = "Rendimiento", x = "Direccion")
+
+ggplot(df_rendimiento, aes(as.factor(Fijacion), Rendimiento)) + geom_boxplot(aes(fill = Grupo ,as.factor(Separacion))) + geom_abline(slope = 0, intercept = 1) + facet_wrap(~ Fijacion, scales="free_x") + labs( y = "Rendimiento", x = "Separacion")
 
