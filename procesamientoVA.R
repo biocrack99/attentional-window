@@ -572,6 +572,9 @@ df_tempo <- data.frame(Ntrials = rep(1:336, 2), Obervador = "aaf", Condicion = r
   
 ggplot(df_tempo, aes(x = Ntrials)) + geom_point(aes(y = Porcentaje, color = Condicion)) + geom_text(aes( x= Ntrials[1], y = Porcentaje[1], label = "Referencia pre", hjust = -0.2), size = 3) + geom_text(aes( x= Ntrials[1], y = Porcentaje[337], label = "Referencia pos", hjust = -0.2, vjust = 2), size = 3) + geom_point(aes(x = Ntrials[1], y = Porcentaje[337]), size = 3)
                                                 
+
+
+
 #5.3
 #Origino una lista de indices para cadaa observador con los trials aceptados para el procesamiento posterior
 #Obtengo los triasl que tienen un porcentaje mayor al 40% de los puntos del gaze dentro de la zona de fijacion
@@ -729,7 +732,7 @@ ggplot(df_rendimiento %>% filter(Grupo == "lt"), aes(as.factor(Separacion), Rend
 
 ggplot(df_rendimiento%>% filter(Grupo == "lt"), aes(as.factor(Fijacion), Rendimiento)) + geom_boxplot(aes(fill = Direccion)) + geom_abline(slope = 0, intercept = 1) + facet_wrap(~ Fijacion, scales="free_x") + labs( y = "Rendimiento", x = "Direccion")
 
-ggplot(df_rendimiento%>% filter(Grupo == "lt"), aes(as.factor(Fijacion), Rendimiento)) + geom_boxplot(aes(fill = as.factor(Separacion))) + geom_abline(slope = 0, intercept = 1) + facet_wrap(~ Fijacion, scales="free_x") + labs( y = "Rendimiento", x = "Separacion")
+ggplot(df_rendimiento%>% filter(Grupo == "lt"), aes(as.factor(Fijacion), Rendimiento)) + geom_boxplot(aes(fill = as.factor(Separacion))) + geom_abline(slope = 0, intercept = 1) + facet_wrap(~ Fijacion, scales="free_x") + labs( y = "Rendimiento", x = "Fijacion")
 
 #Fijacion
 ggplot(df_rendimiento, aes(as.factor(Fijacion), Rendimiento)) + geom_boxplot(aes(fill = Grupo)) + geom_abline(slope = 0, intercept = 1) + facet_wrap(~ Fijacion, scales="free_x") + labs( y = "Rendimiento", x = "Fijacion")

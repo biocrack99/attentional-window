@@ -1,0 +1,36 @@
+---
+title: "Informe Ventana Atencional"
+author: "Anibal de Paul"
+date: "13 de mayo de 2020"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## R Markdown
+
+This is an R Markdown presentation. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document.
+
+## Slide with Bullets
+
+- Bullet 1
+- Bullet 2
+- Bullet 3
+
+## Slide with R Output
+
+```{r cars, echo = TRUE}
+ggplot(data = df_porcentaje, aes(x= Ntrials , y= TRialOK)) + geom_point(aes(color = Condicion), alpha = 0.5) +  geom_text(aes( x= 1, y = 100, label = "Referencia", hjust = -0.2), size = 3) +
+  facet_wrap( ~ Observador, scales="free_x")
+```
+
+## Slide with Plot
+
+```{r pressure}
+plot(pressure)
+```
+
