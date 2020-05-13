@@ -7,7 +7,7 @@ library(R.matlab)
 library(readr)
 library(reshape2)
 library(plyr)
-################################################################################LISTA DE LOS DATOS
+
 
 #Lista para guardar los datos segun la cantidad de obsevadores
 N <- 30
@@ -16,6 +16,8 @@ list_datos <- vector("list", N)
 list_gaze <- vector ("list", N)
 Ntrials <- 336
 
+
+# CARGO DATOS ILAV PRE ENTRENAMIENTO --------------------------------------
 #Cargo los datos de la ventana atencional antes del entrenamiento del ILAV
 #ubico el directorio donde se encuentran los archivos
 setwd(paste("D:/Dropbox/Posdoc",
@@ -110,8 +112,7 @@ for (i in seq_along(files))  {
       }
   
   
-#--------------------------------------------------------------------------
-  
+
   #Creo una tabla sin las columnas del gaze
   tbl_sin_gaze <- tbl[,-(7:ncol(tbl))]
   #Elimino las filas que tengas valores NA
@@ -150,7 +151,8 @@ for (i in seq_along(files))  {
 rm(averages, datos, df_gaze, ls_gaze_x, ls_gaze_y, tbl, tbl_gaze, tbl_sin_gaze ) 
 
 
-###############################################################################
+
+# CARGO DATOS HOCKEY PRE ENTRENAMIENTO ------------------------------
 #Cargo los datos de la ventana atencional antes del entrenamiento de Hockey
 setwd(paste("D:/Dropbox/Posdoc",
             "/Percepcion Deporte",
@@ -172,6 +174,8 @@ for (i in seq_along(files))  {
   data_mat    <- as.data.frame(datList)
   #names(data_mat) <- varNames
   datos <- as.data.frame(t(data_mat))
+
+# GAZE --------------------------------------------------------------------
   #corto los datos del gaze 
   for (k in seq_along(1:Ntrials)){
     
@@ -235,7 +239,8 @@ for (i in seq_along(files))  {
 #Elimino  variables
 rm(averages, data_mat, datList, datos, datos_sin_Gaze, matlabFile, tabla, tabla_total, values) 
 
-###############################################################################
+
+# CARGO DATOS ILAV POS ENTRENAMIENTO --------------------------------------
 #Cargo los datos de la ventana atencional despues del entrenamiento del ILAV
 setwd(paste("D:/Dropbox/Posdoc",
             "/Percepcion Deporte",
@@ -246,15 +251,11 @@ setwd(paste("D:/Dropbox/Posdoc",
             "/VENTANA ATENCION/Ventana version final/Datos/Post test/CSV/", sep = ""))
 #Leo los nombres de los de archivos que contienen la extenxion .csv
 files <- list.files(pattern = "*.csv", full.names = T)
-
 #rm(tbl, tbl_sin_gaze, datos, n, averages)
-
-
 for (i in seq_along(files))  {
   
   tbl <- sapply(files[i], read_csv, simplify=FALSE) %>% 
     bind_rows()
-
 # GAZE --------------------------------------------------------------------
   #Creo un data frame con los datos del gaze en cada trial
   tbl_gaze <- tbl[, (5:8)]
@@ -331,7 +332,6 @@ for (i in seq_along(files))  {
     
   }
   
-#--------------------------------------------------------------------------
   #Creo una tabla sin las columnas del gaze
   tbl_sin_gaze <- tbl[,-(7:ncol(tbl))]
   #Elimino las filas que tengas valores NA
@@ -367,13 +367,12 @@ for (i in seq_along(files))  {
   list_gaze[i + 15] <- list(df_gaze)
   
 }
-
-
 #Elimino  variables
 rm(averages, datos, df_gaze, ls_gaze_x, ls_gaze_y, tbl, tbl_gaze, tbl_sin_gaze ) 
 
 
-###############################################################################
+
+# CARGO DATOS HOCEKY POS ENTRENAMIENTO ------------------------------------
 #Cargo los datos de la ventana atencional despues del entrenamiento Hockey 
 #ubico el directorio donde se encuentran los archivos
 setwd(paste("D:/Dropbox/Posdoc",
@@ -456,8 +455,10 @@ for (i in seq_along(files))  {
 
 #Elimino las variables
 rm(list=setdiff(ls(), c("list_datos", "list_gaze", "Ntrials", "list_datosRaw"))) 
-###############################################################################
-#PROCESAMIENTO
+
+
+# PROCESAMIENTO -----------------------------------------------------------
+
 
 #1- Agrego columna pre y pos en la lista donde se encuentras los datos
 
@@ -514,9 +515,10 @@ df_datos <- ldply (list_datos, data.frame)
 
 names(list_gaze) <- c("pre_aaf",  "pre_afb",  "pre_agm", "pre_cic", "pre_jjr", "pre_lrc", "pre_mab", "pre_mdn", "pre_msz", "pre_nga", "pre_pab", "pre_at", "pre_lfa", "pre_lms", "pre_mcm", "pos_aaf",  "pos_afb",  "pos_agm", "pos_cic", "pos_jjr", "pos_lrc", "pos_mab", "pos_mdn", "pos_msz", "pos_nga", "pos_pab", "pos_at", "pos_lfa", "pos_lms", "pos_mcm")
 
+
+# GAZE --------------------------------------------------------------------
 #5- Comparo para cada obsevador el gaze de cada trial con el gaze del primer
 #trial que se toma como referencia.
-
 #5.1
 #Calculo la media del XGaze y del YGaze del primer trial
 #Calculo la distancia de cada punto del Gaze de los sucesivo trials con
@@ -553,7 +555,6 @@ for (i in seq_along(vr_num_Dist)){
 
   
 }
-
 #5.2 
 #Grafico un panel con los porcentajes del gaze que caen dentro de la zona de #fijacion antes y despues del entrenamiento
 Obs <- c("aaf", "afb", "agm", "cic", "jjr", "lrc", "mab", "mdn", "msz", "nga", "pab", "at",  "lfa", "lms", "mcm") 
@@ -563,18 +564,30 @@ df_porcentaje$Observador <- rep(rep(Obs,each = 336), 2)
 df_porcentaje$Condicion <- rep(c("pre", "pos"),each = (10080/2))
 df_porcentaje$Ntrials <- rep(1:336, 30)
 
-
 ggplot(data = df_porcentaje, aes(x= Ntrials , y= TRialOK)) + geom_point(aes(color = Condicion), alpha = 0.5) +  geom_text(aes( x= 1, y = 100, label = "Referencia", hjust = -0.2), size = 3) +
   facet_wrap( ~ Observador, scales="free_x")
+
+#Grafico los porcentajes de trials para cada observador antes y despues del entrenamiento que tienen un porcentaje de 80,60,40 y 20 de puntos de fijación dentro de la zona de fijacion definida en el dataframe df_porcentaje
+#Creo data frame
+df_aceptado <- data.frame(Observador = rep(Obs, 2), Condicion = rep(c("pre", "pos"), each = 15 ), Porcentaje80 = c(NaN),  Porcentaje60 = c(NaN), Porcentaje40 = c(NaN), Porcentaje20 = c(NaN))
+#Nuevas varibles con los porcentajes de trials para cada observador que superan un 80, 60, 40 y 20 % de puntos de fijacion dentro de la zona de fijacion
+for (i in seq_along(1:30)){
+  
+  
+  df_aceptado$Porcentaje80[i] <- ((sum(list_gaze[[i]]$TRialOK[2:336] >= 80))/335)*100
+  df_aceptado$Porcentaje60[i] <- ((sum(list_gaze[[i]]$TRialOK[2:336] >= 60))/335)*100
+  df_aceptado$Porcentaje40[i] <- ((sum(list_gaze[[i]]$TRialOK[2:336] >= 40))/335)*100
+  df_aceptado$Porcentaje20[i] <- ((sum(list_gaze[[i]]$TRialOK[2:336] >= 20))/335)*100
+  
+}
+#Graficos de barras para comparar 
+ggplot() + geom_col(data = df_aceptado, aes(x = Observador, y = Porcentaje80, fill = Condicion), position = "dodge") 
 
 #Creo un data frame para ver los datos de cada observador en un gráfico
 df_tempo <- data.frame(Ntrials = rep(1:336, 2), Obervador = "aaf", Condicion = rep(c("pre", "pos"), each=336), Porcentaje = c(list_gaze$pre_lms$TRialOK, list_gaze$pos_lms$TRialOK))
   
 ggplot(df_tempo, aes(x = Ntrials)) + geom_point(aes(y = Porcentaje, color = Condicion)) + geom_text(aes( x= Ntrials[1], y = Porcentaje[1], label = "Referencia pre", hjust = -0.2), size = 3) + geom_text(aes( x= Ntrials[1], y = Porcentaje[337], label = "Referencia pos", hjust = -0.2, vjust = 2), size = 3) + geom_point(aes(x = Ntrials[1], y = Porcentaje[337]), size = 3)
                                                 
-
-
-
 #5.3
 #Origino una lista de indices para cadaa observador con los trials aceptados para el procesamiento posterior
 #Obtengo los triasl que tienen un porcentaje mayor al 40% de los puntos del gaze dentro de la zona de fijacion
@@ -601,6 +614,7 @@ for (i in seq_along(list_gaze)){
  
  }
 
+# GRAFICOS VARIOS ---------------------------------------------------------
 #6 Grafico los resultados obtenido
 df_datosFinal <- ldply (list_datosFinal, data.frame)
 df_datosFinal_x <- ldply (list_datosFinal_x, data.frame)
@@ -611,7 +625,7 @@ names(df_datos)[7:9] <- c("Observadores", "Condicion", "Grupo")
 df_datos <- rbind(df_datos, df_datosFinal, df_datosFinal_x)
 
 ggplot(df_datos, aes(x= as.factor(Separacion), y= p)) + geom_boxplot(aes(fill= Fijacion, Grupo)) +
-  facet_wrap( ~ Separacion, scales="free_x") + labs( y = "Respuestas Correctas", x = "Condición", title = "Todos los trials")
+  facet_wrap( ~ Separacion, scales="free_x") + labs( y = "Respuestas Correctas", x = "Grupos", title = "Promedio respuestas correctas por grupo ")
 
 #6.1 Panel con Boxplot
 ggplot(df_datos %>% filter(Fijacion == "NA"), aes(x= as.factor(Direccion), y= p)) + geom_boxplot(aes(fill=Grupo, Condicion)) +
@@ -700,8 +714,7 @@ ggplot(df_datos %>% filter(Separacion == 20 , Fijacion == "NO"), aes(x= as.facto
 
 
 
-# Nuevas variables --------------------------------------------------------
-
+# NUEVAS VARIABLES --------------------------------------------------------
 #Cambio nombre a data frames
 df_datosCF <- df_datosFinal
 df_datosSF <- df_datosFinal_x
