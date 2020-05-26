@@ -1,5 +1,5 @@
-##Script para ordenar y cargor los datos de los archivos obtenidos
-##durante el experimento de Ventana Atencional
+##Experimento Ventana Atencional
+##Script para ordenar y cargar los datos de los archivos obtenidos durante el experimento de Ventana Atencional
 
 #cargo librerias
 library(tidyverse)
@@ -568,19 +568,45 @@ ggplot(data = df_porcentaje, aes(x= Ntrials , y= TRialOK)) + geom_point(aes(colo
 
 #Grafico los porcentajes de trials para cada observador antes y despues del entrenamiento que tienen un porcentaje de 80,60,40 y 20 de puntos de fijación dentro de la zona de fijacion definida en el dataframe df_porcentaje
 #Creo data frame
-df_aceptado <- data.frame(Observador = rep(Obs, 2), Condicion = rep(c("pre", "pos"), each = 15 ), Porcentaje80 = c(NaN),  Porcentaje60 = c(NaN), Porcentaje40 = c(NaN), Porcentaje20 = c(NaN))
+df_aceptado <- data.frame(Observador = rep(Obs, 2), Condicion = rep(c("pre", "pos"), each = 15 ), Porcentaje80 = c(NaN),  Porcentaje60 = c(NaN), Porcentaje50 = c(NaN), Porcentaje20 = c(NaN))
 #Nuevas varibles con los porcentajes de trials para cada observador que superan un 80, 60, 40 y 20 % de puntos de fijacion dentro de la zona de fijacion
 for (i in seq_along(1:30)){
   
   
   df_aceptado$Porcentaje80[i] <- ((sum(list_gaze[[i]]$TRialOK[2:336] >= 80))/335)*100
   df_aceptado$Porcentaje60[i] <- ((sum(list_gaze[[i]]$TRialOK[2:336] >= 60))/335)*100
-  df_aceptado$Porcentaje40[i] <- ((sum(list_gaze[[i]]$TRialOK[2:336] >= 40))/335)*100
+  df_aceptado$Porcentaje50[i] <- ((sum(list_gaze[[i]]$TRialOK[2:336] >= 40))/335)*100
   df_aceptado$Porcentaje20[i] <- ((sum(list_gaze[[i]]$TRialOK[2:336] >= 20))/335)*100
   
-}
+  if( (df_aceptado$Observador[i] == "aaf" )||(df_aceptado$Observador[i] == "agm" )|| (df_aceptado$Observador[i] == "lrc")||(df_aceptado$Observador[i] == "pab") ){
+    
+    df_aceptado$Grupo[i] <- c("cl")
+    
+  }
+  
+  else if ((df_aceptado$Observador[i] == "afb" )||(df_aceptado$Observador[i] == "cic" )|| (df_aceptado$Observador[i] == "msz")|| (df_aceptado$Observador[i] == "nga") ){
+      
+    df_aceptado$Grupo[i] <- c("rt")
+      
+    }
+    else if ( (df_aceptado$Observador[i] == "lfa" )||(df_aceptado$Observador[i] == "lms" )|| (df_aceptado$Observador[i] == "mcm")|| (df_aceptado$Observador[i] == "at") ){
+      
+      df_aceptado$Grupo[i] <- c("hk")
+      
+    }
+    
+    else if ( (df_aceptado$Observador[i] == "jjr" )||(df_aceptado$Observador[i] == "mab" )|| (df_aceptado$Observador[i] == "mdn")){
+      
+      df_aceptado$Grupo[i] <- c("lt")
+      
+    } 
+  
+  }
+
 #Graficos de barras para comparar 
-ggplot() + geom_col(data = df_aceptado, aes(x = Observador, y = Porcentaje80, fill = Condicion), position = "dodge") 
+ggplot() + geom_col(data = df_aceptado, aes(x = Observador, y = Porcentaje50, fill = Condicion), position = "dodge") 
+
+
 
 #Creo un data frame para ver los datos de cada observador en un gráfico
 df_tempo <- data.frame(Ntrials = rep(1:336, 2), Obervador = "aaf", Condicion = rep(c("pre", "pos"), each=336), Porcentaje = c(list_gaze$pre_lms$TRialOK, list_gaze$pos_lms$TRialOK))

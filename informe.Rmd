@@ -22,26 +22,49 @@ load("C:/Users/Anibal/Documents/R/attentional-window/procesamientoVA.RData")
 ## Efectos de entrenamiento con MOT en Ventana Atencional
 En esta expriencia utilizamos el paradigma MOT (seguimiento de objetos mútiples o "Multiple Object Tracking") como herramienta de entrenamiento atencional. 
 
-## Slide with Bullets
+## Grupos, factores y variables
 
-- Bullet 1
-- Bullet 2
-- Bullet 3
+- Grupos: Control (cl), Carga(lt), Tiempo de Reacción(rt), Hockey (hk)
+- Direccion (0°, 45°, 90°, 135°)
+- Separación  (3°, 5°, 8°, 11°, 14°, 17°, 20°)
+- Fijacion = NA SI NO
+- Observaciones = Respuestas correctas y Rendimiento
 
-## Slide with R Output
+##Porcentaje del gaze dentro de la zona de fijacion
 
-```{r , echo = FALSE, fig.width = 8, fig.asp = 0.63}
-ggplot(data = df_porcentaje, aes(x= Ntrials , y= TRialOK)) + geom_point(aes(color = Condicion), alpha = 0.5) +  geom_text(aes( x= 1, y = 100, label = "Referencia", hjust = -0.2), size = 3) +
-  facet_wrap( ~ Observador, scales="free_x")
+```{r}
 
+ggplot(df_tempo, aes(x = Ntrials)) + geom_point(aes(y = Porcentaje, color = Condicion)) + geom_text(aes( x= Ntrials[1], y = Porcentaje[1], label = "Referencia pre", hjust = -0.2), size = 3) + geom_text(aes( x= Ntrials[1], y = Porcentaje[337], label = "Referencia pos", hjust = -0.2, vjust = 2), size = 3) + geom_point(aes(x = Ntrials[1], y = Porcentaje[337]), size = 3)
+```
 
+##Zona de fijación 
+
+```{r}
+
+ggplot(data = df_porcentaje, aes(x= Ntrials , y= TRialOK)) + geom_point(aes(color = Condicion), alpha = 0.5) +  
+  facet_wrap( ~ Observador, scales="free_x") + labs( y = "Porcentaje puntos", x = " N° Trial")
 
 ```
 
-## Slide with Plot
+##Porcentaje de trials en zona de fijación
+```{r}
+ggplot() + geom_col(data = df_aceptado, aes(x = Observador, y = Porcentaje50, fill = Condicion), position = "dodge") 
+```
 
-```{r pressure}
-plot(pressure)
+##Respuestas correctas 
+```{r }
+
+ggplot(df_datos, aes(x= as.factor(Separacion), y= p)) + geom_boxplot(aes(fill= Fijacion, Grupo)) +
+  facet_wrap( ~ Separacion, scales="free_x") + labs( y = "Respuestas Correctas", x = "Grupos")
+
+```
+
+##Respuestas correctas
+```{r}
+
+ggplot(df_datos, aes(x= as.factor(Direccion), y= p)) + geom_boxplot(aes(fill= Fijacion, Grupo)) +
+  facet_wrap( ~ Direccion, scales="free_x") + labs( y = "Respuestas Correctas", x = "Grupos")
+
 ```
 
 ## References
