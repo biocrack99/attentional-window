@@ -8,7 +8,6 @@ library(readr)
 library(reshape2)
 library(plyr)
 
-
 #Lista para guardar los datos segun la cantidad de obsevadores
 N <- 30
 list_datosRaw <- vector("list", N)
@@ -754,3 +753,21 @@ ggplot(df_rendimiento, aes(as.factor(Fijacion), Rendimiento)) + geom_boxplot(aes
 
 ggplot(df_rendimiento, aes(as.factor(Fijacion), Rendimiento)) + geom_boxplot(aes(fill = Grupo ,as.factor(Separacion))) + geom_abline(slope = 0, intercept = 1) + facet_wrap(~ Fijacion, scales="free_x") + labs( y = "Rendimiento", x = "Separacion")
 
+
+# GUARDAR DATOS -----------------------------------------------------------
+getCurrentFileLocation <-  function()
+{
+  this_file <- commandArgs() %>% 
+    tibble::enframe(name = NULL) %>%
+    tidyr::separate(col=value, into=c("key", "value"), sep="=", fill='right') %>%
+    dplyr::filter(key == "--file") %>%
+    dplyr::pull(value)
+  if (length(this_file)==0)
+  {
+    this_file <- rstudioapi::getSourceEditorContext()$path
+  }
+  return(dirname(this_file))
+}
+#Guardo dataframes para el informe en MD
+file_procesamientoVA<- paste(getCurrentFileLocation(),'/procesamientoVA.RData', sep = "")
+save.image(file = file_procesamientoVA)
