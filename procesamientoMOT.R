@@ -405,6 +405,75 @@ for (i in seq_along (files)){
   
 }
 
+#Elimino variables innecesarias
+rm(df_datos, ls_dat, mx_data, matlab_file)
 
 
+# Procesamiento -----------------------------------------------------------
+#1- Comparar porcentaje de aciertos entre 1 y 6 sesion para cada observador y cada grupo
+#Grupo LT
+df_obs_lt <- data.frame(Observador = rep(c("jjr", "mab", "mdn"), each = 300), 
+                        Porcentaje = c(ls_datos[[1]]$Porcentaje, 
+                                       ls_datos[[6]]$Porcentaje, 
+                                       ls_datos[[7]]$Porcentaje, 
+                                       ls_datos[[12]]$Porcentaje, 
+                                       ls_datos[[13]]$Porcentaje, 
+                                       ls_datos[[18]]$Porcentaje ), 
+                        Sesion = rep(c("Sesion 1", "Sesion 6"), 3, each=150))
+ 
+df_obs <- df_obs_lt %>% 
+                      group_by(Observador, Sesion) %>% 
+                      summarise(Media = mean(Porcentaje))
 
+#Gráfico de barras para comparar el rendimiento en el primer y el ultimo entrenamiento con MOT para los sujetos del grupo LT
+ggplot() + 
+  geom_col(data = df_obs, 
+           aes( x = Observador, y = Media, fill = Sesion), 
+           position = "dodge"
+  )
+
+
+#Grupo LT en promedio 
+df_obs <- df_obs_lt %>% 
+                  group_by(Sesion) %>% 
+                  summarise(Media = mean(Porcentaje))
+
+#Gráfico de barras para comparar el rendimiento en el primer y el ultimo entrenamiento con MOT para todos los sujetos del grupo LT
+ggplot() + 
+  geom_col(data = df_obs, 
+           aes( x = Sesion, y = Media), 
+           position = "dodge"
+  )
+
+#Grupo RT
+df_obs_rt <- data.frame(Observador = rep(c("afb", "cic", "msz",                                             "nga"), each = 300), 
+                        Porcentaje = c(ls_datos[[19]]$Porcentaje,                                                     ls_datos[[25]]$Porcentaje,                                                     ls_datos[[26]]$Porcentaje,                                                     ls_datos[[32]]$Porcentaje,                                                     ls_datos[[33]]$Porcentaje,                                                     ls_datos[[38]]$Porcentaje,
+                                       ls_datos[[37]]$Porcentaje,
+                                       ls_datos[[42]]$Porcentaje
+                                       ), 
+                        Sesion = rep(c("Sesion 1", "Sesion 6"), 4, each=150))
+
+df_obs <- df_obs_rt %>% 
+                  group_by(Observador, Sesion) %>% 
+                  summarise(Media = mean(Porcentaje))
+
+#Gráfico de barras para comparar el rendimiento en el primer y el ultimo entrenamiento con MOT para los sujetos del grupo LT
+ggplot() + 
+  geom_col(data = df_obs, 
+           aes( x = Observador, y = Media, fill = Sesion), 
+           position = "dodge"
+  )
+
+#Grupo RT en promedio 
+df_obs <- df_obs_lt %>% 
+                  group_by(Sesion) %>% 
+                  summarise(Media = mean(Porcentaje))
+
+#Gráfico de barras para comparar el rendimiento en el primer y el ultimo entrenamiento con MOT para todos los sujetos del grupo LT
+ggplot() + 
+  geom_col(data = df_obs, 
+           aes( x = Sesion, y = Media), 
+           position = "dodge"
+  )
+
+#Grupo CT
