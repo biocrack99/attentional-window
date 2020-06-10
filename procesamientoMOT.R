@@ -409,9 +409,9 @@ for (i in seq_along (files)){
 rm(df_datos, ls_dat, mx_data, matlab_file)
 
 
-# Procesamiento -----------------------------------------------------------
+# Procesamiento ---------------------------------------------------------------
 #1- Comparar porcentaje de aciertos entre 1 y 6 sesion para cada observador y cada grupo
-#Grupo LT
+#Grupo LT----------------------------------------------------------------------
 df_obs_lt <- data.frame(Observador = rep(c("jjr", "mab", "mdn"), each = 300), 
                         Porcentaje = c(ls_datos[[1]]$Porcentaje, 
                                        ls_datos[[6]]$Porcentaje, 
@@ -447,11 +447,12 @@ ggplot() +
 
 #Grupo RT
 df_obs_rt <- data.frame(Observador = rep(c("afb", "cic", "msz",                                             "nga"), each = 300), 
-                        Porcentaje = c(ls_datos[[19]]$Porcentaje,                                                     ls_datos[[25]]$Porcentaje,                                                     ls_datos[[26]]$Porcentaje,                                                     ls_datos[[32]]$Porcentaje,                                                     ls_datos[[33]]$Porcentaje,                                                     ls_datos[[38]]$Porcentaje,
-                                       ls_datos[[37]]$Porcentaje,
-                                       ls_datos[[42]]$Porcentaje
+                        Porcentaje = c( ls_datos[[19]]$Porcentaje,                                                     ls_datos[[25]]$Porcentaje,                                                     ls_datos[[26]]$Porcentaje,                                                     ls_datos[[32]]$Porcentaje,                                                     ls_datos[[33]]$Porcentaje,                                                     ls_datos[[38]]$Porcentaje,
+                                        ls_datos[[37]]$Porcentaje,
+                                        ls_datos[[42]]$Porcentaje
                                        ), 
-                        Sesion = rep(c("Sesion 1", "Sesion 6"), 4, each=150))
+                        Sesion = rep(c("Sesion 1", "Sesion 6"), 4, each=150)
+              )
 
 df_obs <- df_obs_rt %>% 
                   group_by(Observador, Sesion) %>% 
@@ -466,8 +467,8 @@ ggplot() +
 
 #Grupo RT en promedio 
 df_obs <- df_obs_lt %>% 
-                  group_by(Sesion) %>% 
-                  summarise(Media = mean(Porcentaje))
+          group_by(Sesion) %>% 
+          summarise(Media = mean(Porcentaje))
 
 #Gráfico de barras para comparar el rendimiento en el primer y el ultimo entrenamiento con MOT para todos los sujetos del grupo LT
 ggplot() + 
@@ -477,3 +478,20 @@ ggplot() +
   )
 
 #Grupo CT
+#AT
+df_at <- data.frame( Observador = "at",
+                     Sesion = rep(c ("Sesion LT", "Sesion RT"), each = 150), 
+                     Porcentaje = c( ls_datos_ct[[1]]$Porcentaje, 
+                                     ls_datos_ct[[20]]$Porcentaje)
+          )
+
+#Dataframe para graficar las medias del acierto
+df_at <- df_at %>% 
+         group_by(Sesion) %>% 
+         summarise(Media = mean(Porcentaje))
+
+#Analisis del tiempo de reaccion de at
+#Media
+db_rt <- mean( unlist( ls_datos_ct[[20]]$RT), na.rm = TRUE)
+db_rt_sd <- sd( unlist( ls_datos_ct[[20]]$RT), na.rm = TRUE)
+in_errados <- (sum( is.na( ls_datos_ct[[20]]$RT)))/150
