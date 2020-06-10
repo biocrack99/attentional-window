@@ -445,7 +445,7 @@ ggplot() +
            position = "dodge"
   )
 
-#Grupo RT
+#Grupo RT----------------------------------------------------------------------
 df_obs_rt <- data.frame(Observador = rep(c("afb", "cic", "msz",                                             "nga"), each = 300), 
                         Porcentaje = c( ls_datos[[19]]$Porcentaje,                                                     ls_datos[[25]]$Porcentaje,                                                     ls_datos[[26]]$Porcentaje,                                                     ls_datos[[32]]$Porcentaje,                                                     ls_datos[[33]]$Porcentaje,                                                     ls_datos[[38]]$Porcentaje,
                                         ls_datos[[37]]$Porcentaje,
@@ -477,7 +477,7 @@ ggplot() +
            position = "dodge"
   )
 
-#Grupo CT
+#Grupo CT----------------------------------------------------------------------
 #AT
 df_at <- data.frame( Observador = "at",
                      Sesion = rep(c ("Sesion LT", "Sesion RT"), each = 150), 
