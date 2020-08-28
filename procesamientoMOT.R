@@ -445,9 +445,9 @@ ggplot() +
            position = "dodge"
   )
 
-#Grupo RT----------------------------------------------------------------------
+#Grupo RT--------------------------------------------------------
 df_obs_rt <- data.frame(Observador = rep(c("afb", "cic", "msz",                                             "nga"), each = 300), 
-                        Porcentaje = c( ls_datos[[19]]$Porcentaje,                                                     ls_datos[[25]]$Porcentaje,                                                     ls_datos[[26]]$Porcentaje,                                                     ls_datos[[32]]$Porcentaje,                                                     ls_datos[[33]]$Porcentaje,                                                     ls_datos[[38]]$Porcentaje,
+                        Porcentaje = c( ls_datos[[19]]$Porcentaje,                                                    ls_datos[[25]]$Porcentaje,                                                    ls_datos[[26]]$Porcentaje,                                                    ls_datos[[32]]$Porcentaje,                                                    ls_datos[[33]]$Porcentaje,                                                    ls_datos[[38]]$Porcentaje,
                                         ls_datos[[37]]$Porcentaje,
                                         ls_datos[[42]]$Porcentaje
                                        ), 
@@ -477,7 +477,7 @@ ggplot() +
            position = "dodge"
   )
 
-#Grupo CT----------------------------------------------------------------------
+#Grupo CT--------------------------------------------------------
 #AT
 df_at <- data.frame( Observador = "at",
                      Sesion = rep(c ("Sesion LT", "Sesion RT"), each = 150), 
@@ -491,7 +491,38 @@ df_at <- df_at %>%
          summarise(Media = mean(Porcentaje))
 
 #Analisis del tiempo de reaccion de at
-#Media
-db_rt <- mean( unlist( ls_datos_ct[[20]]$RT), na.rm = TRUE)
-db_rt_sd <- sd( unlist( ls_datos_ct[[20]]$RT), na.rm = TRUE)
-in_errados <- (sum( is.na( ls_datos_ct[[20]]$RT)))/150
+#Media, desviacion y errados.
+db_rt <- mean(unlist(ls_datos_ct[[20]]$RT), na.rm = TRUE)
+db_rt_sd <- sd(unlist(ls_datos_ct[[20]]$RT), na.rm = TRUE)
+in_errados <- (sum(is.na(ls_datos_ct[[20]]$RT)))/150
+
+#Sujetos con entrenamiento expandido LFA, LMS, MCM
+#Modo LT
+df_obs_ct_lt <- ldply(ls_datos_ct[c(2:19)], rbind)
+
+df_ct_lt <- df_obs_ct_lt %>% 
+  group_by(Observador, Sesion) %>% 
+  summarise(Media = mean(Porcentaje)) %>%
+  mutate(Proporcion = Media/100, Transformacion=asin(sqrt(Proporcion)))
+            
+
+ggplot() + 
+  geom_col(data = df_ct_lt%>%filter(Sesion == c("1","6")), 
+           aes( x = as.factor(Sesion), y = Media, fill = Observador), 
+           position = "dodge"
+  )
+
+#Modo RT
+df_obs_ct_rt <- ldply(ls_datos_ct[c(21:38)], rbind)
+
+df_ct_rt <- df_obs_ct_rt %>% 
+  group_by(Observador, Sesion) %>% 
+  summarise(Media = mean(Porcentaje)) %>%
+  mutate(Proporcion = Media/100, Transformacion=asin(sqrt(Proporcion)))
+
+ggplot() + 
+  geom_col(data = df_ct_rt%>%filter(Sesion == c("1","6")), 
+           aes( x = as.factor(Sesion), y = Media, fill = Observador), 
+           position = "dodge"
+  )
+

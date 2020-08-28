@@ -2,11 +2,12 @@
 ##Script para ordenar y cargar los datos de los archivos obtenidos durante el experimento de Ventana Atencional
 
 #cargo librerias
+library(plyr)
 library(tidyverse)
 library(R.matlab)
 library(readr)
 library(reshape2)
-library(plyr)
+
 
 #Lista para guardar los datos segun la cantidad de obsevadores
 N <- 30
@@ -122,10 +123,17 @@ for (i in seq_along(files))  {
   #Redondeo los datos de la columna separacion
   datos$Separacion <- round(as.numeric(datos$Separacion), digits = 0)
   #Obtengo nuevas variables
-  datos <- mutate(datos, correctas_A = Cantidad_TGC_1 == Respuesta_A, 
-                  correctas_B = Cantidad_TGC_2 == Respuesta_B)
+  datos <- mutate(datos, 
+                  correctas_A = Cantidad_TGC_1 == Respuesta_A, 
+                  correctas_B = Cantidad_TGC_2 == Respuesta_B
+                  )
   #Obtengo las respuesta correctas
-  datos <- mutate(datos, correctas = correctas_A == correctas_B)
+  datos <- mutate(datos, 
+                  correctas = (correctas_A == 1 & 
+                               correctas_B == 1
+                              )
+                 )
+  
   #Convierto a numero variables logicas
   datos[c(7:9)] <- sapply(datos[c(7:9)], as.numeric)
   #Elimino la primer fila de los datos debido a que se usa para
@@ -202,11 +210,16 @@ for (i in seq_along(files))  {
   tabla <- tbl_df(datos_sin_Gaze)
   
   #obtengo nuevas variables
-  tabla_total <- mutate(tabla, correctas_A = Cantidad.TGC.1 == Respuesta.A, 
-                        correctas_B = Cantidad.TGC.2 == Respuesta.B)
+  tabla_total <- mutate(tabla, 
+                correctas_A = Cantidad.TGC.1 ==  Respuesta.A, 
+                correctas_B = Cantidad.TGC.2 == Respuesta.B)
+  
   
   #obtengo las respuesta correctas
-  tabla_total <- mutate(tabla_total, correctas = correctas_A == correctas_B)
+  #tabla_total <- mutate(tabla_total, correctas = correctas_A == correctas_B)
+  tabla_total <- mutate(tabla_total, 
+              correctas = (correctas_A == TRUE & correctas_B == TRUE))
+  
   
   #convierto a numero variables logicas
   tabla_total[c(7:9)] <- sapply(tabla_total[c(7:9)], as.numeric)
@@ -341,10 +354,16 @@ for (i in seq_along(files))  {
   #Redondeo los datos de la columna separacion
   datos$Separacion <- round(as.numeric(datos$Separacion), digits = 0)
   #Obtengo nuevas variables
-  datos <- mutate(datos, correctas_A = Cantidad_TGC_1 == Respuesta_A, 
-                  correctas_B = Cantidad_TGC_2 == Respuesta_B)
+  datos <- mutate(datos, 
+                  correctas_A = Cantidad_TGC_1 == Respuesta_A, 
+                  correctas_B = Cantidad_TGC_2 == Respuesta_B
+                  )
   #Obtengo las respuesta correctas
-  datos <- mutate(datos, correctas = correctas_A == correctas_B)
+  datos <- mutate(datos, 
+                  correctas = (correctas_A == 1 & 
+                               correctas_B == 1
+                              )
+                  )
   #Convierto a numero variables logicas
   datos[c(7:9)] <- sapply(datos[c(7:9)], as.numeric)
   #Elimino la primer fila de los datos debido a que se usa para
@@ -421,11 +440,17 @@ for (i in seq_along(files))  {
   tabla <- tbl_df(datos_sin_Gaze)
   
   #obtengo nuevas variables
-  tabla_total <- mutate(tabla, correctas_A = Cantidad.TGC.1 == Respuesta.A, 
-                        correctas_B = Cantidad.TGC.2 == Respuesta.B)
-  
+  tabla_total <- mutate(tabla, 
+                      correctas_A = Cantidad.TGC.1 == Respuesta.A, 
+                      correctas_B = Cantidad.TGC.2 == Respuesta.B
+                      )
   #obtengo las respuesta correctas
-  tabla_total <- mutate(tabla_total, correctas = correctas_A == correctas_B)
+  tabla_total <- mutate(tabla_total, 
+                        correctas = (correctas_A == TRUE &
+                                     correctas_B == TRUE
+                                    )
+                        )
+  
   
   #convierto a numero variables logicas
   tabla_total[c(7:9)] <- sapply(tabla_total[c(7:9)], as.numeric)
@@ -615,7 +640,7 @@ ggplot(df_tempo, aes(x = Ntrials)) + geom_point(aes(y = Porcentaje, color = Cond
                                                 
 #5.3
 #Origino una lista de indices para cadaa observador con los trials aceptados para el procesamiento posterior
-#Obtengo los triasl que tienen un porcentaje mayor al 40% de los puntos del gaze dentro de la zona de fijacion
+#Obtengo los trials que tienen un porcentaje mayor al 40% de los puntos del gaze dentro de la zona de fijacion
 #Genero un data frame para cada observador con el porcentaje de respuestas correctas en cada Direccion y en cada Separacion
 list_index <- vector("list", 30)
 list_datosFinal <- vector ("list", 30)
@@ -796,4 +821,6 @@ getCurrentFileLocation <-  function()
 }
 #Guardo dataframes para el informe en MD
 file_procesamientoVA<- paste(getCurrentFileLocation(),'/procesamientoVA.RData', sep = "")
-save.image(file = file_procesamientoVA)
+save.image(file = file_procesamientoVA
+
+
