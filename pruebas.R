@@ -1,5 +1,5 @@
 ##Experimento Ventana Atencional
-##Script para ir porbando distintas cuestiones
+##Script para ir probando distintas cuestiones
 
 #cargo librerias
 library(plyr)
@@ -123,10 +123,17 @@ for (i in seq_along(files))  {
   #Redondeo los datos de la columna separacion
   datos$Separacion <- round(as.numeric(datos$Separacion), digits = 0)
   #Obtengo nuevas variables
-  datos <- mutate(datos, correctas_A = Cantidad_TGC_1 == Respuesta_A, 
-                  correctas_B = Cantidad_TGC_2 == Respuesta_B)
+  datos <- mutate(datos, 
+                  correctas_A = Cantidad_TGC_1 == Respuesta_A, 
+                  correctas_B = Cantidad_TGC_2 == Respuesta_B
+  )
   #Obtengo las respuesta correctas
-  datos <- mutate(datos, correctas = correctas_A == correctas_B)
+  datos <- mutate(datos, 
+                  correctas = (correctas_A == 1 & 
+                                 correctas_B == 1
+                  )
+  )
+  
   #Convierto a numero variables logicas
   datos[c(7:9)] <- sapply(datos[c(7:9)], as.numeric)
   #Elimino la primer fila de los datos debido a que se usa para
@@ -203,11 +210,16 @@ for (i in seq_along(files))  {
   tabla <- tbl_df(datos_sin_Gaze)
   
   #obtengo nuevas variables
-  tabla_total <- mutate(tabla, correctas_A = Cantidad.TGC.1 == Respuesta.A, 
+  tabla_total <- mutate(tabla, 
+                        correctas_A = Cantidad.TGC.1 ==  Respuesta.A, 
                         correctas_B = Cantidad.TGC.2 == Respuesta.B)
   
+  
   #obtengo las respuesta correctas
-  tabla_total <- mutate(tabla_total, correctas = correctas_A == correctas_B)
+  #tabla_total <- mutate(tabla_total, correctas = correctas_A == correctas_B)
+  tabla_total <- mutate(tabla_total, 
+                        correctas = (correctas_A == TRUE & correctas_B == TRUE))
+  
   
   #convierto a numero variables logicas
   tabla_total[c(7:9)] <- sapply(tabla_total[c(7:9)], as.numeric)
@@ -342,10 +354,16 @@ for (i in seq_along(files))  {
   #Redondeo los datos de la columna separacion
   datos$Separacion <- round(as.numeric(datos$Separacion), digits = 0)
   #Obtengo nuevas variables
-  datos <- mutate(datos, correctas_A = Cantidad_TGC_1 == Respuesta_A, 
-                  correctas_B = Cantidad_TGC_2 == Respuesta_B)
+  datos <- mutate(datos, 
+                  correctas_A = Cantidad_TGC_1 == Respuesta_A, 
+                  correctas_B = Cantidad_TGC_2 == Respuesta_B
+  )
   #Obtengo las respuesta correctas
-  datos <- mutate(datos, correctas = correctas_A == correctas_B)
+  datos <- mutate(datos, 
+                  correctas = (correctas_A == 1 & 
+                                 correctas_B == 1
+                  )
+  )
   #Convierto a numero variables logicas
   datos[c(7:9)] <- sapply(datos[c(7:9)], as.numeric)
   #Elimino la primer fila de los datos debido a que se usa para
@@ -422,11 +440,17 @@ for (i in seq_along(files))  {
   tabla <- tbl_df(datos_sin_Gaze)
   
   #obtengo nuevas variables
-  tabla_total <- mutate(tabla, correctas_A = Cantidad.TGC.1 == Respuesta.A, 
-                        correctas_B = Cantidad.TGC.2 == Respuesta.B)
-  
+  tabla_total <- mutate(tabla, 
+                        correctas_A = Cantidad.TGC.1 == Respuesta.A, 
+                        correctas_B = Cantidad.TGC.2 == Respuesta.B
+  )
   #obtengo las respuesta correctas
-  tabla_total <- mutate(tabla_total, correctas = correctas_A == correctas_B)
+  tabla_total <- mutate(tabla_total, 
+                        correctas = (correctas_A == TRUE &
+                                       correctas_B == TRUE
+                        )
+  )
+  
   
   #convierto a numero variables logicas
   tabla_total[c(7:9)] <- sapply(tabla_total[c(7:9)], as.numeric)
@@ -456,7 +480,9 @@ for (i in seq_along(files))  {
 #Elimino las variables
 rm(list=setdiff(ls(), c("list_datos", "list_gaze", "Ntrials", "list_datosRaw"))) 
 
+
 # PROCESAMIENTO -----------------------------------------------------------
+
 
 #1- Agrego columna pre y pos en la lista donde se encuentras los datos
 
@@ -479,33 +505,34 @@ for (i in seq_along(list_datos)){
 
 #2- Agrego columna con los grupos en la lista donde se encuentras los datos
 
-for (i in seq_along(list_datos)) {
+for (i in seq_along(list_datos)){
   
-  if( (list_datos[[i]]$observadores == "aaf" ) || (list_datos[[i]]$observadores == "agm" ) || (list_datos[[i]]$observadores == "lrc") || (list_datos[[i]]$observadores == "pab") ) {
+  if( (list_datos[[i]]$observadores == "aaf" )||(list_datos[[i]]$observadores == "agm" )|| (list_datos[[i]]$observadores == "lrc")||(list_datos[[i]]$observadores == "pab") ){
     
     list_datos[[i]]$grupo <- c("cl")
-}
+  }
   
-  else if ( (list_datos[[i]]$observadores == "afb" ) || (list_datos[[i]]$observadores == "cic" ) || (list_datos[[i]]$observadores == "msz") || (list_datos[[i]]$observadores == "nga") ) {
+  else if ( (list_datos[[i]]$observadores == "afb" )||(list_datos[[i]]$observadores == "cic" )|| (list_datos[[i]]$observadores == "msz")|| (list_datos[[i]]$observadores == "nga") ){
     
     list_datos[[i]]$grupo <- c("rt")
     
-}
-  else if ( (list_datos[[i]]$observadores == "lfa" ) || (list_datos[[i]]$observadores == "lms" ) || (list_datos[[i]]$observadores == "mcm") || (list_datos[[i]]$observadores == "at-") ) {
+  }
+  else if ( (list_datos[[i]]$observadores == "lfa" )||(list_datos[[i]]$observadores == "lms" )|| (list_datos[[i]]$observadores == "mcm")|| (list_datos[[i]]$observadores == "at-") ){
     
     list_datos[[i]]$grupo <- c("hk")
     
-}
+  }
   
-  else if ( (list_datos[[i]]$observadores == "jjr" ) || (list_datos[[i]]$observadores == "mab" ) || (list_datos[[i]]$observadores == "mdn")) {
+  else if ( (list_datos[[i]]$observadores == "jjr" )||(list_datos[[i]]$observadores == "mab" )|| (list_datos[[i]]$observadores == "mdn")){
     
     list_datos[[i]]$grupo <- c("lt")
     
-}
+  }
   
 }
 
-#3- Creo un dataframe con la lista de datos
+
+#3- Creo dataframes con la lista de datos
 
 df_datos <- ldply (list_datos, data.frame)
 df_datosRaw <- ldply (list_datosRaw, data.frame)
@@ -525,6 +552,92 @@ ggplot(data= df_datosRaw) +
       geom_bar(aes(Cantidad_TGC_2),alpha = .3) 
 
 
+#5- Data frames para poder mejorar el gráfico de densidad  
+
+#Data frame posicion del estimulo A
+df_distribucionA <- select(df_datosRaw, c(1,3))
+
+df_distribucionA <- data.frame(Cantidad=unlist(df_distribucionA, use.names = 
+                                                 
+                                                 FALSE
+                                               )
+                               )
+
+df_distribucionA$Condicion <- rep(c("Cantidad", "Clicks"), each = 10050)
+
+df_distribucionA$Ubicacion <- rep(c("A"), each = 20100)
+
+#Data frame posicion del estimulo B
+df_distribucionB <- select(df_datosRaw, c(2,4))
+
+df_distribucionB <- data.frame(Cantidad=unlist(df_distribucionB, use.names = 
+                                                 
+                                                 FALSE
+                                               )
+                               )
+
+df_distribucionB$Condicion <- rep(c("Cantidad", "Clicks"), each = 10050)
+
+df_distribucionB$Ubicacion <- rep(c("B"), each = 20100)
+
+#Graficos de densidad para comparar cantidad con clicks
+#Posicion A del estímulo
+ggplot(df_distribucionA, aes(Cantidad, fill = Condicion)) + 
+  
+  geom_density(alpha = 0.2)
+
+ggplot(df_distribucionA, aes(x= as.numeric(Cantidad))) + 
+  
+  geom_histogram()
+
+#Posicion A del estímulo
+ggplot(df_distribucionB, aes(Cantidad, fill = Condicion)) + 
+  
+  geom_density(alpha = 0.2)
+
+ggplot(df_distribucionB, aes(x= as.numeric(Cantidad))) + 
+  
+  geom_histogram()
 
 
+#Dataframes con variables para histograma
+df_resumenA <- df_distribucionA %>% 
+                                  group_by( Cantidad, Condicion) %>% 
+                                  summarise(n = n())  %>%
+                                  mutate(Relativo = n/10050)
 
+df_resumenB <- df_distribucionB %>% 
+                                  group_by( Cantidad, Condicion) %>% 
+                                  summarise(n = n())  %>%
+                                  mutate(Relativo = n/10050)
+
+#Plot histogramas
+ggplot() + 
+  
+  geom_col(data = df_resumenA, aes(x = Cantidad, y = n, fill = Condicion), 
+           
+           position = "dodge"
+           
+          ) 
+
+ggplot() + 
+  
+  geom_col(data = df_resumenB, aes(x = Cantidad, y = n, fill = Condicion), 
+           
+           position = "dodge"
+           
+  )  
+#Para comparar con los valores teóricos calculados
+ggplot() + 
+  
+  geom_col(data = df_resumenA, aes(x = Cantidad, y = Relativo, fill = Condicion), 
+           position = "dodge"
+           
+  ) 
+
+ggplot() + 
+  
+  geom_col(data = df_resumenB, aes(x = Cantidad, y = Relativo, fill = Condicion), 
+           position = "dodge"
+           
+  )  

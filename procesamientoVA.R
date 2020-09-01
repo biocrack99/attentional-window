@@ -821,6 +821,7 @@ getCurrentFileLocation <-  function()
 }
 #Guardo dataframes para el informe en MD
 file_procesamientoVA<- paste(getCurrentFileLocation(),'/procesamientoVA.RData', sep = "")
-save.image(file = file_procesamientoVA
+save.image(file = file_procesamientoVA)
 
-
+#Gaurdo datos para enviar a Jose 
+write.csv(df_datos,"C:\\Users\\Anibal\\Documents\\R\\attentional-window\\datosVA_v.1.csv", row.names = TRUE)
