@@ -1,6 +1,7 @@
 ##Experimento Ventana Atencional
 ##Script para ordenar y cargar los datos de los archivos obtenidos durante el experimento de Ventana Atencional
 
+
 #cargo librerias
 library(plyr)
 library(tidyverse)
