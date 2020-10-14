@@ -9,7 +9,7 @@ library(tidyverse)
 library(R.matlab)
 library(readr)
 library(reshape2)
-
+library(e1071)
 
 #Lista para guardar los datos segun la cantidad de obsevadores
 N <- 30
@@ -585,23 +585,38 @@ for (j in seq_along(list_gaze)){
 #Origino una lista de indices para cadaa observador con los trials aceptados para el procesamiento posterior
 #Obtengo los trials que tienen un porcentaje mayor al 40% de los puntos del gaze dentro de la zona de fijacion
 #Genero un data frame para cada observador con el porcentaje de respuestas correctas en cada Direccion y en cada Separacion
-list_index <- vector("list", 30)
+list_index <- vector("list", 40)
 list_datosFinal <- vector ("list", 30)
 list_datosFinal_x <- vector("list", 30)
 
 for (i in seq_along(list_gaze)){
   
   list_index[[i]] <- which(list_gaze[[i]]$TRialOK >= 40)
-  list_datosFinal[[i]] <- slice(list_datosRaw[[i]], c(list_index[[i]][-1]))
-  list_datosFinal_x[[i]] <- slice(list_datosRaw[[i]], c(-list_index[[i]]))
-  list_datosFinal[[i]] <-list_datosFinal[[i]] %>% group_by( Direccion, Separacion) %>% dplyr::summarise(n = n(), nYes = sum(correctas), nNo = n - nYes, p = nYes / n)
-  list_datosFinal_x[[i]] <-list_datosFinal_x[[i]] %>% group_by( Direccion, Separacion) %>% dplyr::summarise(n = n(), nYes = sum(correctas), nNo = n - nYes, p = nYes / n)
   
-  list_datosFinal[[i]]$Observadores <- list_datos[[i]]$observadores[1:length(list_datosFinal[[i]]$p)]
-  list_datosFinal_x[[i]]$Observadores <- list_datos[[i]]$observadores[1:length(list_datosFinal_x[[i]]$p)]
-  list_datosFinal[[i]]$Condicion <- list_datos[[i]]$condicion[1:length(list_datosFinal[[i]]$p)]
+  list_datosFinal[[i]] <- slice(list_datosRaw[[i]], c(list_index[[i]][-1]))
+  
+  list_datosFinal_x[[i]] <- slice(list_datosRaw[[i]], c(-list_index[[i]]))
+  
+  list_datosFinal[[i]] <-list_datosFinal[[i]] %>% 
+    group_by( Direccion, Separacion) %>% 
+    dplyr::summarise(n = n(), nYes = sum(correctas), nNo = n - nYes, p = nYes / n)
+  
+  list_datosFinal_x[[i]] <-list_datosFinal_x[[i]] %>% 
+    group_by( Direccion, Separacion) %>% 
+    dplyr::summarise(n = n(), nYes = sum(correctas), nNo = n - nYes, p = nYes / n)
+  
+  list_datosFinal[[i]]$Observadores <- list_datos[[i]]$observadores[1:length
+(list_datosFinal[[i]]$p)]
+  
+  list_datosFinal_x[[i]]$Observadores <-list_datos[[i]]$observadores[1:length
+(list_datosFinal_x[[i]]$p)]
+  
+  list_datosFinal[[i]]$Condicion <-list_datos[[i]]$condicion[1:length(list_datosFinal[[i]]$p)]
+  
   list_datosFinal_x[[i]]$Condicion <- list_datos[[i]]$condicion[1:length(list_datosFinal_x[[i]]$p)]
+  
   list_datosFinal[[i]]$Grupo <- list_datos[[i]]$grupo[1:length(list_datosFinal[[i]]$p)]
+  
   list_datosFinal_x[[i]]$Grupo <- list_datos[[i]]$grupo[1:length(list_datosFinal_x[[i]]$p)]
   
   
@@ -619,11 +634,11 @@ df_datos <- rbind(df_datos, df_datosFinal, df_datosFinal_x)
 #7 Creo un dataframe Grupo Control
 df_GrupoControl <-  df_datos %>%
                     
-                    filter(Grupo == "cl", Fijacion == "NA") %>%
+                    filter(Grupo == "cl", Fijacion == "SI") %>%
                     
                     group_by(Separacion, Condicion) %>%
   
-                    summarise(MediaAciertos = mean(p)) %>%
+                    summarise(MediaAciertos = mean(p), DesvAciertos = sd(p)) %>%
   
                     mutate(Ratio = MediaAciertos[which(Condicion== "pos")]/                                        MediaAciertos[which(Condicion == "pre")],
                
@@ -633,11 +648,82 @@ df_GrupoControl <-  df_datos %>%
 #7.1 Genero nuevas variables con el porcentaje de aciertos Pre y Pos entrenamiento para luego poder organizar el dataframe coomo lo hizo Jose           
 df_GrupoControl <-  df_GrupoControl %>% 
   
-                    mutate( Pre = MediaAciertos[which(Condicion == "pre")],
-                            Pos = MediaAciertos[which(Condicion == "pos")]
-                            
+                    mutate( PreMedia = MediaAciertos[which(Condicion == "pre")],
+                            PosMedia = MediaAciertos[which(Condicion == "pos")],
+                            PreDesv  = DesvAciertos[which(Condicion  == "pre")],
+                            PosDesv  = DesvAciertos[which(Condicion  == "pos")] 
                           )
 #7.2 Elimino columnas y valores dupplicados
-df_GrupoControl[2:3] <- list(NULL)
-unique(df_GrupoControl)
+df_GrupoControl[2:4] <- list(NULL)
+df_GrupoControl <- unique(df_GrupoControl)
                             
+#8 Modelos lineales
+#8.1 Gráficos 
+par(mfrow=c(1, 2))  
+scatter.smooth(x=df_GrupoControl$Separacion, 
+               y=df_GrupoControl$Ratio, 
+               main="Ratio ~ Separacion"
+               )
+
+scatter.smooth(x=df_GrupoControl$Separacion, 
+               y=df_GrupoControl$Difer, 
+               main="Difer ~ Separacion"
+               )
+
+#Divido el area del gráfico en 2 columnas
+par(mfrow=c(1, 2))  
+
+#Boxplor para la variable Ratio Pos/Pre
+boxplot(df_GrupoControl$Ratio, 
+        main="Ratio", 
+        sub=paste("Outlier rows: ", boxplot.stats(df_GrupoControl$Ratio)$out)
+        )  
+#Boxplot para la variable Difer Pos-Pre
+boxplot(df_GrupoControl$Difer, 
+        main="Diferencia", 
+        sub=paste("Outlier rows: ", 
+                  boxplot.stats(df_GrupoControl$Difer)$out
+                  )
+        )  
+#Grafico de densidad
+par(mfrow=c(1, 2))  
+#Densidad 
+plot(density(df_GrupoControl$Ratio), 
+     
+     main="Density Plot: Ratio", 
+     
+     ylab="Frecuencia", 
+     
+     sub=paste("Skewness:", 
+     
+               round(e1071::skewness(df_GrupoControl$Ratio), 2)
+               )
+     )  
+
+polygon(density(df_GrupoControl$Ratio), col="red")
+
+plot(density(df_GrupoControl$Difer), 
+     
+     main="Density Plot: Diferencia", 
+     
+     ylab="",
+     
+     sub=paste("Skewness:", round(e1071::skewness(df_GrupoControl$Difer), 2))
+     
+     )  
+
+polygon(density(df_GrupoControl$Difer), col="red")
+
+correlation_ratio <- cor(df_GrupoControl$Ratio, df_GrupoControl$Separacion) 
+
+correlation_difer <- cor(df_GrupoControl$Difer, df_GrupoControl$Separacion) 
+
+
+lm_Ratio <-  lm(df_GrupoControl$Ratio ~ df_GrupoControl$Separacion)
+
+summary(lm_Ratio)
+
+lm_Difer <-  lm(df_GrupoControl$Difer ~ df_GrupoControl$Separacion)
+
+summary(lm_Difer)
+
