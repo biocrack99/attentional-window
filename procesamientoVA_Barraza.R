@@ -541,7 +541,6 @@ df_datos <- ldply (list_datos, data.frame)
 
 names(list_gaze) <- c("pre_aaf",  "pre_afb",  "pre_agm", "pre_cic", "pre_jjr", "pre_lrc", "pre_mab", "pre_mdn", "pre_msz", "pre_nga", "pre_pab", "pre_at", "pre_lfa", "pre_lms", "pre_mcm", "pos_aaf",  "pos_afb",  "pos_agm", "pos_cic", "pos_jjr", "pos_lrc", "pos_mab", "pos_mdn", "pos_msz", "pos_nga", "pos_pab", "pos_at", "pos_lfa", "pos_lms", "pos_mcm")
 
-
 # GAZE --------------------------------------------------------------------
 #5- Comparo para cada obsevador el gaze de cada trial con el gaze del primer
 #trial que se toma como referencia.
@@ -631,7 +630,18 @@ df_datos$Fijacion <- c("NA")
 names(df_datos)[7:9] <- c("Observadores", "Condicion", "Grupo")
 df_datos <- rbind(df_datos, df_datosFinal, df_datosFinal_x)
 
-#7 Creo un dataframe Grupo Control
+#ALTERNATIVA PROCESAMIENTO GAZE: LIBRERIA saccades
+
+#Creo dataframe para preparar los datos según la libreria
+x <- ldply(list_gaze$pre_aaf$XGaze.mm, data.frame)
+y <- ldply(list_gaze$pre_aaf$YGaze.mm, data.frame)
+Trial <- rep(c(1:336), each = 84)
+Time <- rep(c(0:0.02:83*0.02), 336)
+gaze_pre_aaf <- data.frame(Time, Trial, x, y)
+colnames(gaze_pre_aaf) <- c("Time","Trial", "x", "y")
+
+# PROCESAMIENTO GRUPO CONTROL ----------------------------------------------------
+#1 Creo un dataframe Grupo Control
 df_GrupoControl <-  df_datos %>%
                     
                     filter(Grupo == "cl", Fijacion == "SI") %>%
@@ -645,7 +655,7 @@ df_GrupoControl <-  df_datos %>%
                            Difer = MediaAciertos[which(Condicion== "pos")]-                                        MediaAciertos[which(Condicion == "pre")]
                            )
                 
-#7.1 Genero nuevas variables con el porcentaje de aciertos Pre y Pos entrenamiento para luego poder organizar el dataframe coomo lo hizo Jose           
+#2 Genero nuevas variables con el porcentaje de aciertos Pre y Pos entrenamiento para luego poder organizar el dataframe coomo lo hizo Jose           
 df_GrupoControl <-  df_GrupoControl %>% 
   
                     mutate( PreMedia = MediaAciertos[which(Condicion == "pre")],
@@ -653,12 +663,12 @@ df_GrupoControl <-  df_GrupoControl %>%
                             PreDesv  = DesvAciertos[which(Condicion  == "pre")],
                             PosDesv  = DesvAciertos[which(Condicion  == "pos")] 
                           )
-#7.2 Elimino columnas y valores dupplicados
+#2.1 Elimino columnas y valores dupplicados
 df_GrupoControl[2:4] <- list(NULL)
 df_GrupoControl <- unique(df_GrupoControl)
                             
-#8 Modelos lineales
-#8.1 Gráficos 
+#3 Modelos lineales
+#3.1 Gráficos 
 par(mfrow=c(1, 2))  
 scatter.smooth(x=df_GrupoControl$Separacion, 
                y=df_GrupoControl$Ratio, 
