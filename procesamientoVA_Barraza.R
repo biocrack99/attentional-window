@@ -635,10 +635,26 @@ df_datos <- rbind(df_datos, df_datosFinal, df_datosFinal_x)
 #Creo dataframe para preparar los datos según la libreria
 x <- ldply(list_gaze$pre_aaf$XGaze.mm, data.frame)
 y <- ldply(list_gaze$pre_aaf$YGaze.mm, data.frame)
-Trial <- rep(c(1:336), each = 84)
-Time <- rep(c(0:0.02:83*0.02), 336)
-gaze_pre_aaf <- data.frame(Time, Trial, x, y)
-colnames(gaze_pre_aaf) <- c("Time","Trial", "x", "y")
+trial <- rep(c(1:336), each = 84)
+time <- rep(c(0:0.02:83*0.02), 336)
+gaze_pre_aaf <- data.frame(time,x, y, trial)
+colnames(gaze_pre_aaf) <- c("time", "x", "y", "trial")
+
+
+data_plot <- subset(gaze_pre_aaf, trial <= 20, select = c(trial,x,y))
+
+ggplot(data_plot, aes(x, y)) +
+       geom_point(size=0.8) +
+       coord_fixed() +
+       facet_wrap(~trial)
+
+fixations <- detect.fixations(gaze_pre_aaf)
+head(fixations)
+
+stats <- calculate.summary(fixations)
+round(stats, digits=2)
+
+
 
 # PROCESAMIENTO GRUPO CONTROL ----------------------------------------------------
 #1 Creo un dataframe Grupo Control
