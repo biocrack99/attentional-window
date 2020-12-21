@@ -1,5 +1,6 @@
 ##Experimento Ventana Atencional
-##Script para el procesamiento de los datos del experimento de Ventana Atencion usando la propuesta de procesamiento del Dr. José Barraza
+##Script para el procesamiento de los datos del experimento de Ventana Atencion 
+## usando la propuesta de procesamiento del Dr. José Barraza
 ## Autor: Aníbal de Paul
 ## Fecha: 25/09/2020
 
@@ -10,12 +11,14 @@ library(R.matlab)
 library(readr)
 library(reshape2)
 library(e1071)
+library(saccades)
 
 #Lista para guardar los datos segun la cantidad de obsevadores
 N <- 30
 list_datosRaw <- vector("list", N)
 list_datos <- vector("list", N)
 list_gaze <- vector ("list", N)
+list_fixations <- vector("list", N)
 Ntrials <- 336
 
 
@@ -480,7 +483,7 @@ for (i in seq_along(files))  {
 }
 
 #Elimino las variables
-rm(list=setdiff(ls(), c("list_datos", "list_gaze", "Ntrials", "list_datosRaw"))) 
+rm(list=setdiff(ls(), c("list_datos", "list_gaze", "Ntrials", "list_datosRaw", "list_fixations"))) 
 
 
 # PROCESAMIENTO -----------------------------------------------------------
@@ -539,7 +542,16 @@ df_datos <- ldply (list_datos, data.frame)
 
 #4- Agrego los nombres de los observadores a la lista del gaze
 
-names(list_gaze) <- c("pre_aaf",  "pre_afb",  "pre_agm", "pre_cic", "pre_jjr", "pre_lrc", "pre_mab", "pre_mdn", "pre_msz", "pre_nga", "pre_pab", "pre_at", "pre_lfa", "pre_lms", "pre_mcm", "pos_aaf",  "pos_afb",  "pos_agm", "pos_cic", "pos_jjr", "pos_lrc", "pos_mab", "pos_mdn", "pos_msz", "pos_nga", "pos_pab", "pos_at", "pos_lfa", "pos_lms", "pos_mcm")
+names(list_gaze) <- c("pre_aaf", "pre_afb", "pre_agm", 
+                      "pre_cic", "pre_jjr", "pre_lrc", 
+                      "pre_mab", "pre_mdn", "pre_msz", 
+                      "pre_nga", "pre_pab", "pre_at", 
+                      "pre_lfa", "pre_lms", "pre_mcm", 
+                      "pos_aaf", "pos_afb", "pos_agm", 
+                      "pos_cic", "pos_jjr", "pos_lrc", 
+                      "pos_mab", "pos_mdn", "pos_msz", 
+                      "pos_nga", "pos_pab", "pos_at", 
+                      "pos_lfa", "pos_lms", "pos_mcm")
 
 # GAZE --------------------------------------------------------------------
 #5- Comparo para cada obsevador el gaze de cada trial con el gaze del primer
@@ -577,11 +589,12 @@ for (j in seq_along(list_gaze)){
     
   }
   list_gaze[[j]]$TRialOK <- vr_TrialOK
-  
+  list_gaze[[j]]$trial <- c(1:336)
+  list_gaze[[j]]$time <- c(0:0.02:83*0.02)
   
 }
 #5.3
-#Origino una lista de indices para cadaa observador con los trials aceptados para el procesamiento posterior
+#Origino una lista de indices para cada observador con los trials aceptados para el procesamiento posterior
 #Obtengo los trials que tienen un porcentaje mayor al 40% de los puntos del gaze dentro de la zona de fijacion
 #Genero un data frame para cada observador con el porcentaje de respuestas correctas en cada Direccion y en cada Separacion
 list_index <- vector("list", 40)
@@ -632,27 +645,165 @@ df_datos <- rbind(df_datos, df_datosFinal, df_datosFinal_x)
 
 #ALTERNATIVA PROCESAMIENTO GAZE: LIBRERIA saccades
 
-#Creo dataframe para preparar los datos según la libreria
-x <- ldply(list_gaze$pre_aaf$XGaze.mm, data.frame)
-y <- ldply(list_gaze$pre_aaf$YGaze.mm, data.frame)
-trial <- rep(c(1:336), each = 84)
-time <- rep(c(0:0.02:83*0.02), 336)
-gaze_pre_aaf <- data.frame(time,x, y, trial)
-colnames(gaze_pre_aaf) <- c("time", "x", "y", "trial")
+#1.Creo una lista para preparar los datos según la libreria saccades
+#usando a los datos de todos los observadores 
+for (i in seq_along(list_gaze)){
+  
+  gaze <- data.frame(time = rep(c(0:0.02:83*0.02), 336), 
+                     x = unlist(list_gaze[[i]]$XGaze.mm), 
+                     y = unlist(list_gaze[[i]]$YGaze.mm), 
+                     trial = rep(c(1:336), each = 84)
+                     )
+  
+  fixations <- detect.fixations(gaze, 
+                                lambda = 10, 
+                                smooth.coordinates = TRUE, 
+                                smooth.saccades = FALSE
+                                )
+  #Elimino las fijaciones que detecta el algoritmo con 
+  #duracion menor a 0.28
+  fixations <- subset(fixations,
+                      dur > 0.28, 
+                      select = c(trial:dur)
+                      )
+  
+  #Calculo la distancia de las fijaciones detectadas a
+  #la fijacion del primer trial
+  fixations$dist <- sqrt((fixations$x-fixations$x[1])^2 +
+                        (fixations$y-fixations$y[1])^2
+                        ) 
+  
+  #Agrego a la lista de fijaciones
+  list_fixations[i] <- list(fixations)
+
+  }
+
+#2- Agrego columna pre y pos en la lista donde 
+#se encuentras los datos de la fijaciones
+for (i in seq_along(list_fixations)){
+  
+  if (i <= (length(list_fixations)/2)){
+    
+    list_fixations[[i]]$condicion <- c("pre")
+    
+  }
+  
+  else {
+    
+    list_fixations[[i]]$condicion <- c("pos")
+    
+  }
+  
+  
+}
+#Nombre de los observadores en la lista de fijacion
+names(list_fixations) <- c("pre_aaf", "pre_afb", "pre_agm", 
+                      "pre_cic", "pre_jjr", "pre_lrc", 
+                      "pre_mab", "pre_mdn", "pre_msz", 
+                      "pre_nga", "pre_pab", "pre_at", 
+                      "pre_lfa", "pre_lms", "pre_mcm", 
+                      "pos_aaf", "pos_afb", "pos_agm", 
+                      "pos_cic", "pos_jjr", "pos_lrc", 
+                      "pos_mab", "pos_mdn", "pos_msz", 
+                      "pos_nga", "pos_pab", "pos_at", 
+                      "pos_lfa", "pos_lms", "pos_mcm")
+
+#Data frame con los trials de cada observador 
+#donde se detectan sacados 
+obs <- c(names(list_fixations)) 
+
+for (i in seq_along(list_fixations)){
+  
+  n <- list_fixations[[i]] %>% 
+    group_by(trial) %>%
+    summarise (n=n())
+  porcentaje[i] <-  nrow(n)/336
+    
+
+}
+
+  
+  #ldply(list_fixations[1], data.frame)
+
+vr_index_trial <- vr_index_trial %>%
+  
+  group_by(trial) %>%
+  
+  summarise(n = n())
 
 
-data_plot <- subset(gaze_pre_aaf, trial <= 20, select = c(trial,x,y))
+
+#Grafico gaze para observar comportamiento. 
+#Solo para cada observador
+fixations <- ldply(list_fixations$trial, data.frame)
+y <- ldply(list_fixations$y, data.frame)
+#trial <- rep(c(1:336), each = 84)
+#time <- rep(c(0:0.02:83*0.02), 336)
+#gaze <- data.frame(time,x, y, trial)
+#colnames(gaze) <- c("time", "x", "y", "trial")
+#Grafico panel para observar el comportamiento de algunos trials
+#data_plot <- subset(gaze, 
+#                    trial >= 1 & trial < 15, 
+#                    select = c(trial,x,y)
+#                    )
 
 ggplot(data_plot, aes(x, y)) +
-       geom_point(size=0.8) +
-       coord_fixed() +
-       facet_wrap(~trial)
+  geom_point(size=0.8) +
+  coord_fixed() +
+  facet_wrap(~trial) + 
+  labs(x = 'Gaze[mm]', y = 'Gaze[mm]')
 
-fixations <- detect.fixations(gaze_pre_aaf)
-head(fixations)
+#Grafico de las coordenadas x e y del gaze de 
+#un determinado trial y los x e y 
+#de las fijaciones detectadas por el algoritmo.
+# 1.Grafico todos los trials en plots separados
+#Fijaciones
+ggplot() +
+  geom_point(data = as.data.frame(list_fixations[[2]]), 
+             aes(x = list_fixations[[2]]$x, y = list_fixations[[2]]$y), 
+             color = list_fixations[[2]]$trial
+             ) +
+  labs(x = 'Coordenadas fijacion [mm]', y = 'Coordenadas fijacion [mm]', 
+       title = paste('Observador', names(list_gaze)[2]))
+#Gaze
+ggplot() +
+  geom_point(data = gaze, 
+             aes(x = x,y = y),
+             size = 0.3,
+             color = trial) +
+  labs(x = 'Coordenadas gaze [mm]', y = 'Coordenadas gaze [mm]', 
+       title = paste('Observador', names(list_gaze)[1]))
+             
 
-stats <- calculate.summary(fixations)
-round(stats, digits=2)
+#2.Grafico las coordenadas de las fijaciones 
+#por trial y por observador
+ggplot() + 
+    
+  #Fijaciones
+  geom_point(data = subset(as.data.frame(list_fixations[[1]]), trial == 20, 
+                             select = c(x,y)),
+             aes(x,y), 
+             size = 1.6) + 
+  #Gaze
+  geom_point(data = subset(gaze, trial == 20, select = c(x,y)), 
+             aes(x,y), 
+             size = .8, color = "blue") +
+  #Fijación referencia
+  geom_point(data = subset(as.data.frame(list_fixations[[1]]),
+                           trial == 1, 
+                           select = c(x,y)),
+             aes(x,y), 
+             size = 1.6, color = "red")
+  
+#3.Graficos todos los trials para un observador en un mismo plot. Agrego referencia del primer trial  
+#Eligo el observador
+fixations <- as.data.frame(list_fixations[[1]])  
+ggplot() + 
+    geom_point(data = gaze, aes(x,y), size = 3, alpha = 0.5) + 
+    #geom_point(data = fixations,aes(x,y), size = 3, alpha = 0.4) +
+    geom_point(data = subset(fixations, trial == 1, select = c(x,y)), 
+               aes(x,y), size = 3, color = "red" )
+  
 
 
 
