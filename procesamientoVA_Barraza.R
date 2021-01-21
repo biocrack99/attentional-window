@@ -542,16 +542,16 @@ df_datos <- ldply (list_datos, data.frame)
 
 #4- Agrego los nombres de los observadores a la lista del gaze
 
-names(list_gaze) <- c("pre_aaf", "pre_afb", "pre_agm", 
-                      "pre_cic", "pre_jjr", "pre_lrc", 
-                      "pre_mab", "pre_mdn", "pre_msz", 
-                      "pre_nga", "pre_pab", "pre_at", 
-                      "pre_lfa", "pre_lms", "pre_mcm", 
-                      "pos_aaf", "pos_afb", "pos_agm", 
-                      "pos_cic", "pos_jjr", "pos_lrc", 
-                      "pos_mab", "pos_mdn", "pos_msz", 
-                      "pos_nga", "pos_pab", "pos_at", 
-                      "pos_lfa", "pos_lms", "pos_mcm")
+obs <- c("pre_aaf", "pre_afb", "pre_agm", "pre_cic", 
+         "pre_jjr", "pre_lrc", "pre_mab", "pre_mdn", 
+         "pre_msz", "pre_nga", "pre_pab", "pre_at", 
+         "pre_lfa", "pre_lms", "pre_mcm", "pos_aaf", 
+         "pos_afb", "pos_agm", "pos_cic", "pos_jjr", 
+         "pos_lrc", "pos_mab", "pos_mdn", "pos_msz", 
+         "pos_nga", "pos_pab", "pos_at",  "pos_lfa", 
+         "pos_lms", "pos_mcm")
+
+names(list_gaze) <- obs 
 
 # GAZE --------------------------------------------------------------------
 #5- Comparo para cada obsevador el gaze de cada trial con el gaze del primer
@@ -593,7 +593,7 @@ for (j in seq_along(list_gaze)){
   list_gaze[[j]]$time <- c(0:0.02:83*0.02)
   
 }
-#5.3
+#5.2
 #Origino una lista de indices para cada observador con los trials aceptados para el procesamiento posterior
 #Obtengo los trials que tienen un porcentaje mayor al 40% de los puntos del gaze dentro de la zona de fijacion
 #Genero un data frame para cada observador con el porcentaje de respuestas correctas en cada Direccion y en cada Separacion
@@ -634,7 +634,7 @@ for (i in seq_along(list_gaze)){
   
 }
 
-#6 Creo un dataframe con los daots del gaze
+#6 Creo un dataframe con los datos del gaze
 df_datosFinal <- ldply (list_datosFinal, data.frame)
 df_datosFinal_x <- ldply (list_datosFinal_x, data.frame)
 df_datosFinal$Fijacion <- c("SI") 
@@ -696,42 +696,30 @@ for (i in seq_along(list_fixations)){
   
   
 }
-#Nombre de los observadores en la lista de fijacion
-names(list_fixations) <- c("pre_aaf", "pre_afb", "pre_agm", 
-                      "pre_cic", "pre_jjr", "pre_lrc", 
-                      "pre_mab", "pre_mdn", "pre_msz", 
-                      "pre_nga", "pre_pab", "pre_at", 
-                      "pre_lfa", "pre_lms", "pre_mcm", 
-                      "pos_aaf", "pos_afb", "pos_agm", 
-                      "pos_cic", "pos_jjr", "pos_lrc", 
-                      "pos_mab", "pos_mdn", "pos_msz", 
-                      "pos_nga", "pos_pab", "pos_at", 
-                      "pos_lfa", "pos_lms", "pos_mcm")
 
-#Data frame con los trials de cada observador 
-#donde se detectan sacados 
-obs <- c(names(list_fixations)) 
-
+#3-Variable para el nombre de los observadores
+names(list_fixations) <- obs 
+#4-Lazo para detectar la cantidad de trials aceptados
+#para el post-procesamiento. Cuento los trials donde no
+#hay ningna fijacion para luego eliminarlos.
+vr_index_trial <- 1:336
+porcentajeTrialFinal <- NA
+trialDescartar <- NA
 for (i in seq_along(list_fixations)){
   
   n <- list_fixations[[i]] %>% 
     group_by(trial) %>%
     summarise (n=n())
-  porcentaje[i] <-  nrow(n)/336
-    
-
+# Vector con la cantidad de trials donde el sujeto realiza
+# una o mas fijaciones mayor a 0.28 seg  
+  porcentajeTrialFinal <-  nrow(n)/336
+  #list_fixations[[i]]$porcentajeTrialOk <- porcentajeTrialFinal  
+# Busco los trials para descartar
+  trialDescartar <- which(is.na(match(vr_index_trial,n$trial)))               
+  list_fixations[[i]] <- list(list_fixations[[i]], 
+                              porcentajeTrialFinal, 
+                              trialDescartar)                                            
 }
-
-  
-  #ldply(list_fixations[1], data.frame)
-
-vr_index_trial <- vr_index_trial %>%
-  
-  group_by(trial) %>%
-  
-  summarise(n = n())
-
-
 
 #Grafico gaze para observar comportamiento. 
 #Solo para cada observador
