@@ -19,6 +19,7 @@ list_datosRaw <- vector("list", N)
 list_datos <- vector("list", N)
 list_gaze <- vector ("list", N)
 list_fixations <- vector("list", N)
+
 Ntrials <- 336
 
 
@@ -486,8 +487,8 @@ for (i in seq_along(files))  {
 rm(list=setdiff(ls(), c("list_datos", "list_gaze", "Ntrials", "list_datosRaw", "list_fixations"))) 
 
 
-# PROCESAMIENTO -----------------------------------------------------------
 
+# PROCESAMIENTO -----------------------------------------------------------
 
 #1- Agrego columna pre y pos en la lista donde se encuentras los datos
 
@@ -552,6 +553,7 @@ obs <- c("pre_aaf", "pre_afb", "pre_agm", "pre_cic",
          "pos_lms", "pos_mcm")
 
 names(list_gaze) <- obs 
+
 
 # GAZE --------------------------------------------------------------------
 #5- Comparo para cada obsevador el gaze de cada trial con el gaze del primer
@@ -634,7 +636,8 @@ for (i in seq_along(list_gaze)){
   
 }
 
-#6 Creo un dataframe con los datos del gaze
+#5.3 
+#Creo un dataframe con los datos del gaze
 df_datosFinal <- ldply (list_datosFinal, data.frame)
 df_datosFinal_x <- ldply (list_datosFinal_x, data.frame)
 df_datosFinal$Fijacion <- c("SI") 
@@ -643,9 +646,10 @@ df_datos$Fijacion <- c("NA")
 names(df_datos)[7:9] <- c("Observadores", "Condicion", "Grupo")
 df_datos <- rbind(df_datos, df_datosFinal, df_datosFinal_x)
 
-#ALTERNATIVA PROCESAMIENTO GAZE: LIBRERIA saccades
+#ALTERNATIVA PROCESAMIENTO GAZE: LIBRERIA saccades -----------------------------
 
-#1.Creo una lista para preparar los datos según la libreria saccades
+#6- Libreria saccades
+#Creo una lista para preparar los datos según la libreria saccades
 #usando a los datos de todos los observadores 
 for (i in seq_along(list_gaze)){
   
@@ -678,7 +682,8 @@ for (i in seq_along(list_gaze)){
 
   }
 
-#2- Agrego columna pre y pos en la lista donde 
+#6.1
+#Agrego columna pre y pos en la lista donde 
 #se encuentras los datos de la fijaciones
 for (i in seq_along(list_fixations)){
   
@@ -697,9 +702,12 @@ for (i in seq_along(list_fixations)){
   
 }
 
-#3-Variable para el nombre de los observadores
+#6.2
+#Variable para el nombre de los observadores
 names(list_fixations) <- obs 
-#4-Lazo para detectar la cantidad de trials aceptados
+
+#6.3
+#Lazo para detectar la cantidad de trials aceptados
 #para el post-procesamiento. Cuento los trials donde no
 #hay ningna fijacion para luego eliminarlos.
 vr_index_trial <- 1:336
@@ -721,82 +729,320 @@ for (i in seq_along(list_fixations)){
                               trialDescartar)                                            
 }
 
-#Grafico gaze para observar comportamiento. 
-#Solo para cada observador
-fixations <- ldply(list_fixations$trial, data.frame)
-y <- ldply(list_fixations$y, data.frame)
-#trial <- rep(c(1:336), each = 84)
-#time <- rep(c(0:0.02:83*0.02), 336)
-#gaze <- data.frame(time,x, y, trial)
-#colnames(gaze) <- c("time", "x", "y", "trial")
-#Grafico panel para observar el comportamiento de algunos trials
-#data_plot <- subset(gaze, 
-#                    trial >= 1 & trial < 15, 
-#                    select = c(trial,x,y)
-#                    )
-
-ggplot(data_plot, aes(x, y)) +
-  geom_point(size=0.8) +
-  coord_fixed() +
-  facet_wrap(~trial) + 
-  labs(x = 'Gaze[mm]', y = 'Gaze[mm]')
-
-#Grafico de las coordenadas x e y del gaze de 
-#un determinado trial y los x e y 
-#de las fijaciones detectadas por el algoritmo.
-# 1.Grafico todos los trials en plots separados
-#Fijaciones
-ggplot() +
-  geom_point(data = as.data.frame(list_fixations[[2]]), 
-             aes(x = list_fixations[[2]]$x, y = list_fixations[[2]]$y), 
-             color = list_fixations[[2]]$trial
-             ) +
-  labs(x = 'Coordenadas fijacion [mm]', y = 'Coordenadas fijacion [mm]', 
-       title = paste('Observador', names(list_gaze)[2]))
-#Gaze
-ggplot() +
-  geom_point(data = gaze, 
-             aes(x = x,y = y),
-             size = 0.3,
-             color = trial) +
-  labs(x = 'Coordenadas gaze [mm]', y = 'Coordenadas gaze [mm]', 
-       title = paste('Observador', names(list_gaze)[1]))
-             
-
-#2.Grafico las coordenadas de las fijaciones 
-#por trial y por observador
-ggplot() + 
+#6.4 Elimino los trials donde no hay fijacion de la lista 
+#de datos crudos para cada observador y creo una lista con 
+#variables nuevas para las respuesta del observador 
+list_datos_filtrados <- vector("list", 30)
+for (i in seq_along(list_datosRaw)){
+  
+  list_datos_filtrados[[i]] <- list_datosRaw[[i]]
+  
+  if (!is_empty(list_fixations[[i]][[3]])){
+  
+  
+    list_datos_filtrados[[i]] <-list_datos_filtrados[[i]][-list_fixations[[i]][[3]], ]
+  
+  }
+  
+  else {
+  
+    list_datos_filtrados[[i]] <- list_datos_filtrados[[i]]
     
-  #Fijaciones
-  geom_point(data = subset(as.data.frame(list_fixations[[1]]), trial == 20, 
-                             select = c(x,y)),
-             aes(x,y), 
-             size = 1.6) + 
-  #Gaze
-  geom_point(data = subset(gaze, trial == 20, select = c(x,y)), 
-             aes(x,y), 
-             size = .8, color = "blue") +
-  #Fijación referencia
-  geom_point(data = subset(as.data.frame(list_fixations[[1]]),
-                           trial == 1, 
-                           select = c(x,y)),
-             aes(x,y), 
-             size = 1.6, color = "red")
+    }
   
-#3.Graficos todos los trials para un observador en un mismo plot. Agrego referencia del primer trial  
-#Eligo el observador
-fixations <- as.data.frame(list_fixations[[1]])  
-ggplot() + 
-    geom_point(data = gaze, aes(x,y), size = 3, alpha = 0.5) + 
-    #geom_point(data = fixations,aes(x,y), size = 3, alpha = 0.4) +
-    geom_point(data = subset(fixations, trial == 1, select = c(x,y)), 
-               aes(x,y), size = 3, color = "red" )
+    
+    
+    list_datos_filtrados[[i]] <- mutate(list_datos_filtrados[[i]], 
+                                      correctas_A = Cantidad_TGC_1 == Respuesta_A, 
+                                      correctas_B = Cantidad_TGC_2 == Respuesta_B
+                                      )
+  #Obtengo las respuesta correctas
+  list_datos_filtrados[[i]] <- mutate(list_datos_filtrados[[i]], 
+                                      correctas = (correctas_A == 1 & 
+                                                     correctas_B == 1
+                  
+                                                   )
   
+                                      )
+  list_datos_filtrados[[i]] <- list_datos_filtrados[[i]] %>% 
+    group_by( Direccion, Separacion) %>% 
+    dplyr::summarise(n = n(), 
+                     nYes = sum(correctas), 
+                     nNo = n - nYes, 
+                     p = nYes / n)  
+    
+                                                                    
+}
+names(list_datos_filtrados) <- obs 
+
+#6.5 Agrego columna pre y pos en la lista donde se encuentras los datos
+for (i in seq_along(list_datos_filtrados)){
+  
+  if (i <= (length(list_datos_filtrados)/2)){
+    
+    list_datos_filtrados[[i]]$condicion <- c("pre")
+    
+  }
+  
+  else {
+    
+    list_datos_filtrados[[i]]$condicion <- c("pos")
+    
+  }
+  
+  list_datos_filtrados[[i]]$observadores <- list_datos[[i]]$observadores 
+  
+}
+
+#6.6 Agrego columna con los grupos en la lista donde se encuentras los datos
+for (i in seq_along(list_datos_filtrados)){
+  
+  if( (list_datos_filtrados[[i]]$observadores == "aaf" )||(list_datos_filtrados[[i]]$observadores == "agm" )|| (list_datos_filtrados[[i]]$observadores == "lrc")||(list_datos_filtrados[[i]]$observadores == "pab") ){
+    
+    list_datos_filtrados[[i]]$grupo <- c("cl")
+  }
+  
+  else if ( (list_datos_filtrados[[i]]$observadores == "afb" )||(list_datos_filtrados[[i]]$observadores == "cic" )|| (list_datos_filtrados[[i]]$observadores == "msz")|| (list_datos_filtrados[[i]]$observadores == "nga") ){
+    
+    list_datos_filtrados[[i]]$grupo <- c("rt")
+    
+  }
+  else if ( (list_datos_filtrados[[i]]$observadores == "lfa" )||(list_datos_filtrados[[i]]$observadores == "lms" )|| (list_datos_filtrados[[i]]$observadores == "mcm")|| (list_datos_filtrados[[i]]$observadores == "at-") ){
+    
+    list_datos_filtrados[[i]]$grupo <- c("hk")
+    
+  }
+  
+  else if ( (list_datos_filtrados[[i]]$observadores == "jjr" )||(list_datos_filtrados[[i]]$observadores == "mab" )|| (list_datos_filtrados[[i]]$observadores == "mdn")){
+    
+    list_datos_filtrados[[i]]$grupo <- c("lt")
+    
+  }
+  
+}
+
+
+#PROCESAMIENTO GRUPO CONTROL ----------------------------------------------------
+
+#1- Creo un dataframe con la lista de datos
+df_datos_filtrados <- ldply (list_datos_filtrados, data.frame)
+df_datos_filtrados <- df_datos_filtrados[,-1]
+
+#2- Dataframe Grupo Control y nuevas variables 
+df_GrupoControl_filtrados <-  df_datos_filtrados %>%
+  
+  filter(grupo == "cl") %>%
+  
+  group_by(Separacion, condicion) %>%
+  
+  summarise(MediaAciertos = mean(p), DesvAciertos = sd(p)) %>%
+  
+  mutate(Ratio =  
+           MediaAciertos[which(condicion== "pos")]/ 
+           MediaAciertos[which(condicion == "pre")],
+         
+         Difer = 
+           MediaAciertos[which(condicion== "pos")]- 
+           MediaAciertos[which(condicion == "pre")]
+  )
+
+#3- Genero nuevas variables con el porcentaje de aciertos Pre y Pos entrenamiento 
+#para luego poder organizar el dataframe coomo lo hizo Jose           
+df_GrupoControl_filtrados <-  df_GrupoControl_filtrados %>% 
+  
+  mutate( PreMedia = MediaAciertos[which(condicion == "pre")],
+          PosMedia = MediaAciertos[which(condicion == "pos")],
+          PreDesv  = DesvAciertos[which(condicion  == "pre")],
+          PosDesv  = DesvAciertos[which(condicion  == "pos")] 
+  )
+
+#4- Elimino columnas y valores duplicados
+df_GrupoControl_filtrados[2:4] <- list(NULL)
+df_GrupoControl_filtrados <- unique(df_GrupoControl_filtrados)
+
+
+# Modelos lineales
+#1 Gráficos 
+par(mfrow=c(1, 2))  
+scatter.smooth(x=df_GrupoControl_filtrados$Separacion, 
+               y=df_GrupoControl_filtrados$Ratio, 
+               main="Ratio ~ Separacion"
+)
+
+scatter.smooth(x=df_GrupoControl_filtrados$Separacion, 
+               y=df_GrupoControl_filtrados$Difer, 
+               main="Difer ~ Separacion"
+)
+
+#Divido el area del gráfico en 2 columnas
+par(mfrow=c(1, 2))  
+
+#Boxplot para la variable Ratio Pos/Pre
+boxplot(df_GrupoControl_filtrados$Ratio, 
+        main="Ratio", 
+        sub=paste("Outlier rows: ", boxplot.stats(df_GrupoControl_filtrados$Ratio)$out)
+)  
+#Boxplot para la variable Difer Pos-Pre
+boxplot(df_GrupoControl_filtrados$Difer, 
+        main="Diferencia", 
+        sub=paste("Outlier rows: ", 
+                  boxplot.stats(df_GrupoControl_filtrados$Difer)$out
+        )
+)  
+#Grafico de densidad
+par(mfrow=c(1, 2))  
+#Densidad 
+plot(density(df_GrupoControl_filtrados$Ratio), 
+     
+     main="Density Plot: Ratio", 
+     
+     ylab="Frecuencia", 
+     
+     sub=paste("Skewness:", 
+               
+               round(e1071::skewness(df_GrupoControl_filtrados$Ratio), 2)
+     )
+)  
+
+polygon(density(df_GrupoControl_filtrados$Ratio), col="red")
+
+plot(density(df_GrupoControl_filtrados$Difer), 
+     
+     main="Density Plot: Diferencia", 
+     
+     ylab="",
+     
+     sub=paste("Skewness:", round(e1071::skewness(df_GrupoControl_filtrados$Difer), 2))
+     
+)  
+
+polygon(density(df_GrupoControl_filtrados$Difer), col="red")
+
+correlation_ratio <- cor(df_GrupoControl_filtrados$Ratio, df_GrupoControl_filtrados$Separacion) 
+
+correlation_difer <- cor(df_GrupoControl_filtrados$Difer, df_GrupoControl_filtrados$Separacion) 
+
+
+lm_Ratio <-  lm(df_GrupoControl_filtrados$Ratio ~ df_GrupoControl_filtrados$Separacion)
+
+summary(lm_Ratio)
+
+lm_Difer <-  lm(df_GrupoControl_filtrados$Difer ~ df_GrupoControl_filtrados$Separacion)
+
+summary(lm_Difer)
+
+
+#GRUPO CON CARGA ATENCIONAL
+
+#1- Dataframe Grupo con Carga Atencional y nuevas variables 
+df_GrupoCarga_filtrados <-  df_datos_filtrados %>%
+  
+  filter(grupo == "lt") %>%
+  
+  group_by(Separacion, condicion) %>%
+  
+  summarise(MediaAciertos = mean(p), DesvAciertos = sd(p)) %>%
+  
+  mutate(Ratio =  
+           MediaAciertos[which(condicion== "pos")]/ 
+           MediaAciertos[which(condicion == "pre")],
+         
+         Difer = 
+           MediaAciertos[which(condicion== "pos")]- 
+           MediaAciertos[which(condicion == "pre")]
+  )
+#3- Genero nuevas variables con el porcentaje de aciertos Pre y Pos entrenamiento 
+#para luego poder organizar el dataframe coomo lo hizo Jose           
+df_GrupoCarga_filtrados <-  df_GrupoCarga_filtrados %>% 
+  
+  mutate( PreMedia = MediaAciertos[which(condicion == "pre")],
+          PosMedia = MediaAciertos[which(condicion == "pos")],
+          PreDesv  = DesvAciertos[which(condicion  == "pre")],
+          PosDesv  = DesvAciertos[which(condicion  == "pos")] 
+  )
+
+#4- Elimino columnas y valores duplicados
+df_GrupoCarga_filtrados[2:4] <- list(NULL)
+df_GrupoCarga_filtrados <- unique(df_GrupoCarga_filtrados)
+
+
+# Modelos lineales
+#1 Gráficos 
+par(mfrow=c(1, 2))  
+scatter.smooth(x=df_GrupoCarga_filtrados$Separacion, 
+               y=df_GrupoCarga_filtrados$Ratio, 
+               main="Ratio ~ Separacion"
+)
+
+scatter.smooth(x=df_GrupoCarga_filtrados$Separacion, 
+               y=df_GrupoCarga_filtrados$Difer, 
+               main="Difer ~ Separacion"
+)
+
+#Divido el area del gráfico en 2 columnas
+par(mfrow=c(1, 2))  
+
+#Boxplot para la variable Ratio Pos/Pre
+boxplot(df_GrupoCarga_filtrados$Ratio, 
+        main="Ratio", 
+        sub=paste("Outlier rows: ", 
+                  boxplot.stats(df_GrupoCarga_filtrados$Ratio)$out)
+)  
+#Boxplot para la variable Difer Pos-Pre
+boxplot(df_GrupoCarga_filtrados$Difer, 
+        main="Diferencia", 
+        sub=paste("Outlier rows: ", 
+                  boxplot.stats(df_GrupoCarga_filtrados$Difer)$out
+        )
+)  
+#Grafico de densidad
+par(mfrow=c(1, 2))  
+#Densidad 
+plot(density(df_GrupoCarga_filtrados$Ratio), 
+     
+     main="Density Plot: Ratio", 
+     
+     ylab="Frecuencia", 
+     
+     sub=paste("Skewness:", 
+               
+               round(e1071::skewness(df_GrupoCarga_filtrados$Ratio), 2)
+     )
+)  
+
+polygon(density(df_GrupoCarga_filtrados$Ratio), col="red")
+
+plot(density(df_GrupoCarga_filtrados$Difer), 
+     
+     main="Density Plot: Diferencia", 
+     
+     ylab="",
+     
+     sub=paste("Skewness:", round(e1071::skewness(df_GrupoControl_filtrados$Difer), 2))
+     
+)  
+
+polygon(density(df_GrupoCarga_filtrados$Difer), col="red")
+
+correlation_ratio <- cor(df_GrupoCarga_filtrados$Ratio, df_GrupoCarga_filtrados$Separacion) 
+
+correlation_difer <- cor(df_GrupoCarga_filtrados$Difer, df_GrupoCarga_filtrados$Separacion) 
+
+
+lm_RatioCarga <-  lm(df_GrupoCarga_filtrados$Ratio ~ df_GrupoCarga_filtrados$Separacion)
+
+summary(lm_RatioCarga)
+
+lm_DiferCarga <-  lm(df_GrupoCarga_filtrados$Difer ~ df_GrupoCarga_filtrados$Separacion)
+
+summary(lm_DiferCarga)
+
+write.csv(df_datos_filtrados,"C:\\Users\\Anibal\\Documents\\R\\attentional-window\\datosVA_v.2.csv", row.names = TRUE)
 
 
 
 # PROCESAMIENTO GRUPO CONTROL ----------------------------------------------------
-#1 Creo un dataframe Grupo Control
+# Creo un dataframe Grupo Control
 df_GrupoControl <-  df_datos %>%
                     
                     filter(Grupo == "cl", Fijacion == "SI") %>%
