@@ -12,6 +12,7 @@ library(readr)
 library(reshape2)
 library(e1071)
 library(saccades)
+library(fmsb)
 
 #Lista para guardar los datos segun la cantidad de obsevadores
 N <- 30
@@ -883,14 +884,14 @@ df_GrupoControl_filtrados_dir <-  df_datos_filtrados %>%
            MediaAciertos[which(condicion== "pos")]/ 
            MediaAciertos[which(condicion == "pre")],
          
-         Difer = 
-           MediaAciertos[which(condicion== "pos")]- 
-           MediaAciertos[which(condicion == "pre")]
   )
+#3- Convierto variable a numero y ordeno para el gráfico de 
+#radar
+df_GrupoControl_filtrados_dir$Direccion <- as.numeric(df_GrupoControl_filtrados_dir$Direccion)
 
+df_GrupoControl_filtrados_dir <- df_GrupoControl_filtrados_dir[order(df_GrupoControl_filtrados_dir$Direccion),]
 
-
-#3- Genero nuevas variables con el porcentaje de aciertos Pre y Pos entrenamiento 
+#4- Genero nuevas variables con el porcentaje de aciertos Pre y Pos entrenamiento 
 #para luego poder organizar el dataframe coomo lo hizo Jose           
 df_GrupoControl_filtrados <-  df_GrupoControl_filtrados %>% 
   
@@ -900,9 +901,20 @@ df_GrupoControl_filtrados <-  df_GrupoControl_filtrados %>%
           PosDesv  = DesvAciertos[which(condicion  == "pos")] 
   )
 
-#4- Elimino columnas y valores duplicados
+df_GrupoControl_filtrados_dir <-  df_GrupoControl_filtrados_dir %>% 
+  
+  mutate( PreMedia = MediaAciertos[which(condicion == "pre")],
+          PosMedia = MediaAciertos[which(condicion == "pos")],
+          PreDesv  = DesvAciertos[which(condicion  == "pre")],
+          PosDesv  = DesvAciertos[which(condicion  == "pos")] 
+  )
+
+
+#5- Elimino columnas y valores duplicados
 df_GrupoControl_filtrados[2:4] <- list(NULL)
 df_GrupoControl_filtrados <- unique(df_GrupoControl_filtrados)
+df_GrupoControl_filtrados_dir[2:4] <- list(NULL)
+df_GrupoControl_filtrados_dir <- unique(df_GrupoControl_filtrados_dir)
 
 
 # Modelos lineales
@@ -924,6 +936,16 @@ ggplot(df_GrupoControl_filtrados,
        y = "Ratio Pos/Pre [-]") +
   ylim(0,2)
 
+#Radar
+#1-
+max_min <- data.frame(
+  Grados_90 = c(1, 0), Grados_135 = c(1, 0), Grados_180 = c(1, 0),
+  Grados_225 = c(1, 0),  Grados_270 = c(1, 0), Grados_315 = c(1, 0), 
+  Grados_0 = c(1, 0), Grados_45 = c(1, 0)
+)
+rownames(max_min) <- c("Max", "Min")
+
+
 
 #GRUPO CON CARGA ATENCIONAL-------------------------------
 
@@ -941,10 +963,25 @@ df_GrupoCarga_filtrados <-  df_datos_filtrados %>%
            MediaAciertos[which(condicion== "pos")]/ 
            MediaAciertos[which(condicion == "pre")],
          
-         Difer = 
-           MediaAciertos[which(condicion== "pos")]- 
-           MediaAciertos[which(condicion == "pre")]
+         
   )
+
+df_GrupoCarga_filtrados_dir <-  df_datos_filtrados %>%
+  
+  filter(grupo == "lt") %>%
+  
+  group_by(Direccion, condicion) %>%
+  
+  summarise(MediaAciertos = mean(p), DesvAciertos = sd(p)) %>%
+  
+  mutate(Ratio =  
+           MediaAciertos[which(condicion== "pos")]/ 
+           MediaAciertos[which(condicion == "pre")],
+         
+         
+  )
+
+
 #3- Genero nuevas variables con el porcentaje de aciertos Pre y Pos entrenamiento 
 #para luego poder organizar el dataframe coomo lo hizo Jose           
 df_GrupoCarga_filtrados <-  df_GrupoCarga_filtrados %>% 
@@ -955,12 +992,23 @@ df_GrupoCarga_filtrados <-  df_GrupoCarga_filtrados %>%
           PosDesv  = DesvAciertos[which(condicion  == "pos")] 
   )
 
+df_GrupoCarga_filtrados_dir <-  df_GrupoCarga_filtrados_dir %>% 
+  
+  mutate( PreMedia = MediaAciertos[which(condicion == "pre")],
+          PosMedia = MediaAciertos[which(condicion == "pos")],
+          PreDesv  = DesvAciertos[which(condicion  == "pre")],
+          PosDesv  = DesvAciertos[which(condicion  == "pos")] 
+  )
+
+
 #4- Elimino columnas y valores duplicados
 df_GrupoCarga_filtrados[2:4] <- list(NULL)
+df_GrupoCarga_filtrados_dir[2:4] <- list(NULL)
 df_GrupoCarga_filtrados <- unique(df_GrupoCarga_filtrados)
 
 
 #5- Gráficos
+#Lineal
 ggplot() + 
   geom_point(data = df_GrupoControl_filtrados, 
              aes(Separacion, Ratio), color = "red") +
@@ -977,7 +1025,36 @@ ggplot() +
   labs(title = "Control and Load Group", 
        x = "Separation[°]",
        y = "Ratio Pos/Pre [-]") +
-  ylim(0,2) 
+  ylim(0,2)
+
+#Radar
+
+df_GrupoCarga_radar <- data.frame(row.names = c("Pre", "Pos"), 
+                        Grados_90= t(df_GrupoCarga_filtrados_dir[7,3:4]), 
+                        Grados_135 = t(df_GrupoCarga_filtrados_dir[3,3:4]),
+                        Grados_180 = t(df_GrupoCarga_filtrados_dir[1,3:4]), 
+                        Grados_225 = t(df_GrupoCarga_filtrados_dir[5,3:4]), 
+                        Grados_270= t(df_GrupoCarga_filtrados_dir[7,3:4]), 
+                        Grados_315 = t(df_GrupoCarga_filtrados_dir[3,3:4]),
+                        Grados_0 = t(df_GrupoCarga_filtrados_dir[1,3:4]), 
+                        Grados_45 = t(df_GrupoCarga_filtrados_dir[5,3:4]))
+
+df_GrupoCarga_radar <- rbind(max_min, df_GrupoCarga_radar)
+#Condicion Pre y Pos en un mismo gráfico
+op <- par(mar = c(1, 2, 2, 2))
+# Create the radar charts
+create_beautiful_radarchart(
+  data = df_GrupoCarga_radar, caxislabels = c(0, 0.25, 0.50, 0.75, 1.0),
+  color = c("#00AFBB", "#E7B800", "#FC4E07")
+)
+# Add an horizontal legend
+legend(
+  x = "left", legend = rownames(df[-c(1,2),]), horiz = FALSE,
+  bty = "n", pch = 20 , col = c("#00AFBB", "#E7B800", "#FC4E07"),
+  text.col = "black", cex = 1, pt.cex = 1.5
+)
+par(op)
+
   
 #6- Modelo  
 lm_RatioCarga <-  lm(df_GrupoCarga_filtrados$Ratio ~ df_GrupoCarga_filtrados$Separacion)
@@ -1002,15 +1079,34 @@ df_GrupoReaccion_filtrados <-  df_datos_filtrados %>%
   
   mutate(Ratio =  
            MediaAciertos[which(condicion== "pos")]/ 
-           MediaAciertos[which(condicion == "pre")],
-         
-         Difer = 
-           MediaAciertos[which(condicion== "pos")]- 
+           MediaAciertos[which(condicion == "pre")]
+         )
+#Direccion
+df_GrupoReaccion_filtrados_dir <-  df_datos_filtrados %>%
+  
+  filter(grupo == "rt") %>%
+  
+  group_by(Direccion, condicion) %>%
+  
+  summarise(MediaAciertos = mean(p), DesvAciertos = sd(p)) %>%
+  
+  mutate(Ratio =  
+           MediaAciertos[which(condicion== "pos")]/ 
            MediaAciertos[which(condicion == "pre")]
   )
+
+
+
 #3- Genero nuevas variables con el porcentaje de aciertos Pre y Pos entrenamiento 
 #para luego poder organizar el dataframe coomo lo hizo Jose           
 df_GrupoReaccion_filtrados <-  df_GrupoReaccion_filtrados %>% 
+  
+  mutate( PreMedia = MediaAciertos[which(condicion == "pre")],
+          PosMedia = MediaAciertos[which(condicion == "pos")],
+          PreDesv  = DesvAciertos[which(condicion  == "pre")],
+          PosDesv  = DesvAciertos[which(condicion  == "pos")] 
+  )
+df_GrupoReaccion_filtrados_dir <-  df_GrupoReaccion_filtrados_dir %>% 
   
   mutate( PreMedia = MediaAciertos[which(condicion == "pre")],
           PosMedia = MediaAciertos[which(condicion == "pos")],
@@ -1021,6 +1117,7 @@ df_GrupoReaccion_filtrados <-  df_GrupoReaccion_filtrados %>%
 #4- Elimino columnas y valores duplicados
 df_GrupoReaccion_filtrados[2:4] <- list(NULL)
 df_GrupoReaccion_filtrados <- unique(df_GrupoReaccion_filtrados)
+df_GrupoReaccion_filtrados_dir[2:4] <- list(NULL)
 
 #Gráficos 
 
@@ -1042,16 +1139,42 @@ ggplot() +
        y = "Ratio Pos/Pre [-]") +
   ylim(0.5,1.5) 
 
+#Radar
+df_GrupoReaccion_radar <- data.frame(row.names = c("Pre", "Pos"), 
+                                  Grados_90= t(df_GrupoReaccion_filtrados_dir[7,3:4]), 
+                                  Grados_135 = t(df_GrupoReaccion_filtrados_dir[3,3:4]),
+                                  Grados_180 = t(df_GrupoReaccion_filtrados_dir[1,3:4]), 
+                                  Grados_225 = t(df_GrupoReaccion_filtrados_dir[5,3:4]), 
+                                  Grados_270= t(df_GrupoReaccion_filtrados_dir[7,3:4]), 
+                                  Grados_315 = t(df_GrupoReaccion_filtrados_dir[3,3:4]),
+                                  Grados_0 = t(df_GrupoReaccion_filtrados_dir[1,3:4]), 
+                                  Grados_45 = t(df_GrupoReaccion_filtrados_dir[5,3:4]))
+
+df_GrupoReaccion_radar <- rbind(max_min, df_GrupoReaccion_radar)
+#Condicion Pre y Pos en un mismo gráfico
+op <- par(mar = c(1, 2, 2, 2))
+# Create the radar charts
+create_beautiful_radarchart(
+  data = df_GrupoReaccion_radar, caxislabels = c(0, 0.25, 0.50, 0.75, 1.0),
+  color = c("#00AFBB", "#E7B800", "#FC4E07")
+)
+# Add an horizontal legend
+legend(
+  x = "left", legend = rownames(df[-c(1,2),]), horiz = FALSE,
+  bty = "n", pch = 20 , col = c("#00AFBB", "#E7B800", "#FC4E07"),
+  text.col = "black", cex = 1, pt.cex = 1.5
+)
+par(op)
 
 lm_RatioReaccion <-  lm(df_GrupoReaccion_filtrados$Ratio ~ df_GrupoCarga_filtrados$Separacion)
 
 summary(lm_RatioReaccion)
 
 
-#GRUPO MIXTO
+#GRUPO COMBINADO--------------------------------------------------------------------
 
 #1- Dataframe Grupo Combinado y nuevas variables 
-df_GrupoMixto_filtrados <-  df_datos_filtrados %>%
+df_GrupoCombinado_filtrados <-  df_datos_filtrados %>%
   
   filter(grupo == "hk") %>%
   
@@ -1061,15 +1184,26 @@ df_GrupoMixto_filtrados <-  df_datos_filtrados %>%
   
   mutate(Ratio =  
            MediaAciertos[which(condicion== "pos")]/ 
-           MediaAciertos[which(condicion == "pre")],
-         
-         Difer = 
-           MediaAciertos[which(condicion== "pos")]- 
+           MediaAciertos[which(condicion == "pre")]
+         )
+#Direccion
+df_GrupoCombinado_filtrados_dir <-  df_datos_filtrados %>%
+  
+  filter(grupo == "hk") %>%
+  
+  group_by(Direccion, condicion) %>%
+  
+  summarise(MediaAciertos = mean(p), DesvAciertos = sd(p)) %>%
+  
+  mutate(Ratio =  
+           MediaAciertos[which(condicion== "pos")]/ 
            MediaAciertos[which(condicion == "pre")]
   )
+
+
 #3- Genero nuevas variables con el porcentaje de aciertos Pre y Pos entrenamiento 
 #para luego poder organizar el dataframe coomo lo hizo Jose           
-df_GrupoMixto_filtrados <-  df_GrupoMixto_filtrados %>% 
+df_GrupoCombinado_filtrados <-  df_GrupoCombinado_filtrados %>% 
   
   mutate( PreMedia = MediaAciertos[which(condicion == "pre")],
           PosMedia = MediaAciertos[which(condicion == "pos")],
@@ -1077,9 +1211,21 @@ df_GrupoMixto_filtrados <-  df_GrupoMixto_filtrados %>%
           PosDesv  = DesvAciertos[which(condicion  == "pos")] 
   )
 
+df_GrupoCombinado_filtrados_dir <-  df_GrupoCombinado_filtrados_dir %>% 
+  
+  mutate( PreMedia = MediaAciertos[which(condicion == "pre")],
+          PosMedia = MediaAciertos[which(condicion == "pos")],
+          PreDesv  = DesvAciertos[which(condicion  == "pre")],
+          PosDesv  = DesvAciertos[which(condicion  == "pos")] 
+  )
+
+
+
+
 #4- Elimino columnas y valores duplicados
-df_GrupoMixto_filtrados[2:4] <- list(NULL)
-df_GrupoMixto_filtrados <- unique(df_GrupoMixto_filtrados)
+df_GrupoCombinado_filtrados[2:4] <- list(NULL)
+df_GrupoCombinado_filtrados <- unique(df_GrupoCombinado_filtrados)
+df_GrupoCombinado_filtrados_dir[2:4] <- list(NULL)
 
 
 #Graficos
@@ -1101,7 +1247,32 @@ ggplot() +
        x = "Separation[°]",
        y = "Ratio Pos/Pre [-]") +
   ylim(0.5,1.5) 
+#Radar
+df_GrupoCombinado_radar <- data.frame(row.names = c("Pre", "Pos"), 
+                                     Grados_90= t(df_GrupoCombinado_filtrados_dir[7,3:4]), 
+                                     Grados_135 = t(df_GrupoCombinado_filtrados_dir[3,3:4]),
+                                     Grados_180 = t(df_GrupoCombinado_filtrados_dir[1,3:4]), 
+                                     Grados_225 = t(df_GrupoCombinado_filtrados_dir[5,3:4]), 
+                                     Grados_270= t(df_GrupoCombinado_filtrados_dir[7,3:4]), 
+                                     Grados_315 = t(df_GrupoCombinado_filtrados_dir[3,3:4]),
+                                     Grados_0 = t(df_GrupoCombinado_filtrados_dir[1,3:4]), 
+                                     Grados_45 = t(df_GrupoCombinado_filtrados_dir[5,3:4]))
 
+df_GrupoCombinado_radar <- rbind(max_min, df_GrupoCombinado_radar)
+#Condicion Pre y Pos en un mismo gráfico
+op <- par(mar = c(1, 2, 2, 2))
+# Create the radar charts
+create_beautiful_radarchart(
+  data = df_GrupoCombinado_radar, caxislabels = c(0, 0.25, 0.50, 0.75, 1.0),
+  color = c("#00AFBB", "#E7B800", "#FC4E07")
+)
+# Add an horizontal legend
+legend(
+  x = "left", legend = rownames(df[-c(1,2),]), horiz = FALSE,
+  bty = "n", pch = 20 , col = c("#00AFBB", "#E7B800", "#FC4E07"),
+  text.col = "black", cex = 1, pt.cex = 1.5
+)
+par(op)
 
 lm_RatioMixto <-  lm(df_GrupoMixto_filtrados$Ratio ~ df_GrupoMixto_filtrados$Separacion)
 
@@ -1141,5 +1312,63 @@ ggplot() +
        y = "Ratio Pos/Pre [-]") +
   ylim(0,2) 
 
+
+#Grafico radar con libreria fmsb
+create_beautiful_radarchart <- function(data, color = "#00AFBB", 
+                                        vlabels = colnames(data), vlcex = 0.7,
+                                        caxislabels = NULL, title = NULL, ...){
+  radarchart(
+    data, axistype = 1,
+    # Customize the polygon
+    pcol = color, pfcol = scales::alpha(color, 0.5), plwd = 2, plty = 1,
+    # Customize the grid
+    cglcol = "grey", cglty = 1, cglwd = 0.8,
+    # Customize the axis
+    axislabcol = "grey", 
+    # Variable labels
+    vlcex = vlcex, vlabels = vlabels,
+    caxislabels = caxislabels, title = title, ...
+  )
+
+}
+
+
+#Grupo Control
+df_prueba <- data.frame(row.names = c("Pre", "Pos"), 
+                        Grados_90= c(0.4159155, 0.4704770), 
+                        Grados_135 = c(0.4405763, 0.482182),
+                        Grados_180 = c(0.5073216, 0.4998048), 
+                        Grados_225 = c(0.4475587, 0.5199821), 
+                        Grados_270= c(0.4159155, 0.4704770), 
+                        Grados_315 = c(0.4405763, 0.482182),
+                        Grados_0 = c(0.5073216, 0.4998048), 
+                        Grados_45 = c(0.4475587, 0.5199821))
+
+
+# Bind the variable ranges to the data
+df <- rbind(max_min, df_prueba)
+Pre_data <- df[c("Max", "Min", "Pre"), ]
+radarchart(Pre_data)
+#Condicion Pre
+op <- par(mar = c(1, 2, 2, 1))
+create_beautiful_radarchart(Pre_data, caxislabels = c(0, 0.25, 0.50, 0.75, 1.0))
+par(op)
+#Condicion Pre y Pos en un mismo gráfico
+op <- par(mar = c(1, 2, 2, 2))
+# Create the radar charts
+create_beautiful_radarchart(
+  data = df, caxislabels = c(0, 0.25, 0.50, 0.75, 1.0),
+  color = c("#00AFBB", "#E7B800", "#FC4E07")
+)
+# Add an horizontal legend
+legend(
+  x = "left", legend = rownames(df[-c(1,2),]), horiz = FALSE,
+  bty = "n", pch = 20 , col = c("#00AFBB", "#E7B800", "#FC4E07"),
+  text.col = "black", cex = 1, pt.cex = 1.5
+)
+par(op)
+
+
+#Grupo Carga Atencional
 
 
