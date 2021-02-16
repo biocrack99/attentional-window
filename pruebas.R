@@ -483,7 +483,6 @@ rm(list=setdiff(ls(), c("list_datos", "list_gaze", "Ntrials", "list_datosRaw")))
 
 # PROCESAMIENTO -----------------------------------------------------------
 
-
 #1- Agrego columna pre y pos en la lista donde se encuentras los datos
 
 for (i in seq_along(list_datos)){
@@ -530,7 +529,6 @@ for (i in seq_along(list_datos)){
   }
   
 }
-
 
 #3- Creo dataframes con la lista de datos
 

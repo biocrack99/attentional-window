@@ -646,7 +646,8 @@ df_datos$Fijacion <- c("NA")
 names(df_datos)[7:9] <- c("Observadores", "Condicion", "Grupo")
 df_datos <- rbind(df_datos, df_datosFinal, df_datosFinal_x)
 
-#ALTERNATIVA PROCESAMIENTO GAZE: LIBRERIA saccades -----------------------------
+
+# ALTERNATIVA GAZE: LIBRERIA saccades ------------------------------------------
 
 #6- Libreria saccades
 #Creo una lista para preparar los datos según la libreria saccades
@@ -713,6 +714,7 @@ names(list_fixations) <- obs
 vr_index_trial <- 1:336
 porcentajeTrialFinal <- NA
 trialDescartar <- NA
+df_porcetaje_trials <- 1:30
 for (i in seq_along(list_fixations)){
   
   n <- list_fixations[[i]] %>% 
@@ -726,8 +728,22 @@ for (i in seq_along(list_fixations)){
   trialDescartar <- which(is.na(match(vr_index_trial,n$trial)))               
   list_fixations[[i]] <- list(list_fixations[[i]], 
                               porcentajeTrialFinal, 
-                              trialDescartar)                                            
+                              trialDescartar)
+  df_porcetaje_trials[i] <- porcentajeTrialFinal
 }
+
+df_porcetaje_trials <- data.frame(obs, 
+                                  porcentaje = df_porcetaje_trials,
+                                  condicion = c('pre', 'pre', 'pre',
+                                                'pre', 'pre', 'pre',
+                                                'pre', 'pre', 'pre',
+                                                'pre', 'pre', 'pre',
+                                                'pre', 'pre', 'pre',
+                                                'pos', 'pos', 'pos',
+                                                'pos', 'pos', 'pos',
+                                                'pos', 'pos', 'pos',
+                                                'pos', 'pos', 'pos',
+                                                'pos', 'pos', 'pos'))
 
 #6.4 Elimino los trials donde no hay fijacion de la lista 
 #de datos crudos para cada observador y creo una lista con 
@@ -821,6 +837,15 @@ for (i in seq_along(list_datos_filtrados)){
   
 }
 
+#6.7 Summarize para el data frame de los porcentajes, quiero ver
+# si hay cambio o no entre pre y pos
+
+df_media_porcentaje <- df_porcetaje_trials %>%
+  
+  group_by(condicion) %>% summarise(media = median(porcentaje),
+                                    desviacion = sd(porcentaje),
+                                    mediana = median(porcentaje))
+
 
 #PROCESAMIENTO GRUPO CONTROL ----------------------------------------------------
 
@@ -846,6 +871,25 @@ df_GrupoControl_filtrados <-  df_datos_filtrados %>%
            MediaAciertos[which(condicion == "pre")]
   )
 
+df_GrupoControl_filtrados_dir <-  df_datos_filtrados %>%
+  
+  filter(grupo == "cl") %>%
+  
+  group_by(Direccion, condicion) %>%
+  
+  summarise(MediaAciertos = mean(p), DesvAciertos = sd(p)) %>%
+  
+  mutate(Ratio =  
+           MediaAciertos[which(condicion== "pos")]/ 
+           MediaAciertos[which(condicion == "pre")],
+         
+         Difer = 
+           MediaAciertos[which(condicion== "pos")]- 
+           MediaAciertos[which(condicion == "pre")]
+  )
+
+
+
 #3- Genero nuevas variables con el porcentaje de aciertos Pre y Pos entrenamiento 
 #para luego poder organizar el dataframe coomo lo hizo Jose           
 df_GrupoControl_filtrados <-  df_GrupoControl_filtrados %>% 
@@ -862,79 +906,29 @@ df_GrupoControl_filtrados <- unique(df_GrupoControl_filtrados)
 
 
 # Modelos lineales
-#1 Gráficos 
-par(mfrow=c(1, 2))  
-scatter.smooth(x=df_GrupoControl_filtrados$Separacion, 
-               y=df_GrupoControl_filtrados$Ratio, 
-               main="Ratio ~ Separacion"
-)
-
-scatter.smooth(x=df_GrupoControl_filtrados$Separacion, 
-               y=df_GrupoControl_filtrados$Difer, 
-               main="Difer ~ Separacion"
-)
-
-#Divido el area del gráfico en 2 columnas
-par(mfrow=c(1, 2))  
-
-#Boxplot para la variable Ratio Pos/Pre
-boxplot(df_GrupoControl_filtrados$Ratio, 
-        main="Ratio", 
-        sub=paste("Outlier rows: ", boxplot.stats(df_GrupoControl_filtrados$Ratio)$out)
-)  
-#Boxplot para la variable Difer Pos-Pre
-boxplot(df_GrupoControl_filtrados$Difer, 
-        main="Diferencia", 
-        sub=paste("Outlier rows: ", 
-                  boxplot.stats(df_GrupoControl_filtrados$Difer)$out
-        )
-)  
-#Grafico de densidad
-par(mfrow=c(1, 2))  
-#Densidad 
-plot(density(df_GrupoControl_filtrados$Ratio), 
-     
-     main="Density Plot: Ratio", 
-     
-     ylab="Frecuencia", 
-     
-     sub=paste("Skewness:", 
-               
-               round(e1071::skewness(df_GrupoControl_filtrados$Ratio), 2)
-     )
-)  
-
-polygon(density(df_GrupoControl_filtrados$Ratio), col="red")
-
-plot(density(df_GrupoControl_filtrados$Difer), 
-     
-     main="Density Plot: Diferencia", 
-     
-     ylab="",
-     
-     sub=paste("Skewness:", round(e1071::skewness(df_GrupoControl_filtrados$Difer), 2))
-     
-)  
-
-polygon(density(df_GrupoControl_filtrados$Difer), col="red")
-
 correlation_ratio <- cor(df_GrupoControl_filtrados$Ratio, df_GrupoControl_filtrados$Separacion) 
 
-correlation_difer <- cor(df_GrupoControl_filtrados$Difer, df_GrupoControl_filtrados$Separacion) 
+lm_RatioControl <-  lm(df_GrupoControl_filtrados$Ratio ~ df_GrupoControl_filtrados$Separacion)
+
+summary(lm_RatioControl)
+
+# Gráficos
+
+ggplot(df_GrupoControl_filtrados, 
+       aes(x = df_GrupoControl_filtrados$Separacion,
+           y = df_GrupoControl_filtrados$Ratio)) + 
+  geom_point(color = "red") +
+  stat_smooth(method = "lm", col = "red")+
+  labs(title = "Control Group", 
+       x = "Separation[°]",
+       y = "Ratio Pos/Pre [-]") +
+  ylim(0,2)
 
 
-lm_Ratio <-  lm(df_GrupoControl_filtrados$Ratio ~ df_GrupoControl_filtrados$Separacion)
-
-summary(lm_Ratio)
-
-lm_Difer <-  lm(df_GrupoControl_filtrados$Difer ~ df_GrupoControl_filtrados$Separacion)
-
-summary(lm_Difer)
-
-
-#GRUPO CON CARGA ATENCIONAL
+#GRUPO CON CARGA ATENCIONAL-------------------------------
 
 #1- Dataframe Grupo con Carga Atencional y nuevas variables 
+# Respecto a la separacion
 df_GrupoCarga_filtrados <-  df_datos_filtrados %>%
   
   filter(grupo == "lt") %>%
@@ -966,175 +960,186 @@ df_GrupoCarga_filtrados[2:4] <- list(NULL)
 df_GrupoCarga_filtrados <- unique(df_GrupoCarga_filtrados)
 
 
-# Modelos lineales
-#1 Gráficos 
-par(mfrow=c(1, 2))  
-scatter.smooth(x=df_GrupoCarga_filtrados$Separacion, 
-               y=df_GrupoCarga_filtrados$Ratio, 
-               main="Ratio ~ Separacion"
-)
-
-scatter.smooth(x=df_GrupoCarga_filtrados$Separacion, 
-               y=df_GrupoCarga_filtrados$Difer, 
-               main="Difer ~ Separacion"
-)
-
-#Divido el area del gráfico en 2 columnas
-par(mfrow=c(1, 2))  
-
-#Boxplot para la variable Ratio Pos/Pre
-boxplot(df_GrupoCarga_filtrados$Ratio, 
-        main="Ratio", 
-        sub=paste("Outlier rows: ", 
-                  boxplot.stats(df_GrupoCarga_filtrados$Ratio)$out)
-)  
-#Boxplot para la variable Difer Pos-Pre
-boxplot(df_GrupoCarga_filtrados$Difer, 
-        main="Diferencia", 
-        sub=paste("Outlier rows: ", 
-                  boxplot.stats(df_GrupoCarga_filtrados$Difer)$out
-        )
-)  
-#Grafico de densidad
-par(mfrow=c(1, 2))  
-#Densidad 
-plot(density(df_GrupoCarga_filtrados$Ratio), 
-     
-     main="Density Plot: Ratio", 
-     
-     ylab="Frecuencia", 
-     
-     sub=paste("Skewness:", 
-               
-               round(e1071::skewness(df_GrupoCarga_filtrados$Ratio), 2)
-     )
-)  
-
-polygon(density(df_GrupoCarga_filtrados$Ratio), col="red")
-
-plot(density(df_GrupoCarga_filtrados$Difer), 
-     
-     main="Density Plot: Diferencia", 
-     
-     ylab="",
-     
-     sub=paste("Skewness:", round(e1071::skewness(df_GrupoControl_filtrados$Difer), 2))
-     
-)  
-
-polygon(density(df_GrupoCarga_filtrados$Difer), col="red")
-
-correlation_ratio <- cor(df_GrupoCarga_filtrados$Ratio, df_GrupoCarga_filtrados$Separacion) 
-
-correlation_difer <- cor(df_GrupoCarga_filtrados$Difer, df_GrupoCarga_filtrados$Separacion) 
-
-
+#5- Gráficos
+ggplot() + 
+  geom_point(data = df_GrupoControl_filtrados, 
+             aes(Separacion, Ratio), color = "red") +
+  stat_smooth(data = df_GrupoControl_filtrados, 
+              aes(Separacion,Ratio),
+              method = "lm", col = "red")+
+  geom_point(data = df_GrupoCarga_filtrados, 
+             aes(Separacion,
+                 Ratio), color="blue")+
+  stat_smooth(data = df_GrupoCarga_filtrados,
+              aes(Separacion,
+                  Ratio),
+              method = "lm", col = "blue") +
+  labs(title = "Control and Load Group", 
+       x = "Separation[°]",
+       y = "Ratio Pos/Pre [-]") +
+  ylim(0,2) 
+  
+#6- Modelo  
 lm_RatioCarga <-  lm(df_GrupoCarga_filtrados$Ratio ~ df_GrupoCarga_filtrados$Separacion)
 
 summary(lm_RatioCarga)
 
-lm_DiferCarga <-  lm(df_GrupoCarga_filtrados$Difer ~ df_GrupoCarga_filtrados$Separacion)
-
-summary(lm_DiferCarga)
-
-write.csv(df_datos_filtrados,"C:\\Users\\Anibal\\Documents\\R\\attentional-window\\datosVA_v.2.csv", row.names = TRUE)
 
 
+#write.csv(df_datos_filtrados,"C:\\Users\\Anibal\\Documents\\R\\attentional-window\\datosVA_v.2.csv", row.names = TRUE)
 
-# PROCESAMIENTO GRUPO CONTROL ----------------------------------------------------
-# Creo un dataframe Grupo Control
-df_GrupoControl <-  df_datos %>%
-                    
-                    filter(Grupo == "cl", Fijacion == "SI") %>%
-                    
-                    group_by(Separacion, Condicion) %>%
+
+#GRUPO CON TIEMPO DE REACCION-------------------------------
+
+#1- Dataframe Grupo Tiempo de Reaccion y nuevas variables 
+df_GrupoReaccion_filtrados <-  df_datos_filtrados %>%
   
-                    summarise(MediaAciertos = mean(p), DesvAciertos = sd(p)) %>%
+  filter(grupo == "rt") %>%
   
-                    mutate(Ratio = MediaAciertos[which(Condicion== "pos")]/                                        MediaAciertos[which(Condicion == "pre")],
-               
-                           Difer = MediaAciertos[which(Condicion== "pos")]-                                        MediaAciertos[which(Condicion == "pre")]
-                           )
-                
-#2 Genero nuevas variables con el porcentaje de aciertos Pre y Pos entrenamiento para luego poder organizar el dataframe coomo lo hizo Jose           
-df_GrupoControl <-  df_GrupoControl %>% 
+  group_by(Separacion, condicion) %>%
   
-                    mutate( PreMedia = MediaAciertos[which(Condicion == "pre")],
-                            PosMedia = MediaAciertos[which(Condicion == "pos")],
-                            PreDesv  = DesvAciertos[which(Condicion  == "pre")],
-                            PosDesv  = DesvAciertos[which(Condicion  == "pos")] 
-                          )
-#2.1 Elimino columnas y valores dupplicados
-df_GrupoControl[2:4] <- list(NULL)
-df_GrupoControl <- unique(df_GrupoControl)
-                            
-#3 Modelos lineales
-#3.1 Gráficos 
-par(mfrow=c(1, 2))  
-scatter.smooth(x=df_GrupoControl$Separacion, 
-               y=df_GrupoControl$Ratio, 
-               main="Ratio ~ Separacion"
-               )
+  summarise(MediaAciertos = mean(p), DesvAciertos = sd(p)) %>%
+  
+  mutate(Ratio =  
+           MediaAciertos[which(condicion== "pos")]/ 
+           MediaAciertos[which(condicion == "pre")],
+         
+         Difer = 
+           MediaAciertos[which(condicion== "pos")]- 
+           MediaAciertos[which(condicion == "pre")]
+  )
+#3- Genero nuevas variables con el porcentaje de aciertos Pre y Pos entrenamiento 
+#para luego poder organizar el dataframe coomo lo hizo Jose           
+df_GrupoReaccion_filtrados <-  df_GrupoReaccion_filtrados %>% 
+  
+  mutate( PreMedia = MediaAciertos[which(condicion == "pre")],
+          PosMedia = MediaAciertos[which(condicion == "pos")],
+          PreDesv  = DesvAciertos[which(condicion  == "pre")],
+          PosDesv  = DesvAciertos[which(condicion  == "pos")] 
+  )
 
-scatter.smooth(x=df_GrupoControl$Separacion, 
-               y=df_GrupoControl$Difer, 
-               main="Difer ~ Separacion"
-               )
+#4- Elimino columnas y valores duplicados
+df_GrupoReaccion_filtrados[2:4] <- list(NULL)
+df_GrupoReaccion_filtrados <- unique(df_GrupoReaccion_filtrados)
 
-#Divido el area del gráfico en 2 columnas
-par(mfrow=c(1, 2))  
+#Gráficos 
 
-#Boxplor para la variable Ratio Pos/Pre
-boxplot(df_GrupoControl$Ratio, 
-        main="Ratio", 
-        sub=paste("Outlier rows: ", boxplot.stats(df_GrupoControl$Ratio)$out)
-        )  
-#Boxplot para la variable Difer Pos-Pre
-boxplot(df_GrupoControl$Difer, 
-        main="Diferencia", 
-        sub=paste("Outlier rows: ", 
-                  boxplot.stats(df_GrupoControl$Difer)$out
-                  )
-        )  
-#Grafico de densidad
-par(mfrow=c(1, 2))  
-#Densidad 
-plot(density(df_GrupoControl$Ratio), 
-     
-     main="Density Plot: Ratio", 
-     
-     ylab="Frecuencia", 
-     
-     sub=paste("Skewness:", 
-     
-               round(e1071::skewness(df_GrupoControl$Ratio), 2)
-               )
-     )  
-
-polygon(density(df_GrupoControl$Ratio), col="red")
-
-plot(density(df_GrupoControl$Difer), 
-     
-     main="Density Plot: Diferencia", 
-     
-     ylab="",
-     
-     sub=paste("Skewness:", round(e1071::skewness(df_GrupoControl$Difer), 2))
-     
-     )  
-
-polygon(density(df_GrupoControl$Difer), col="red")
-
-correlation_ratio <- cor(df_GrupoControl$Ratio, df_GrupoControl$Separacion) 
-
-correlation_difer <- cor(df_GrupoControl$Difer, df_GrupoControl$Separacion) 
+ggplot() + 
+  geom_point(data = df_GrupoControl_filtrados, 
+             aes(Separacion, Ratio), color = "red") +
+  stat_smooth(data = df_GrupoControl_filtrados, 
+              aes(Separacion,Ratio),
+              method = "lm", col = "red")+
+  geom_point(data = df_GrupoReaccion_filtrados, 
+             aes(Separacion,
+                 Ratio), color = "black")+
+  stat_smooth(data = df_GrupoReaccion_filtrados,
+              aes(Separacion,
+                  Ratio),
+              method = "lm", col = "black") +
+  labs(title = "Control and Reaction Group", 
+       x = "Separation[°]",
+       y = "Ratio Pos/Pre [-]") +
+  ylim(0.5,1.5) 
 
 
-lm_Ratio <-  lm(df_GrupoControl$Ratio ~ df_GrupoControl$Separacion)
+lm_RatioReaccion <-  lm(df_GrupoReaccion_filtrados$Ratio ~ df_GrupoCarga_filtrados$Separacion)
 
-summary(lm_Ratio)
+summary(lm_RatioReaccion)
 
-lm_Difer <-  lm(df_GrupoControl$Difer ~ df_GrupoControl$Separacion)
 
-summary(lm_Difer)
+#GRUPO MIXTO
+
+#1- Dataframe Grupo Combinado y nuevas variables 
+df_GrupoMixto_filtrados <-  df_datos_filtrados %>%
+  
+  filter(grupo == "hk") %>%
+  
+  group_by(Separacion, condicion) %>%
+  
+  summarise(MediaAciertos = mean(p), DesvAciertos = sd(p)) %>%
+  
+  mutate(Ratio =  
+           MediaAciertos[which(condicion== "pos")]/ 
+           MediaAciertos[which(condicion == "pre")],
+         
+         Difer = 
+           MediaAciertos[which(condicion== "pos")]- 
+           MediaAciertos[which(condicion == "pre")]
+  )
+#3- Genero nuevas variables con el porcentaje de aciertos Pre y Pos entrenamiento 
+#para luego poder organizar el dataframe coomo lo hizo Jose           
+df_GrupoMixto_filtrados <-  df_GrupoMixto_filtrados %>% 
+  
+  mutate( PreMedia = MediaAciertos[which(condicion == "pre")],
+          PosMedia = MediaAciertos[which(condicion == "pos")],
+          PreDesv  = DesvAciertos[which(condicion  == "pre")],
+          PosDesv  = DesvAciertos[which(condicion  == "pos")] 
+  )
+
+#4- Elimino columnas y valores duplicados
+df_GrupoMixto_filtrados[2:4] <- list(NULL)
+df_GrupoMixto_filtrados <- unique(df_GrupoMixto_filtrados)
+
+
+#Graficos
+
+ggplot() + 
+  geom_point(data = df_GrupoControl_filtrados, 
+             aes(Separacion, Ratio), color = "red") +
+  stat_smooth(data = df_GrupoControl_filtrados, 
+              aes(Separacion,Ratio),
+              method = "lm", col = "red")+
+  geom_point(data = df_GrupoMixto_filtrados, 
+             aes(Separacion,
+                 Ratio), color = "orange")+
+  stat_smooth(data = df_GrupoMixto_filtrados,
+              aes(Separacion,
+                  Ratio),
+              method = "lm", col = "orange") +
+  labs(title = "Control and Combined Task Group", 
+       x = "Separation[°]",
+       y = "Ratio Pos/Pre [-]") +
+  ylim(0.5,1.5) 
+
+
+lm_RatioMixto <-  lm(df_GrupoMixto_filtrados$Ratio ~ df_GrupoMixto_filtrados$Separacion)
+
+summary(lm_RatioMixto)
+
+
+# Seccion pruebas --------------------------------------------------------------
+#Comparo los datos sin eliminar los trials debido a la falta
+#de fijacion
+df_prueba <- df_datos %>% 
+  filter(Grupo == "hk") %>%
+  group_by(Separacion, Condicion) %>%
+  summarise(MediaAciertos = mean(p), DesvAciertos = sd(p)) %>%
+  mutate(Ratio =  
+           MediaAciertos[which(Condicion== "pos")]/ 
+           MediaAciertos[which(Condicion == "pre")],
+  )
+
+df_prueba <-  df_prueba %>% 
+  mutate( PreMedia = MediaAciertos[which(Condicion == "pre")],
+          PosMedia = MediaAciertos[which(Condicion == "pos")],
+          PreDesv  = DesvAciertos[which(Condicion  == "pre")],
+          PosDesv  = DesvAciertos[which(Condicion  == "pos")] 
+  )
+  
+df_prueba[2:4] <- list(NULL)
+df_prueba <- unique(df_prueba)
+
+ggplot() + 
+  geom_point(data = df_prueba, 
+             aes(Separacion, Ratio), color = "red") +
+  stat_smooth(data = df_prueba, 
+              aes(Separacion,Ratio),
+              method = "lm", col = "red")+
+  labs(title = "Control Group", 
+       x = "Separation[°]",
+       y = "Ratio Pos/Pre [-]") +
+  ylim(0,2) 
+
+
 
