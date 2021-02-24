@@ -639,3 +639,39 @@ ggplot() +
            position = "dodge"
            
   )  
+
+prueba <- read.csv("C:/Users/Anibal/Documents/R/attentional-window/datos_Jose.csv")
+
+df_datos <- prueba
+df_prueba <- df_datos %>% 
+  filter(grupo == "cl") %>%
+  group_by(Separacion, condicion) %>%
+  summarise(MediaAciertos = mean(p), DesvAciertos = sd(p)) %>%
+  mutate(Ratio =  
+           MediaAciertos[which(condicion== "pos")]/ 
+           MediaAciertos[which(condicion == "pre")],
+  )
+
+df_prueba <-  df_prueba %>% 
+  mutate( PreMedia = MediaAciertos[which(condicion == "pre")],
+          PosMedia = MediaAciertos[which(condicion == "pos")],
+          PreDesv  = DesvAciertos[which(condicion  == "pre")],
+          PosDesv  = DesvAciertos[which(condicion  == "pos")] 
+  )
+
+df_prueba[2:4] <- list(NULL)
+df_prueba <- unique(df_prueba)
+
+ggplot() + 
+  geom_point(data = df_prueba, 
+             aes(Separacion, Ratio), color = "red") +
+  stat_smooth(data = df_prueba, 
+              aes(Separacion,Ratio),
+              method = "lm", col = "red")+
+  labs(title = "Control Group", 
+       x = "Separation[°]",
+       y = "Ratio Pos/Pre [-]") +
+  ylim(0,2) 
+
+
+
