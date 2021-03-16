@@ -565,8 +565,5 @@ ggplot(data = filter(df_prueba, Sesion == "Sesion 6")) +
   geom_col(aes(x = Expertisia, y = Media), 
            position = "dodge") 
          
-ggplot(data = df_prueba, aes(x=Sesion, y=Media,color = Expertisia)) +
-  geom_bar(stat="identity",position=position_dodge())
-
 ggplot(data=df_prueba, aes(x=Sesion, y=Media, fill=Expertisia)) +
   geom_bar(stat="identity", position=position_dodge())

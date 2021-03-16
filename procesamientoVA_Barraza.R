@@ -899,7 +899,7 @@ par(op)
 
 #1- Creo dataframe con los datos de direccion
 df_ventana_GrupoControl <- df_datos_filtrados %>%
-  filter(grupo == "cl" & Separacion  != "3") %>%
+  filter(grupo == "cl") %>%
   group_by(Direccion, Separacion, condicion) %>%
   summarise(MediaAciertos = mean(p))
   
@@ -1095,7 +1095,7 @@ par(op)
 #1- Creo dataframe con los datos de direccion
 
 df_ventana_GrupoCarga <- df_datos_filtrados %>%
-  filter(grupo == "lt"& Separacion != "3") %>%
+  filter(grupo == "lt") %>%
   group_by(Direccion, Separacion, condicion) %>%
   summarise(MediaAciertos = mean(p))
 
@@ -1573,7 +1573,7 @@ lm_RatioCombinado <-  lm(df_GrupoCombinado_filtrados$Ratio ~ df_GrupoCombinado_f
 summary(lm_RatioCombinado)
 
 
-#GRAFICOS RADAR PARA PAPER------------------------------------------------------
+#GRAFICOS RADAR ------------------------------------------------------
 #1- Creo dataframe con todos los grupos y el valor de la 
 #ventana atencional
 df_ventana_radar <- rbind(df_GrupoControl_radar, 
@@ -1635,9 +1635,6 @@ for (i in 4:nrow(df_GrupoCombinado_radar)) {
 # Restore the standard par() settings
 par <- par(opar) 
 
-#Prueba
-
-df_vetana_radar_pru <- 
 
 
 
@@ -1649,6 +1646,23 @@ df_vetana_radar_pru <-
 
 
 
+
+
+
+
+
+
+#PROCESAMIENTO POR ZONAS--------------------------------------------------------
+# La idea es agrupar la separacion en diferentes zonas (Cercana, Media, Lejana)
+# para poder notar el efecto que hay en las zonas de menor separacion 
+# GRUPO CONTROL
+
+df_zonas_GrupoControl <- df_ventana_GrupoControl %>%
+  mutate(Zona = case_when(Separacion <= 8 ~ 'Cercana', 
+                          Separacion > 8  & Separacion <=14 ~ 'Media', 
+                          Separacion > 14 ~ 'Lejana')) %>%
+  group_by(Zona, Direccion, condicion) %>% 
+  summarise(MediaAciertos)
 
 
 
