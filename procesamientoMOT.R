@@ -526,3 +526,47 @@ ggplot() +
            position = "dodge"
   )
 
+
+# Procesamiento Marzo 2021------------------------------------------------------
+
+#Dataframe Grupo No Deportista
+df_obs_lt$Grupo <- c("Carga")
+df_obs_rt$Grupo <- c("Reaccion")
+df_obs_no_deportistas<- rbind(df_obs_lt,df_obs_rt)
+df_obs_no_deportistas$Expertisia <- rep(c("No deportista"), 2100)
+
+#Dataframe Grupo Deportista
+df_obs_deportistas <- data.frame(Observador = rep(c("lfa", "lms", "mcm", "lfa", "lms", "mcm"), each = 100), 
+                                 Porcentaje = c(ls_datos_ct[[2]]$Porcentaje, 
+                                          ls_datos_ct[[7]]$Porcentaje, 
+                                          ls_datos_ct[[8]]$Porcentaje, 
+                                          ls_datos_ct[[13]]$Porcentaje, 
+                                          ls_datos_ct[[14]]$Porcentaje, 
+                                          ls_datos_ct[[19]]$Porcentaje,
+                                          ls_datos_ct[[21]]$Porcentaje,
+                                          ls_datos_ct[[26]]$Porcentaje,
+                                          ls_datos_ct[[27]]$Porcentaje,
+                                          ls_datos_ct[[32]]$Porcentaje,
+                                          ls_datos_ct[[33]]$Porcentaje,
+                                          ls_datos_ct[[38]]$Porcentaje),
+                                 Sesion = rep(c("Sesion 1", "Sesion 6"), 6, each=50),
+                                 Grupo = rep(c("Carga", "Reaccion"), each = 300),
+                                 Expertisia = rep(c("Deportista"), 600))
+                                  
+
+#Dataframe para grafico de barras
+df_grafico_barras <- rbind(df_obs_no_deportistas,df_obs_deportistas)
+#Grafico
+df_prueba <- df_grafico_barras %>% 
+  group_by(Expertisia, Sesion) %>% 
+  summarise(Media = mean(Porcentaje))
+
+ggplot(data = filter(df_prueba, Sesion == "Sesion 6")) + 
+  geom_col(aes(x = Expertisia, y = Media), 
+           position = "dodge") 
+         
+ggplot(data = df_prueba, aes(x=Sesion, y=Media,color = Expertisia)) +
+  geom_bar(stat="identity",position=position_dodge())
+
+ggplot(data=df_prueba, aes(x=Sesion, y=Media, fill=Expertisia)) +
+  geom_bar(stat="identity", position=position_dodge())

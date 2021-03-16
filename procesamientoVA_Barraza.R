@@ -22,7 +22,6 @@ list_gaze <- vector ("list", N)
 list_fixations <- vector("list", N)
 Ntrials <- 336
 
-
 # CARGO DATOS ILAV PRE ENTRENAMIENTO --------------------------------------
 #Cargo los datos de la ventana atencional antes del entrenamiento del ILAV
 #ubico el directorio donde se encuentran los archivos
@@ -161,7 +160,7 @@ for (i in seq_along(files))  {
 }
 
 #Elimino  variables
-rm(averages, datos, df_gaze, ls_gaze_x, ls_gaze_y, tbl, tbl_gaze, tbl_sin_gaze ) 
+rm(averages, df_datos_filtrados, df_gaze, ls_gaze_x, ls_gaze_y, tbl, tbl_gaze, tbl_sin_gaze ) 
 
 
 
@@ -255,7 +254,7 @@ for (i in seq_along(files))  {
 }
 
 #Elimino  variables
-rm(averages, data_mat, datList, datos, datos_sin_Gaze, matlabFile, tabla, tabla_total) 
+rm(averages, data_mat, datList, df_datos_filtrados, datos_sin_Gaze, matlabFile, tabla, tabla_total) 
 
 
 # CARGO DATOS ILAV POS ENTRENAMIENTO --------------------------------------
@@ -392,7 +391,7 @@ for (i in seq_along(files))  {
   
 }
 #Elimino  variables
-rm(averages, datos, df_gaze, ls_gaze_x, ls_gaze_y, tbl, tbl_gaze, tbl_sin_gaze ) 
+rm(averages, df_datos_filtrados, df_gaze, ls_gaze_x, ls_gaze_y, tbl, tbl_gaze, tbl_sin_gaze ) 
 
 
 
@@ -557,100 +556,7 @@ obs <- c("pre_aaf", "pre_afb", "pre_agm", "pre_cic",
 names(list_gaze) <- obs 
 
 
-# # GAZE --------------------------------------------------------------------
-# #5- Comparo para cada obsevador el gaze de cada trial con el gaze del primer
-# #trial que se toma como referencia.
-# #5.1
-# #Calculo la media del XGaze y del YGaze del primer trial
-# #Calculo la distancia de cada punto del Gaze de los sucesivo trials con
-# #respecto a la media del primer trial.
-# #Compara la distancia calculada con un valor constante cst_DIST
-# vr_num_Dist <- rep(NaN, 84)
-# cst_DIST <- 40
-# cst_NPOINTS <- 84
-# vr_TrialOK <- rep(NaN, Ntrials)
-# num_XGazeREF <- rep(NaN, 30)
-# num_YGazeREF <- rep(NaN, 30)
-# for (j in seq_along(list_gaze)){ 
-#   
-#   num_XGazeREF[j] <- mean(list_gaze[[j]]$XGaze.mm[[1]])
-#   num_YGazeREF[j] <- mean(list_gaze[[j]]$YGaze.mm[[1]])
-#   
-#   for (k in seq_along(vr_TrialOK)){
-#     
-#     for (i in seq_along(vr_num_Dist)){
-#       
-#       Xdist <- (list_gaze[[j]]$XGaze.mm[[k]][i] - num_XGazeREF[j])^2
-#       Ydist <- (list_gaze[[j]]$YGaze.mm[[k]][i] - num_YGazeREF[j])^2
-#       
-#       vr_num_Dist[i]  <- sqrt(sum(Xdist,Ydist)) 
-#       
-#     }
-#     #Determino el porcentaje de  puntos caen adentro de la zona de fijacion dada por el tamaño de la cruz de fijacion en mm
-#     aceptado <- c(vr_num_Dist <= cst_DIST)
-#     porcentaje <- ((sum(aceptado == TRUE))/cst_NPOINTS)*100
-#     vr_TrialOK[k] <- porcentaje
-#     
-#   }
-#   list_gaze[[j]]$TRialOK <- vr_TrialOK
-#   list_gaze[[j]]$trial <- c(1:336)
-#   list_gaze[[j]]$time <- c(0:0.02:83*0.02)
-#   
-# }
-# #5.2
-# #Origino una lista de indices para cada observador con los trials aceptados para el procesamiento posterior
-# #Obtengo los trials que tienen un porcentaje mayor al 40% de los puntos del gaze dentro de la zona de fijacion
-# #Genero un data frame para cada observador con el porcentaje de respuestas correctas en cada Direccion y en cada Separacion
-# list_index <- vector("list", 40)
-# list_datosFinal <- vector ("list", 30)
-# list_datosFinal_x <- vector("list", 30)
-# 
-# for (i in seq_along(list_gaze)){
-#   
-#   list_index[[i]] <- which(list_gaze[[i]]$TRialOK >= 40)
-#   
-#   list_datosFinal[[i]] <- slice(list_datosRaw[[i]], c(list_index[[i]][-1]))
-#   
-#   list_datosFinal_x[[i]] <- slice(list_datosRaw[[i]], c(-list_index[[i]]))
-#   
-#   list_datosFinal[[i]] <-list_datosFinal[[i]] %>% 
-#     group_by( Direccion, Separacion) %>% 
-#     dplyr::summarise(n = n(), nYes = sum(correctas), nNo = n - nYes, p = nYes / n)
-#   
-#   list_datosFinal_x[[i]] <-list_datosFinal_x[[i]] %>% 
-#     group_by( Direccion, Separacion) %>% 
-#     dplyr::summarise(n = n(), nYes = sum(correctas), nNo = n - nYes, p = nYes / n)
-#   
-#   list_datosFinal[[i]]$Observadores <- list_datos[[i]]$observadores[1:length
-# (list_datosFinal[[i]]$p)]
-#   
-#   list_datosFinal_x[[i]]$Observadores <-list_datos[[i]]$observadores[1:length
-# (list_datosFinal_x[[i]]$p)]
-#   
-#   list_datosFinal[[i]]$Condicion <-list_datos[[i]]$condicion[1:length(list_datosFinal[[i]]$p)]
-#   
-#   list_datosFinal_x[[i]]$Condicion <- list_datos[[i]]$condicion[1:length(list_datosFinal_x[[i]]$p)]
-#   
-#   list_datosFinal[[i]]$Grupo <- list_datos[[i]]$grupo[1:length(list_datosFinal[[i]]$p)]
-#   
-#   list_datosFinal_x[[i]]$Grupo <- list_datos[[i]]$grupo[1:length(list_datosFinal_x[[i]]$p)]
-#   
-#   
-# }
-# 
-# #5.3 
-# #Creo un dataframe con los datos del gaze
-# df_datosFinal <- ldply (list_datosFinal, data.frame)
-# df_datosFinal_x <- ldply (list_datosFinal_x, data.frame)
-# df_datosFinal$Fijacion <- c("SI") 
-# df_datosFinal_x$Fijacion <- c("NO")
-# df_datos$Fijacion <- c("NA")
-# names(df_datos)[7:9] <- c("Observadores", "Condicion", "Grupo")
-# df_datos <- rbind(df_datos, df_datosFinal, df_datosFinal_x)
-
-
-# ALTERNATIVA GAZE: LIBRERIA saccades ------------------------------------------
-
+# GAZE LIBRERIA saccades ------------------------------------------
 #6- Libreria saccades
 #Creo una lista para preparar los datos según la libreria saccades
 #usando a los datos de todos los observadores 
@@ -858,7 +764,7 @@ df_datos_filtrados <- df_datos_filtrados[,-1]
 #2- Dataframe Grupo Control y nuevas variables 
 df_GrupoControl_filtrados <-  df_datos_filtrados %>%
   
-  filter(grupo == "cl") %>%
+  filter(grupo == "cl" ) %>%
   
   group_by(Separacion, condicion) %>%
   
@@ -992,9 +898,8 @@ par(op)
 #Grafico radar para ventana atencional
 
 #1- Creo dataframe con los datos de direccion
-
 df_ventana_GrupoControl <- df_datos_filtrados %>%
-  filter(grupo == "cl") %>%
+  filter(grupo == "cl" & Separacion  != "3") %>%
   group_by(Direccion, Separacion, condicion) %>%
   summarise(MediaAciertos = mean(p))
   
@@ -1185,13 +1090,99 @@ legend(
 )
 par(op)
 
+#Grafico radar para ventana atencional
+
+#1- Creo dataframe con los datos de direccion
+
+df_ventana_GrupoCarga <- df_datos_filtrados %>%
+  filter(grupo == "lt"& Separacion != "3") %>%
+  group_by(Direccion, Separacion, condicion) %>%
+  summarise(MediaAciertos = mean(p))
+
+#2- Modelo lineal
+#Pre
+lm_ventana_GrupoCarga_pre_0 <- lm(filter(df_ventana_GrupoCarga, Direccion == "0" & condicion == "pre")$MediaAciertos 
+                                    ~ filter(df_ventana_GrupoCarga, Direccion == "0" & condicion == "pre")$Separacion)
+
+lm_ventana_GrupoCarga_pre_45 <- lm(filter(df_ventana_GrupoCarga, Direccion == "45" & condicion == "pre")$MediaAciertos 
+                                     ~ filter(df_ventana_GrupoCarga, Direccion == "45" & condicion == "pre")$Separacion)
+
+lm_ventana_GrupoCarga_pre_90 <- lm(filter(df_ventana_GrupoCarga, Direccion == "90" & condicion == "pre")$MediaAciertos 
+                                     ~ filter(df_ventana_GrupoCarga, Direccion == "90" & condicion == "pre")$Separacion)
+
+lm_ventana_GrupoCarga_pre_135 <- lm(filter(df_ventana_GrupoCarga, Direccion == "135" & condicion == "pre")$MediaAciertos 
+                                      ~ filter(df_ventana_GrupoCarga, Direccion == "135" & condicion == "pre")$Separacion)
+
+vc_coeficientes <- c(lm_ventana_GrupoCarga_pre_90$coefficients,
+                     lm_ventana_GrupoCarga_pre_135$coefficients,
+                     lm_ventana_GrupoCarga_pre_0$coefficients,
+                     lm_ventana_GrupoCarga_pre_45$coefficients,
+                     lm_ventana_GrupoCarga_pre_90$coefficients,
+                     lm_ventana_GrupoCarga_pre_135$coefficients,
+                     lm_ventana_GrupoCarga_pre_0$coefficients,
+                     lm_ventana_GrupoCarga_pre_45$coefficients)
+
+
+
+for (i in seq_along(df_GrupoCarga_radar[3,])){
+  
+  df_GrupoCarga_radar[3,i] <- (0.6 - vc_coeficientes[(2*i)-1])/vc_coeficientes[(2*i)]
+  
+}
+
+# Condicion Pos
+lm_ventana_GrupoCarga_pos_0 <- lm(filter(df_ventana_GrupoCarga, Direccion == "0" & condicion == "pos")$MediaAciertos 
+                                    ~ filter(df_ventana_GrupoCarga, Direccion == "0" & condicion == "pos")$Separacion)
+
+lm_ventana_GrupoCarga_pos_45 <- lm(filter(df_ventana_GrupoCarga, Direccion == "45" & condicion == "pos")$MediaAciertos 
+                                     ~ filter(df_ventana_GrupoCarga, Direccion == "45" & condicion == "pos")$Separacion)
+
+lm_ventana_GrupoCarga_pos_90 <- lm(filter(df_ventana_GrupoCarga, Direccion == "90" & condicion == "pos")$MediaAciertos 
+                                     ~ filter(df_ventana_GrupoCarga, Direccion == "90" & condicion == "pos")$Separacion)
+
+lm_ventana_GrupoCarga_pos_135 <- lm(filter(df_ventana_GrupoCarga, Direccion == "135" & condicion == "pos")$MediaAciertos 
+                                      ~ filter(df_ventana_GrupoCarga, Direccion == "135" & condicion == "pos")$Separacion)
+
+vc_coeficientes <- c(lm_ventana_GrupoCarga_pos_90$coefficients,
+                     lm_ventana_GrupoCarga_pos_135$coefficients,
+                     lm_ventana_GrupoCarga_pos_0$coefficients,
+                     lm_ventana_GrupoCarga_pos_45$coefficients,
+                     lm_ventana_GrupoCarga_pos_90$coefficients,
+                     lm_ventana_GrupoCarga_pos_135$coefficients,
+                     lm_ventana_GrupoCarga_pos_0$coefficients,
+                     lm_ventana_GrupoCarga_pos_45$coefficients)
+
+
+
+for (i in seq_along(df_GrupoCarga_radar[4,])){
+  
+  df_GrupoCarga_radar[4,i] <- (0.6 - vc_coeficientes[(2*i)-1])/vc_coeficientes[(2*i)]
+  
+}
+
+df_GrupoCarga_radar[1,] <- df_GrupoCarga_radar[1,]*10
+
+
+op <- par(mar = c(1, 2, 2, 2))
+# Create the radar charts
+create_beautiful_radarchart(
+  data = df_GrupoCarga_radar, caxislabels = c(0, 5, 10, 15, 20),
+  color = c("#00AFBB", "#E7B800", "#FC4E07")
+)
+# Add an horizontal legend
+legend(
+  x = "left", legend = rownames(df_GrupoCarga_radar[-c(1,2),]), horiz = FALSE,
+  bty = "n", pch = 20 , col = c("#00AFBB", "#E7B800", "#FC4E07"),
+  text.col = "black", cex = 1, pt.cex = 1.5
+)
+par(op)
+
+
   
 #6- Modelo  
 lm_RatioCarga <-  lm(df_GrupoCarga_filtrados$Ratio ~ df_GrupoCarga_filtrados$Separacion)
 
 summary(lm_RatioCarga)
-
-
 
 #write.csv(df_datos_filtrados,"C:\\Users\\Anibal\\Documents\\R\\attentional-window\\datosVA_v.2.csv", row.names = TRUE)
 
@@ -1295,6 +1286,95 @@ legend(
   text.col = "black", cex = 1, pt.cex = 1.5
 )
 par(op)
+#Grafico radar para ventana atencional
+
+#1- Creo dataframe con los datos de direccion
+
+df_ventana_GrupoReaccion <- df_datos_filtrados %>%
+  filter(grupo == "rt" & Separacion != "3") %>%
+  group_by(Direccion, Separacion, condicion) %>%
+  summarise(MediaAciertos = mean(p))
+
+#2- Modelo lineal
+#Pre
+lm_ventana_GrupoReaccion_pre_0 <- lm(filter(df_ventana_GrupoReaccion, Direccion == "0" & condicion == "pre")$MediaAciertos 
+                                    ~ filter(df_ventana_GrupoReaccion, Direccion == "0" & condicion == "pre")$Separacion)
+
+lm_ventana_GrupoReaccion_pre_45 <- lm(filter(df_ventana_GrupoReaccion, Direccion == "45" & condicion == "pre")$MediaAciertos 
+                                     ~ filter(df_ventana_GrupoReaccion, Direccion == "45" & condicion == "pre")$Separacion)
+
+lm_ventana_GrupoReaccion_pre_90 <- lm(filter(df_ventana_GrupoReaccion, Direccion == "90" & condicion == "pre")$MediaAciertos 
+                                     ~ filter(df_ventana_GrupoReaccion, Direccion == "90" & condicion == "pre")$Separacion)
+
+lm_ventana_GrupoReaccion_pre_135 <- lm(filter(df_ventana_GrupoReaccion, Direccion == "135" & condicion == "pre")$MediaAciertos 
+                                      ~ filter(df_ventana_GrupoReaccion, Direccion == "135" & condicion == "pre")$Separacion)
+
+vc_coeficientes <- c(lm_ventana_GrupoReaccion_pre_90$coefficients,
+                     lm_ventana_GrupoReaccion_pre_135$coefficients,
+                     lm_ventana_GrupoReaccion_pre_0$coefficients,
+                     lm_ventana_GrupoReaccion_pre_45$coefficients,
+                     lm_ventana_GrupoReaccion_pre_90$coefficients,
+                     lm_ventana_GrupoReaccion_pre_135$coefficients,
+                     lm_ventana_GrupoReaccion_pre_0$coefficients,
+                     lm_ventana_GrupoReaccion_pre_45$coefficients)
+
+
+
+for (i in seq_along(df_GrupoReaccion_radar[3,])){
+  
+  df_GrupoReaccion_radar[3,i] <- (0.6 - vc_coeficientes[(2*i)-1])/vc_coeficientes[(2*i)]
+  
+}
+
+# Condicion Pos
+lm_ventana_GrupoReaccion_pos_0 <- lm(filter(df_ventana_GrupoReaccion, Direccion == "0" & condicion == "pos")$MediaAciertos 
+                                    ~ filter(df_ventana_GrupoReaccion, Direccion == "0" & condicion == "pos")$Separacion)
+
+lm_ventana_GrupoReaccion_pos_45 <- lm(filter(df_ventana_GrupoReaccion, Direccion == "45" & condicion == "pos")$MediaAciertos 
+                                     ~ filter(df_ventana_GrupoReaccion, Direccion == "45" & condicion == "pos")$Separacion)
+
+lm_ventana_GrupoReaccion_pos_90 <- lm(filter(df_ventana_GrupoReaccion, Direccion == "90" & condicion == "pos")$MediaAciertos 
+                                     ~ filter(df_ventana_GrupoReaccion, Direccion == "90" & condicion == "pos")$Separacion)
+
+lm_ventana_GrupoReaccion_pos_135 <- lm(filter(df_ventana_GrupoReaccion, Direccion == "135" & condicion == "pos")$MediaAciertos 
+                                      ~ filter(df_ventana_GrupoReaccion, Direccion == "135" & condicion == "pos")$Separacion)
+
+vc_coeficientes <- c(lm_ventana_GrupoReaccion_pos_90$coefficients,
+                     lm_ventana_GrupoReaccion_pos_135$coefficients,
+                     lm_ventana_GrupoReaccion_pos_0$coefficients,
+                     lm_ventana_GrupoReaccion_pos_45$coefficients,
+                     lm_ventana_GrupoReaccion_pos_90$coefficients,
+                     lm_ventana_GrupoReaccion_pos_135$coefficients,
+                     lm_ventana_GrupoReaccion_pos_0$coefficients,
+                     lm_ventana_GrupoReaccion_pos_45$coefficients)
+
+
+
+for (i in seq_along(df_GrupoReaccion_radar[4,])){
+  
+  df_GrupoReaccion_radar[4,i] <- (0.6 - vc_coeficientes[(2*i)-1])/vc_coeficientes[(2*i)]
+  
+}
+
+df_GrupoReaccion_radar[1,] <- df_GrupoReaccion_radar[1,]*10
+
+
+op <- par(mar = c(1, 2, 2, 2))
+# Create the radar charts
+create_beautiful_radarchart(
+  data = df_GrupoReaccion_radar, caxislabels = c(0, 5, 10, 15, 20),
+  color = c("#00AFBB", "#E7B800", "#FC4E07")
+)
+# Add an horizontal legend
+legend(
+  x = "left", legend = rownames(df_GrupoReaccion_radar[-c(1,2),]), horiz = FALSE,
+  bty = "n", pch = 20 , col = c("#00AFBB", "#E7B800", "#FC4E07"),
+  text.col = "black", cex = 1, pt.cex = 1.5
+)
+par(op)
+
+
+#Modelo Lineal
 
 lm_RatioReaccion <-  lm(df_GrupoReaccion_filtrados$Ratio ~ df_GrupoCarga_filtrados$Separacion)
 
@@ -1358,9 +1438,9 @@ df_GrupoCombinado_filtrados_dir[2:4] <- list(NULL)
 #Graficos
 
 ggplot() + 
-  geom_point(data = df_GrupoCombinado_filtrados, 
+  geom_point(data = df_GrupoControl_filtrados, 
              aes(Separacion, Ratio), color = "red") +
-  stat_smooth(data = df_GrupoCombinado_filtrados, 
+  stat_smooth(data = df_GrupoControl_filtrados, 
               aes(Separacion,Ratio),
               method = "lm", col = "red")+
   geom_point(data = df_GrupoCombinado_filtrados, 
@@ -1401,9 +1481,77 @@ legend(
 )
 par(op)
 
-df_GrupoCombinado_radar[3,] <- c(6.40,5.77, 10.67, 5.88, 6.40, 5.77,10.67,5.88)
-df_GrupoCombinado_radar[4,] <- c(10.69,8.69,11.85,9.15,10.69,8.69,11.86,9.15)
-df_GrupoCombinado_radar[1,] <- df_GrupoControl_radar[1,]*2
+#Grafico radar para ventana atencional
+
+#1- Creo dataframe con los datos de direccion
+
+df_ventana_GrupoCombinado <- df_datos_filtrados %>%
+  filter(grupo == "cl" & Separacion != "3")  %>%
+  group_by(Direccion, Separacion, condicion) %>%
+  summarise(MediaAciertos = mean(p))
+
+#2- Modelo lineal
+#Pre
+lm_ventana_GrupoCombinado_pre_0 <- lm(filter(df_ventana_GrupoCombinado, Direccion == "0" & condicion == "pre")$MediaAciertos 
+                                    ~ filter(df_ventana_GrupoCombinado, Direccion == "0" & condicion == "pre")$Separacion)
+
+lm_ventana_GrupoCombinado_pre_45 <- lm(filter(df_ventana_GrupoCombinado, Direccion == "45" & condicion == "pre")$MediaAciertos 
+                                     ~ filter(df_ventana_GrupoCombinado, Direccion == "45" & condicion == "pre")$Separacion)
+
+lm_ventana_GrupoCombinado_pre_90 <- lm(filter(df_ventana_GrupoCombinado, Direccion == "90" & condicion == "pre")$MediaAciertos 
+                                     ~ filter(df_ventana_GrupoCombinado, Direccion == "90" & condicion == "pre")$Separacion)
+
+lm_ventana_GrupoCombinado_pre_135 <- lm(filter(df_ventana_GrupoCombinado, Direccion == "135" & condicion == "pre")$MediaAciertos 
+                                      ~ filter(df_ventana_GrupoCombinado, Direccion == "135" & condicion == "pre")$Separacion)
+
+vc_coeficientes <- c(lm_ventana_GrupoCombinado_pre_90$coefficients,
+                     lm_ventana_GrupoCombinado_pre_135$coefficients,
+                     lm_ventana_GrupoCombinado_pre_0$coefficients,
+                     lm_ventana_GrupoCombinado_pre_45$coefficients,
+                     lm_ventana_GrupoCombinado_pre_90$coefficients,
+                     lm_ventana_GrupoCombinado_pre_135$coefficients,
+                     lm_ventana_GrupoCombinado_pre_0$coefficients,
+                     lm_ventana_GrupoCombinado_pre_45$coefficients)
+
+
+
+for (i in seq_along(df_GrupoCombinado_radar[3,])){
+  
+  df_GrupoCombinado_radar[3,i] <- (0.6 - vc_coeficientes[(2*i)-1])/vc_coeficientes[(2*i)]
+  
+}
+
+# Condicion Pos
+lm_ventana_GrupoCombinado_pos_0 <- lm(filter(df_ventana_GrupoCombinado, Direccion == "0" & condicion == "pos")$MediaAciertos 
+                                    ~ filter(df_ventana_GrupoCombinado, Direccion == "0" & condicion == "pos")$Separacion)
+
+lm_ventana_GrupoCombinado_pos_45 <- lm(filter(df_ventana_GrupoCombinado, Direccion == "45" & condicion == "pos")$MediaAciertos 
+                                     ~ filter(df_ventana_GrupoCombinado, Direccion == "45" & condicion == "pos")$Separacion)
+
+lm_ventana_GrupoCombinado_pos_90 <- lm(filter(df_ventana_GrupoCombinado, Direccion == "90" & condicion == "pos")$MediaAciertos 
+                                     ~ filter(df_ventana_GrupoCombinado, Direccion == "90" & condicion == "pos")$Separacion)
+
+lm_ventana_GrupoCombinado_pos_135 <- lm(filter(df_ventana_GrupoCombinado, Direccion == "135" & condicion == "pos")$MediaAciertos 
+                                      ~ filter(df_ventana_GrupoCombinado, Direccion == "135" & condicion == "pos")$Separacion)
+
+vc_coeficientes <- c(lm_ventana_GrupoCombinado_pos_90$coefficients,
+                     lm_ventana_GrupoCombinado_pos_135$coefficients,
+                     lm_ventana_GrupoCombinado_pos_0$coefficients,
+                     lm_ventana_GrupoCombinado_pos_45$coefficients,
+                     lm_ventana_GrupoCombinado_pos_90$coefficients,
+                     lm_ventana_GrupoCombinado_pos_135$coefficients,
+                     lm_ventana_GrupoCombinado_pos_0$coefficients,
+                     lm_ventana_GrupoCombinado_pos_45$coefficients)
+
+
+
+for (i in seq_along(df_GrupoCombinado_radar[4,])){
+  
+  df_GrupoCombinado_radar[4,i] <- (0.6 - vc_coeficientes[(2*i)-1])/vc_coeficientes[(2*i)]
+  
+}
+
+df_GrupoCombinado_radar[1,] <- df_GrupoCombinado_radar[1,]*10
 
 
 op <- par(mar = c(1, 2, 2, 2))
@@ -1423,6 +1571,85 @@ par(op)
 lm_RatioCombinado <-  lm(df_GrupoCombinado_filtrados$Ratio ~ df_GrupoCombinado_filtrados$Separacion)
 
 summary(lm_RatioCombinado)
+
+
+#GRAFICOS RADAR PARA PAPER------------------------------------------------------
+#1- Creo dataframe con todos los grupos y el valor de la 
+#ventana atencional
+df_ventana_radar <- rbind(df_GrupoControl_radar, 
+                    df_GrupoCarga_radar[-(1:2),], 
+                    df_GrupoReaccion_radar[-(1:2),], 
+                    df_GrupoCombinado_radar[-(1:2),])
+
+#2- Creo un vector con el valor medio de ventana atencional
+#para cada direccion en la condicion Pre 
+vr_ventana_mean <- apply(df_ventana_radar[c(3,5,7,9),],
+                         2, mean)
+#3- Elimino filas que no hacen falta
+df_ventana_radar_mean <- rbind(vr_ventana_mean,
+                          df_ventana_radar[-c(3,5,7,9),])
+#4- Ordeno las filas
+df_ventana_radar_mean <- df_ventana_radar_mean[c(2,3,1,4:nrow(df_ventana_radar_mean)),]
+
+#5- Cambio en nombre de las filas
+rownames(df_ventana_radar_mean) <- c("Max", "Min",
+                                    "Average", "Control",
+                                    "Load", "Reaction Time",
+                                    "Combined")
+#6- Ecualizo el máximo
+df_ventana_radar_mean[1,] <- df_ventana_radar_mean[1,]*2
+
+
+opar <- par() 
+# Defino los parametros del gráfico en una grilla de 2x2,
+# con los márgenes apropiados
+par(mar = rep(0.8,4))
+par(mfrow = c(2,2))
+# Crea un gráfico radar para cada grupo
+for (i in 4:nrow(df_ventana_radar_mean)) {
+  radarchart(
+    df_ventana_radar_mean[c(1:3, i), ],
+    pfcol = c("#99999980",NA),
+    pcol= c(NA,2), plty = 1, plwd = 2,
+    title = row.names(df_ventana_radar_mean)[i]
+  )
+}
+# Restore the standard par() settings
+par <- par(opar) 
+
+#Solo para el grupo Combinado
+opar <- par() 
+# Defino los parametros del gráfico en una grilla de 2x2,
+# con los márgenes apropiados
+par(mar = rep(0.8,4))
+par(mfrow = c(1,1))
+# Crea un gráfico radar para cada grupo
+for (i in 4:nrow(df_GrupoCombinado_radar)) {
+  radarchart(
+    df_GrupoCombinado_radar[c(1:3, i), ],
+    pfcol = c("#99999980",NA),
+    pcol= c(NA,2), plty = 1, plwd = 2,
+    title = "Combined Group"
+  )
+}
+# Restore the standard par() settings
+par <- par(opar) 
+
+#Prueba
+
+df_vetana_radar_pru <- 
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # Seccion pruebas --------------------------------------------------------------
@@ -1514,7 +1741,46 @@ legend(
 )
 par(op)
 
+#Radar en panel 
+df <- rbind(df_GrupoControl_radar, 
+            df_GrupoCarga_radar[-(1:2),], 
+            df_GrupoReaccion_radar[-(1:2),], 
+            df_GrupoCombinado_radar[-(1:2),])
 
-#Grupo Carga Atencional
+# Define colors and titles
+colors <- c("#00AFBB", "#E7B800", "#FC4E07", "#6B8E23" )
+titles <- c("Control", "Carga", "Reaccion", "Combinado" )
+
+# Reduce plot margin using par()
+# Split the screen in 3 parts
+op <- par(mar = c(1, 1, 1, 1))
+par(mfrow = c(1,4))
+
+# Create the radar chart
+for(i in 1:4){
+  create_beautiful_radarchart(
+    data = df[c(1, 2, ((2*i) + 2)), ], caxislabels = c(0, 5, 10, 15, 20),
+    color = colors[i], title = titles[i]
+  )
+}
+par(op)
+
+#Prueba normalidad
+
+par(mfrow = c(1,2))
+qqnorm(df_datos_filtrados[df_datos_filtrados$grupo == "cl"& df_datos_filtrados$condicion == "pre","p"], main = "Control")
+qqline(df_datos_filtrados[df_datos_filtrados$grupo == "cl"& df_datos_filtrados$condicion == "pre","p"])
+qqnorm(df_datos_filtrados[df_datos_filtrados$grupo == "lt"& df_datos_filtrados$condicion == "pre","p"], main = "Carga")
+qqline(df_datos_filtrados[df_datos_filtrados$grupo == "lt"& df_datos_filtrados$condicion == "pre","p"])
+par(mfrow = c(1,2))
+qqnorm(df_datos_filtrados[df_datos_filtrados$grupo == "rt"& df_datos_filtrados$condicion == "pre","p"], main = "Reaccion")
+qqline(df_datos_filtrados[df_datos_filtrados$grupo == "rt"& df_datos_filtrados$condicion == "pre","p"])
+qqnorm(df_datos_filtrados[df_datos_filtrados$grupo == "hk"& df_datos_filtrados$condicion == "pre","p"], main = "Combinado")
+qqline(df_datos_filtrados[df_datos_filtrados$grupo == "hk"& df_datos_filtrados$condicion == "pre","p"])
+
+
+par(mfrow = c(1,2))
+qqnorm(df_datos_filtrados[df_datos_filtrados$Separacion & df_datos_filtrados$condicion == "pre","p"], main = "Control")
+qqline(df_datos_filtrados[df_datos_filtrados$Separacion & df_datos_filtrados$condicion == "pre","p"])
 
 
