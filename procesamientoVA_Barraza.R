@@ -1656,13 +1656,46 @@ par <- par(opar)
 # La idea es agrupar la separacion en diferentes zonas (Cercana, Media, Lejana)
 # para poder notar el efecto que hay en las zonas de menor separacion 
 # GRUPO CONTROL
-
 df_zonas_GrupoControl <- df_ventana_GrupoControl %>%
   mutate(Zona = case_when(Separacion <= 8 ~ 'Cercana', 
                           Separacion > 8  & Separacion <=14 ~ 'Media', 
                           Separacion > 14 ~ 'Lejana')) %>%
   group_by(Zona, Direccion, condicion) %>% 
-  summarise(MediaAciertos)
+  summarise(MediaAciertos = mean(MediaAciertos))
+
+
+#Obtengo los valores de razon de respuestas correctas
+vr_pre <- t(df_zonas_GrupoControl[which(df_zonas_GrupoControl$Zona == "Lejana" 
+                                        & df_zonas_GrupoControl$condicion == "pre"), 
+                                  ncol(df_zonas_GrupoControl)]
+            )
+vr_pos <- t(df_zonas_GrupoControl[which(df_zonas_GrupoControl$Zona == "Lejana" 
+                                        & df_zonas_GrupoControl$condicion == "pos"), 
+                                  ncol(df_zonas_GrupoControl)]
+)
+
+#Ordeno y concateneo
+vr_pre <- append(vr_pre[1,c(4,2,1,3)], vr_pre[1,c(4,2,1,3)])
+vr_pos <- append(vr_pos[1,c(4,2,1,3)], vr_pos[1,c(4,2,1,3)])
+# Dataframe Zona cercana para grafico radar
+df_GrupoControl_cercana_radar <- rbind(max_min, vr_pre, vr_pos)*100
+row.names(df_GrupoControl_cercana_radar)[3:4] <- c("Pre", "Pos")
+# Grafico radar
+op <- par(mar = c(1, 2, 2, 2))
+# Crear el grafico radar
+create_beautiful_radarchart(
+  data = df_GrupoControl_cercana_radar, caxislabels = c(0, 25, 50, 75, 100),
+  color = c("#00AFBB", "#E7B800", "#FC4E07"),
+  title = "Zona Cercana"
+)
+# Agregar leyenda
+legend(
+  x = "right", legend = rownames(df_GrupoControl_cercana_radar[-c(1,2),]), horiz = FALSE,
+  bty = "n", pch = 20 , col = c("#00AFBB", "#E7B800", "#FC4E07"),
+  text.col = "black", cex = 1, pt.cex = 1.5
+)
+
+par(op)
 
 
 
