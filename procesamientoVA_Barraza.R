@@ -1723,40 +1723,40 @@ vr_pos <- t(df_zonas_GrupoControl[which(df_zonas_GrupoControl$Zona == "Lejana"
 #Ordeno y concateneo
 vr_pre <- append(vr_pre[1,c(4,2,1,3)], vr_pre[1,c(4,2,1,3)])*100
 vr_pos <- append(vr_pos[1,c(4,2,1,3)], vr_pos[1,c(4,2,1,3)])*100
-# Dataframe Zonas  para grafico radar
+# Dataframe Zonas Grupo Control para grafico radar
 df_zonas_Control_radar <- rbind(df_zonas_Control_radar, vr_pre, vr_pos)
 row.names(df_zonas_Control_radar)[7:8] <- c("Lejana Pre", "Lejana Pos")
 
 
-
-
-
 # Grafico radar
-colors <- c("#00AFBB", "#E7B800", "#FC4E07")
-titles <- c("Cercana", "Media", "Lejana")
-op <- par(mar = c(1, 2, 2, 2))
+titles <- c("Near", "Medium", "Far")
+opar <- par() 
+# Define settings for plotting in a 3x4 grid, with appropriate margins:
+par(mar = rep(0.8,4))
 par(mfrow = c(1,3))
-# Crear el grafico radar
-for(i in 1:3){
-  create_beautiful_radarchart(
-    data = df_zonas_Control_radar[c(1,2,((i+1)*2)-1,(i+1)*2), ], caxislabels = c(0, 25, 50, 75, 100),
-    color = colors[i], title = titles[i]
-  )
-  legend(
-    x = "bottom", legend = rownames(df_GrupoControl_cercana_radar[-c(1,2),]), horiz = FALSE,
-    bty = "n", pch = 20 , col = c("#00AFBB", "#E7B800", "#FC4E07"),
-    text.col = "black", cex = 1, pt.cex = 1.5, inset = 1/16
+# Produce a radar-chart for each student
+for (i in 1:3) {
+  radarchart(
+    df_zonas_Control_radar[c(1,2,((i+1)*2)-1,(i+1)*2), ],
+    pfcol = c("#99999980",NA),
+    pcol= c(NA,2), plty = 1, plwd = 2,
+    title = titles[i],
+    axistype = 1,
+    caxislabels = c(0, 25, 50, 75, 100),
+    vlabels = c('90°', '135°', '180°', '225°', '270°', '315°', '0°', '45°'),
+    vlcex = 1.2,
   )
 }
-par(op)
-# Agregar leyenda
 legend(
-  x = "right", legend = rownames(df_GrupoControl_cercana_radar[-c(1,2),]), horiz = FALSE,
-  bty = "n", pch = 20 , col = c("#00AFBB", "#E7B800", "#FC4E07"),
-  text.col = "black", cex = 1, pt.cex = 1.5, inset = 1/20
+  x = "bottomright", legend = c('Pretraining', 'Postraining'), horiz = FALSE,
+  bty = "n", pch = 16 , col =c("#99999980",2),
+  text.col = "black", cex = 1.5, pt.cex = 2, inset = 1/64
 )
+# Restore the standard par() settings
+par <- par(opar) 
 
-par(op)
+
+
 
 
 
