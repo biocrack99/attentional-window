@@ -1684,6 +1684,7 @@ df_zonas_GrupoCombinado <- df_ventana_GrupoCombinado %>%
   group_by(Zona, Direccion, condicion) %>% 
   summarise(MediaAciertos = mean(MediaAciertos))
 
+# GRUPO CONTROL-----------------------------------------------------------------
 #Obtengo los valores de razón de respuestas correctas Zona Cercana
 vr_pre <- t(df_zonas_GrupoControl[which(df_zonas_GrupoControl$Zona == "Cercana" 
                                         & df_zonas_GrupoControl$condicion == "pre"), 
@@ -1698,7 +1699,6 @@ vr_pos <- append(vr_pos[1,c(4,2,1,3)], vr_pos[1,c(4,2,1,3)])
 # Dataframe Zonas  para grafico radar
 df_zonas_Control_radar <- rbind(max_min, vr_pre, vr_pos)*100
 row.names(df_zonas_Control_radar)[3:4] <- c("Cernana Pre", "Cercana Pos")
-
 #Obtengo los valores de razón de respuestas correctas Zona Media
 vr_pre <- t(df_zonas_GrupoControl[which(df_zonas_GrupoControl$Zona == "Media" 
                                         & df_zonas_GrupoControl$condicion == "pre"), 
@@ -1726,8 +1726,6 @@ vr_pos <- append(vr_pos[1,c(4,2,1,3)], vr_pos[1,c(4,2,1,3)])*100
 # Dataframe Zonas Grupo Control para grafico radar
 df_zonas_Control_radar <- rbind(df_zonas_Control_radar, vr_pre, vr_pos)
 row.names(df_zonas_Control_radar)[7:8] <- c("Lejana Pre", "Lejana Pos")
-
-
 # Grafico radar
 titles <- c("Near", "Medium", "Far")
 opar <- par() 
@@ -1748,17 +1746,223 @@ for (i in 1:3) {
   )
 }
 legend(
-  x = "bottomright", legend = c('Pretraining', 'Postraining'), horiz = FALSE,
+  x = "bottom", legend = c('Pretraining', 'Postraining'), horiz = FALSE,
   bty = "n", pch = 16 , col =c("#99999980",2),
-  text.col = "black", cex = 1.5, pt.cex = 2, inset = 1/64
+  text.col = "black", cex = 1.3, pt.cex = 2, inset = 0, y.intersp = 1
 )
 # Restore the standard par() settings
 par <- par(opar) 
 
+#GRUPO CARGA--------------------------------------------------------------------
+#Obtengo los valores de razón de respuestas correctas Zona Cercana
+vr_pre <- t(df_zonas_GrupoCarga[which(df_zonas_GrupoCarga$Zona == "Cercana" 
+                                        & df_zonas_GrupoCarga$condicion == "pre"), 
+                                  ncol(df_zonas_GrupoCarga)])
+vr_pos <- t(df_zonas_GrupoCarga[which(df_zonas_GrupoCarga$Zona == "Cercana" 
+                                        & df_zonas_GrupoCarga$condicion == "pos"), 
+                                  ncol(df_zonas_GrupoCarga)])
 
+#Ordeno y concateneo
+vr_pre <- append(vr_pre[1,c(4,2,1,3)], vr_pre[1,c(4,2,1,3)])
+vr_pos <- append(vr_pos[1,c(4,2,1,3)], vr_pos[1,c(4,2,1,3)])
+# Dataframe Zonas  para grafico radar
+df_zonas_Carga_radar <- rbind(max_min, vr_pre, vr_pos)*100
+row.names(df_zonas_Carga_radar)[3:4] <- c("Cernana Pre", "Cercana Pos")
 
+#Obtengo los valores de razón de respuestas correctas Zona Media
+vr_pre <- t(df_zonas_GrupoCarga[which(df_zonas_GrupoCarga$Zona == "Media" 
+                                        & df_zonas_GrupoCarga$condicion == "pre"), 
+                                  ncol(df_zonas_GrupoCarga)])
+vr_pos <- t(df_zonas_GrupoCarga[which(df_zonas_GrupoCarga$Zona == "Media" 
+                                        & df_zonas_GrupoCarga$condicion == "pos"), 
+                                  ncol(df_zonas_GrupoCarga)])
+#Ordeno y concateneo
+vr_pre <- append(vr_pre[1,c(4,2,1,3)], vr_pre[1,c(4,2,1,3)])*100
+vr_pos <- append(vr_pos[1,c(4,2,1,3)], vr_pos[1,c(4,2,1,3)])*100
+# Dataframe Zonas  para grafico radar
+df_zonas_Carga_radar <- rbind(df_zonas_Carga_radar, vr_pre, vr_pos)
+row.names(df_zonas_Carga_radar)[5:6] <- c("Media Pre", "Media Pos")
 
+#Obtengo los valores de razón de respuestas correctas Zona Lejana
+vr_pre <- t(df_zonas_GrupoCarga[which(df_zonas_GrupoCarga$Zona == "Lejana" 
+                                        & df_zonas_GrupoCarga$condicion == "pre"), 
+                                  ncol(df_zonas_GrupoCarga)])
+vr_pos <- t(df_zonas_GrupoCarga[which(df_zonas_GrupoCarga$Zona == "Lejana" 
+                                        & df_zonas_GrupoCarga$condicion == "pos"), 
+                                  ncol(df_zonas_GrupoCarga)])
+#Ordeno y concateneo
+vr_pre <- append(vr_pre[1,c(4,2,1,3)], vr_pre[1,c(4,2,1,3)])*100
+vr_pos <- append(vr_pos[1,c(4,2,1,3)], vr_pos[1,c(4,2,1,3)])*100
+# Dataframe Zonas Grupo Control para grafico radar
+df_zonas_Carga_radar <- rbind(df_zonas_Carga_radar, vr_pre, vr_pos)
+row.names(df_zonas_Carga_radar)[7:8] <- c("Lejana Pre", "Lejana Pos")
+# Grafico radar
+titles <- c("Near", "Medium", "Far")
+opar <- par() 
+# Define settings for plotting in a 3x4 grid, with appropriate margins:
+par(mar = rep(0.8,4))
+par(mfrow = c(1,3))
+# Produce a radar-chart for each student
+for (i in 1:3) {
+  radarchart(
+    df_zonas_Carga_radar[c(1,2,((i+1)*2)-1,(i+1)*2), ],
+    pfcol = c("#99999980",NA),
+    pcol= c(NA,2), plty = 1, plwd = 2,
+    title = titles[i],
+    axistype = 1,
+    caxislabels = c(0, 25, 50, 75, 100),
+    vlabels = c('90°', '135°', '180°', '225°', '270°', '315°', '0°', '45°'),
+    vlcex = 1.2,
+  )
+}
+legend(
+  x = "bottom", legend = c('Pretraining', 'Postraining'), horiz = FALSE,
+  bty = "n", pch = 16 , col =c("#99999980",2),
+  text.col = "black", cex = 1.3, pt.cex = 2, inset = 0, y.intersp = 1
+)
+# Restore the standard par() settings
+par <- par(opar) 
 
+#GRUPO REACCION-----------------------------------------------------------------
+#Obtengo los valores de razón de respuestas correctas Zona Cercana
+vr_pre <- t(df_zonas_GrupoReaccion[which(df_zonas_GrupoReaccion$Zona == "Cercana" 
+                                      & df_zonas_GrupoReaccion$condicion == "pre"), 
+                                ncol(df_zonas_GrupoReaccion)])
+vr_pos <- t(df_zonas_GrupoReaccion[which(df_zonas_GrupoReaccion$Zona == "Cercana" 
+                                      & df_zonas_GrupoReaccion$condicion == "pos"), 
+                                ncol(df_zonas_GrupoReaccion)])
+
+#Ordeno y concateneo
+vr_pre <- append(vr_pre[1,c(4,2,1,3)], vr_pre[1,c(4,2,1,3)])
+vr_pos <- append(vr_pos[1,c(4,2,1,3)], vr_pos[1,c(4,2,1,3)])
+# Dataframe Zonas  para grafico radar
+df_zonas_Reaccion_radar <- rbind(max_min, vr_pre, vr_pos)*100
+row.names(df_zonas_Reaccion_radar)[3:4] <- c("Cernana Pre", "Cercana Pos")
+
+#Obtengo los valores de razón de respuestas correctas Zona Media
+vr_pre <- t(df_zonas_GrupoReaccion[which(df_zonas_GrupoReaccion$Zona == "Media" 
+                                      & df_zonas_GrupoReaccion$condicion == "pre"), 
+                                ncol(df_zonas_GrupoReaccion)])
+vr_pos <- t(df_zonas_GrupoReaccion[which(df_zonas_GrupoReaccion$Zona == "Media" 
+                                      & df_zonas_GrupoReaccion$condicion == "pos"), 
+                                ncol(df_zonas_GrupoReaccion)])
+#Ordeno y concateneo
+vr_pre <- append(vr_pre[1,c(4,2,1,3)], vr_pre[1,c(4,2,1,3)])*100
+vr_pos <- append(vr_pos[1,c(4,2,1,3)], vr_pos[1,c(4,2,1,3)])*100
+# Dataframe Zonas  para grafico radar
+df_zonas_Reaccion_radar <- rbind(df_zonas_Reaccion_radar, vr_pre, vr_pos)
+row.names(df_zonas_Reaccion_radar)[5:6] <- c("Media Pre", "Media Pos")
+
+#Obtengo los valores de razón de respuestas correctas Zona Lejana
+vr_pre <- t(df_zonas_GrupoReaccion[which(df_zonas_GrupoReaccion$Zona == "Lejana" 
+                                      & df_zonas_GrupoReaccion$condicion == "pre"), 
+                                ncol(df_zonas_GrupoReaccion)])
+vr_pos <- t(df_zonas_GrupoReaccion[which(df_zonas_GrupoReaccion$Zona == "Lejana" 
+                                      & df_zonas_GrupoReaccion$condicion == "pos"), 
+                                ncol(df_zonas_GrupoReaccion)])
+#Ordeno y concateneo
+vr_pre <- append(vr_pre[1,c(4,2,1,3)], vr_pre[1,c(4,2,1,3)])*100
+vr_pos <- append(vr_pos[1,c(4,2,1,3)], vr_pos[1,c(4,2,1,3)])*100
+# Dataframe Zonas Grupo Control para grafico radar
+df_zonas_Reaccion_radar <- rbind(df_zonas_Reaccion_radar, vr_pre, vr_pos)
+row.names(df_zonas_Reaccion_radar)[7:8] <- c("Lejana Pre", "Lejana Pos")
+# Grafico radar
+titles <- c("Near", "Medium", "Far")
+opar <- par() 
+# Define settings for plotting in a 3x4 grid, with appropriate margins:
+par(mar = rep(0.8,4))
+par(mfrow = c(1,3))
+# Produce a radar-chart for each student
+for (i in 1:3) {
+  radarchart(
+    df_zonas_Reaccion_radar[c(1,2,((i+1)*2)-1,(i+1)*2), ],
+    pfcol = c("#99999980",NA),
+    pcol= c(NA,2), plty = 1, plwd = 2,
+    title = titles[i],
+    axistype = 1,
+    caxislabels = c(0, 25, 50, 75, 100),
+    vlabels = c('90°', '135°', '180°', '225°', '270°', '315°', '0°', '45°'),
+    vlcex = 1.2,
+  )
+}
+legend(
+  x = "bottom", legend = c('Pretraining', 'Postraining'), horiz = FALSE,
+  bty = "n", pch = 16 , col =c("#99999980",2),
+  text.col = "black", cex = 1.3, pt.cex = 2, inset = 0, y.intersp = 1
+)
+# Restore the standard par() settings
+par <- par(opar)
+
+#GRUPO COMBINADO-----------------------------------------------------------------
+#Obtengo los valores de razón de respuestas correctas Zona Cercana
+vr_pre <- t(df_zonas_GrupoCombinado[which(df_zonas_GrupoCombinado$Zona == "Cercana" 
+                                         & df_zonas_GrupoCombinado$condicion == "pre"), 
+                                   ncol(df_zonas_GrupoCombinado)])
+vr_pos <- t(df_zonas_GrupoCombinado[which(df_zonas_GrupoCombinado$Zona == "Cercana" 
+                                         & df_zonas_GrupoCombinado$condicion == "pos"), 
+                                   ncol(df_zonas_GrupoCombinado)])
+
+#Ordeno y concateneo
+vr_pre <- append(vr_pre[1,c(4,2,1,3)], vr_pre[1,c(4,2,1,3)])
+vr_pos <- append(vr_pos[1,c(4,2,1,3)], vr_pos[1,c(4,2,1,3)])
+# Dataframe Zonas  para grafico radar
+df_zonas_Combinado_radar <- rbind(max_min, vr_pre, vr_pos)*100
+row.names(df_zonas_Combinado_radar)[3:4] <- c("Cernana Pre", "Cercana Pos")
+
+#Obtengo los valores de razón de respuestas correctas Zona Media
+vr_pre <- t(df_zonas_GrupoCombinado[which(df_zonas_GrupoCombinado$Zona == "Media" 
+                                         & df_zonas_GrupoCombinado$condicion == "pre"), 
+                                   ncol(df_zonas_GrupoCombinado)])
+vr_pos <- t(df_zonas_GrupoCombinado[which(df_zonas_GrupoCombinado$Zona == "Media" 
+                                         & df_zonas_GrupoCombinado$condicion == "pos"), 
+                                   ncol(df_zonas_GrupoCombinado)])
+#Ordeno y concateneo
+vr_pre <- append(vr_pre[1,c(4,2,1,3)], vr_pre[1,c(4,2,1,3)])*100
+vr_pos <- append(vr_pos[1,c(4,2,1,3)], vr_pos[1,c(4,2,1,3)])*100
+# Dataframe Zonas  para grafico radar
+df_zonas_Combinado_radar <- rbind(df_zonas_Combinado_radar, vr_pre, vr_pos)
+row.names(df_zonas_Combinado_radar)[5:6] <- c("Media Pre", "Media Pos")
+
+#Obtengo los valores de razón de respuestas correctas Zona Lejana
+vr_pre <- t(df_zonas_GrupoCombinado[which(df_zonas_GrupoCombinado$Zona == "Lejana" 
+                                         & df_zonas_GrupoCombinado$condicion == "pre"), 
+                                   ncol(df_zonas_GrupoCombinado)])
+vr_pos <- t(df_zonas_GrupoCombinado[which(df_zonas_GrupoCombinado$Zona == "Lejana" 
+                                         & df_zonas_GrupoCombinado$condicion == "pos"), 
+                                   ncol(df_zonas_GrupoCombinado)])
+#Ordeno y concateneo
+vr_pre <- append(vr_pre[1,c(4,2,1,3)], vr_pre[1,c(4,2,1,3)])*100
+vr_pos <- append(vr_pos[1,c(4,2,1,3)], vr_pos[1,c(4,2,1,3)])*100
+# Dataframe Zonas Grupo Control para grafico radar
+df_zonas_Combinado_radar <- rbind(df_zonas_Combinado_radar, vr_pre, vr_pos)
+row.names(df_zonas_Combinado_radar)[7:8] <- c("Lejana Pre", "Lejana Pos")
+# Grafico radar
+titles <- c("Near", "Medium", "Far")
+opar <- par() 
+# Define settings for plotting in a 3x4 grid, with appropriate margins:
+par(mar = rep(0.8,4))
+par(mfrow = c(1,3))
+# Produce a radar-chart for each student
+for (i in 1:3) {
+  radarchart(
+    df_zonas_Combinado_radar[c(1,2,((i+1)*2)-1,(i+1)*2), ],
+    pfcol = c("#99999980",NA),
+    pcol= c(NA,2), plty = 1, plwd = 2,
+    title = titles[i],
+    axistype = 1,
+    caxislabels = c(0, 25, 50, 75, 100),
+    vlabels = c('90°', '135°', '180°', '225°', '270°', '315°', '0°', '45°'),
+    vlcex = 1.2,
+  )
+}
+legend(
+  x = "bottom", legend = c('Pretraining', 'Postraining'), horiz = FALSE,
+  bty = "n", pch = 16 , col =c("#99999980",2),
+  text.col = "black", cex = 1.3, pt.cex = 2, inset = 0, y.intersp = 1
+)
+# Restore the standard par() settings
+par <- par(opar)
+-----------------
 
 # Seccion pruebas --------------------------------------------------------------
 #Comparo los datos sin eliminar los trials debido a la falta
