@@ -1747,6 +1747,59 @@ grafico_radar_zonas(df_ventana_GrupoCombinado, max_min)
 
 
 
+
+
+
+
+
+
+
+
+
+
+#PROCESAMIENTO LINEAL-----------------------------------------------------------
+#GRUPO CONTROL
+lm_GrupoControl <- lm(p ~ Separacion*condicion*observadores, data = df_datos_filtrados,
+                      subset = (grupo == 'hk'))
+summary(lm_GrupoControl)
+anova(lm_GrupoControl)
+
+#Por observadores
+ggplot(subset(df_datos_filtrados, grupo == 'cl'),
+       aes(x = Separacion, y = p, color = condicion)) + 
+  geom_point()+
+  geom_smooth(method = 'lm') +
+  facet_wrap(~observadores)
+#GRUPO CON CARGA ATENCIONAL
+#Por observadores
+ggplot(subset(df_datos_filtrados, grupo == 'lt'),
+       aes(x = Separacion, y = p, color = condicion)) + 
+  geom_point()+
+  geom_smooth(method = 'lm') +
+  facet_wrap(~observadores)
+#GRUPO CON TIEMPO DE REACCION
+#Por observadores
+ggplot(subset(df_datos_filtrados, grupo == 'rt'),
+       aes(x = Separacion, y = p, color = condicion)) + 
+  geom_point()+
+  geom_smooth(method = 'lm') +
+  facet_wrap(~observadores)
+#GRUPO COMBINADO
+#Por observadores
+ggplot(subset(df_datos_filtrados, grupo == 'hk'),
+       aes(x = Separacion, y = p, color = condicion)) + 
+  geom_point()+
+  geom_smooth(method = 'lm') +
+  facet_wrap(~observadores)
+
+#TODOS JUNTOS
+ggplot(df_datos_filtrados,
+       aes(x = Separacion, y = p, color = condicion)) + 
+  geom_point()+
+  geom_smooth(method = 'lm') +
+  facet_wrap(~observadores ~grupo)
+
+
 # Seccion pruebas --------------------------------------------------------------
 #Comparo los datos sin eliminar los trials debido a la falta
 #de fijacion
