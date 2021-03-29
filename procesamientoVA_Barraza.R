@@ -1737,6 +1737,16 @@ grafico_radar_zonas(df_ventana_GrupoControl, max_min)
 grafico_radar_zonas(df_ventana_GrupoCarga, max_min) 
 grafico_radar_zonas(df_ventana_GrupoReaccion, max_min)
 grafico_radar_zonas(df_ventana_GrupoCombinado, max_min)
+
+
+
+
+
+
+
+
+
+
 # Seccion pruebas --------------------------------------------------------------
 #Comparo los datos sin eliminar los trials debido a la falta
 #de fijacion
