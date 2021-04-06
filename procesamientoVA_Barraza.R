@@ -1758,46 +1758,78 @@ grafico_radar_zonas(df_ventana_GrupoCombinado, max_min)
 
 
 #PROCESAMIENTO LINEAL-----------------------------------------------------------
-#GRUPO CONTROL
-lm_GrupoControl <- lm(p ~ Separacion*condicion*observadores, data = df_datos_filtrados,
-                      subset = (grupo == 'hk'))
-summary(lm_GrupoControl)
-anova(lm_GrupoControl)
-
-#Por observadores
-ggplot(subset(df_datos_filtrados, grupo == 'cl'),
-       aes(x = Separacion, y = p, color = condicion)) + 
-  geom_point()+
+#EFECTO POR OBSERVADOR
+#
+colnames(df_datos_filtrados)[c(1:2,7:9)] <- c("Direction", "Distance", "Condition", 
+                                              "Subjects", "Group")
+#GRUPO CONTROL POR OBSRVADORES
+ggplot(subset(df_datos_filtrados, Group == 'cl' ),
+       aes(x = Distance, y = p, color = Condition)) + 
+  geom_point(shape = 1, size = 3)+
   geom_smooth(method = 'lm') +
-  facet_wrap(~observadores)
+  facet_wrap(~Subjects) + 
+  scale_x_continuous("Distance", labels = as.character(df_datos_filtrados$Distance[1:7]), breaks = df_datos_filtrados$Distance[1:7]) +
+  scale_y_continuous("Proportion", labels = c("0.0", "0.5", "1.0"), breaks = c(0.0,0.5,1.0))
+
+#MODELO LINEAL
+lm_subjects_control <- lm(p ~ Distance*Condition, data = subset(df_datos_filtrados, Group == 'cl'))
+summary(lm_subjects_control)
+anova(lm_subjects_control)
+
+
+
+
+
 #GRUPO CON CARGA ATENCIONAL
 #Por observadores
-ggplot(subset(df_datos_filtrados, grupo == 'lt'),
-       aes(x = Separacion, y = p, color = condicion)) + 
-  geom_point()+
+ggplot(subset(df_datos_filtrados, Group == 'lt' ),
+       aes(x = Distance, y = p, color = Condition)) + 
+  geom_point(shape = 1, size = 3)+
   geom_smooth(method = 'lm') +
-  facet_wrap(~observadores)
+  facet_wrap(~Subjects) + 
+  scale_x_continuous("Distance", labels = as.character(df_datos_filtrados$Distance[1:7]), breaks = df_datos_filtrados$Distance[1:7]) +
+  scale_y_continuous("Proportion", labels = c("0.0", "0.5", "1.0"), breaks = c(0.0,0.5,1.0))
+
 #GRUPO CON TIEMPO DE REACCION
 #Por observadores
-ggplot(subset(df_datos_filtrados, grupo == 'rt'),
-       aes(x = Separacion, y = p, color = condicion)) + 
-  geom_point()+
+ggplot(subset(df_datos_filtrados, Group == 'rt' ),
+       aes(x = Distance, y = p, color = Condition)) + 
+  geom_point(shape = 1, size = 3)+
   geom_smooth(method = 'lm') +
-  facet_wrap(~observadores)
+  facet_wrap(~Subjects) + 
+  scale_x_continuous("Distance", labels = as.character(df_datos_filtrados$Distance[1:7]), breaks = df_datos_filtrados$Distance[1:7]) +
+  scale_y_continuous("Proportion", labels = c("0.0", "0.5", "1.0"), breaks = c(0.0,0.5,1.0))
+
 #GRUPO COMBINADO
 #Por observadores
-ggplot(subset(df_datos_filtrados, grupo == 'hk'),
-       aes(x = Separacion, y = p, color = condicion)) + 
-  geom_point()+
+ggplot(subset(df_datos_filtrados, Group == 'hk' ),
+       aes(x = Distance, y = p, color = Condition)) + 
+  geom_point(shape = 1, size = 3)+
   geom_smooth(method = 'lm') +
-  facet_wrap(~observadores)
+  facet_wrap(~Subjects) + 
+  scale_x_continuous("Distance", labels = as.character(df_datos_filtrados$Distance[1:7]), breaks = df_datos_filtrados$Distance[1:7]) +
+  scale_y_continuous("Proportion", labels = c("0.0", "0.5", "1.0"), breaks = c(0.0,0.5,1.0))
 
-#TODOS JUNTOS
+
+#TODOS LOS OBSERVADORES 
+#vs SEPARACION
+df_datos_filtrados$grupo <- as.factor(df_datos_filtrados$grupo)
+df_datos_filtrados$observadores <- as.factor(df_datos_filtrados$observadores)
 ggplot(df_datos_filtrados,
        aes(x = Separacion, y = p, color = condicion)) + 
-  geom_point()+
+  geom_point(shape = 1)+
   geom_smooth(method = 'lm') +
-  facet_wrap(~observadores ~grupo)
+  facet_wrap(~factor(observadores, levels=c('aaf', 'agm', 'lrc', 'pab', 'afb', 'cic', 'msz', 'nga', 'at-', 'lfa', 'lms', 'mcm', 'jjr', 'mab', 'mdn'))~factor(grupo, levels = c('cl', 'lt', 'rt', 'hk')))
+#VS DIRECCION
+df_datos_filtrados$Direccion <- as.integer(df_datos_filtrados$Direccion)
+ggplot(df_datos_filtrados,
+       aes(x = as.factor(Direccion), y = p, color = condicion)) + 
+  geom_boxplot()+
+  geom_smooth(method = 'lm') +
+  facet_wrap(~factor(observadores, levels=c('aaf', 'agm', 'lrc', 'pab', 'afb', 'cic', 'msz', 'nga', 'at-', 'lfa', 'lms', 'mcm', 'jjr', 'mab', 'mdn'))~factor(grupo, levels = c('cl', 'lt', 'rt', 'hk')))+
+  theme(legend.background = element_blank())
+  
+
 
 
 # Seccion pruebas --------------------------------------------------------------
