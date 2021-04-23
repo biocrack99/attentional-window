@@ -1772,7 +1772,8 @@ ggplot(subset(df_datos_filtrados, Group == 'cl' ),
   scale_y_continuous("Proportion", labels = c("0.0", "0.5", "1.0"), breaks = c(0.0,0.5,1.0))
 
 #MODELO LINEAL
-lm_subjects_control <- lm(p ~ Distance*Condition, data = subset(df_datos_filtrados, Group == 'cl'))
+df_datos_filtrados$Condition <- as.factor(df_datos_filtrados$Condition)
+lm_subjects_control <- lm(p ~ Distance*Condition - 1, data = subset(df_datos_filtrados, Group == 'cl'))
 summary(lm_subjects_control)
 anova(lm_subjects_control)
 
@@ -1790,6 +1791,11 @@ ggplot(subset(df_datos_filtrados, Group == 'lt' ),
   scale_x_continuous("Distance", labels = as.character(df_datos_filtrados$Distance[1:7]), breaks = df_datos_filtrados$Distance[1:7]) +
   scale_y_continuous("Proportion", labels = c("0.0", "0.5", "1.0"), breaks = c(0.0,0.5,1.0))
 
+#MODELO LINEAL
+lm_subjects_load <- lm(p ~ Distance*Condition - 1, data = subset(df_datos_filtrados, Group == 'lt'))
+summary(lm_subjects_load)
+anova(lm_subjects_load)
+
 #GRUPO CON TIEMPO DE REACCION
 #Por observadores
 ggplot(subset(df_datos_filtrados, Group == 'rt' ),
@@ -1799,7 +1805,10 @@ ggplot(subset(df_datos_filtrados, Group == 'rt' ),
   facet_wrap(~Subjects) + 
   scale_x_continuous("Distance", labels = as.character(df_datos_filtrados$Distance[1:7]), breaks = df_datos_filtrados$Distance[1:7]) +
   scale_y_continuous("Proportion", labels = c("0.0", "0.5", "1.0"), breaks = c(0.0,0.5,1.0))
-
+#MODELO LINEAL
+lm_subjects_reaction <- lm(p ~ Distance*Condition - 1, data = subset(df_datos_filtrados, Group == 'rt'))
+summary(lm_subjects_reaction)
+anova(lm_subjects_reaction)
 #GRUPO COMBINADO
 #Por observadores
 ggplot(subset(df_datos_filtrados, Group == 'hk' ),
@@ -1809,7 +1818,10 @@ ggplot(subset(df_datos_filtrados, Group == 'hk' ),
   facet_wrap(~Subjects) + 
   scale_x_continuous("Distance", labels = as.character(df_datos_filtrados$Distance[1:7]), breaks = df_datos_filtrados$Distance[1:7]) +
   scale_y_continuous("Proportion", labels = c("0.0", "0.5", "1.0"), breaks = c(0.0,0.5,1.0))
-
+#MODELO LINEAL
+lm_subjects_combined <- lm(p ~ Distance*Condition - 1, data = subset(df_datos_filtrados, Group == 'hk'))
+summary(lm_subjects_combined)
+anova(lm_subjects_combined)
 
 #TODOS LOS OBSERVADORES 
 #vs SEPARACION
