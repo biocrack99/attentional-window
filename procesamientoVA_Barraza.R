@@ -472,7 +472,7 @@ for (i in seq_along(files))  {
   
   averages$observadores <- substr(files[i], 3,5) 
   #lista de los datos crudos
-  list_datosRaw[i+26] <- list(data.frame(tabla_total))
+  list_datosRaw[i + 26] <- list(data.frame(tabla_total))
   
   
   list_datos[i + 26] <- list(averages)
@@ -1857,7 +1857,63 @@ UnirDataFrames <- function(ls_raw, indice){
   
 }
 
-df_prueba <- UnirDataFrames(list_datosRaw,1)
+df_aaf <- UnirDataFrames(list_datosRaw,1)
+df_afb <- UnirDataFrames(list_datosRaw,2)
+df_agm <- UnirDataFrames(list_datosRaw,3)
+df_cic <- UnirDataFrames(list_datosRaw,4)
+df_jjr <- UnirDataFrames(list_datosRaw,5)
+df_lrc <- UnirDataFrames(list_datosRaw,6)
+df_mab <- UnirDataFrames(list_datosRaw,7)
+df_mdn <- UnirDataFrames(list_datosRaw,8)
+df_msz <- UnirDataFrames(list_datosRaw,9)
+df_nga <- UnirDataFrames(list_datosRaw,10)
+df_pab <- UnirDataFrames(list_datosRaw,11)
+df_at <- UnirDataFrames(list_datosRaw,12)
+df_lfa <- UnirDataFrames(list_datosRaw,13)
+df_lms <- UnirDataFrames(list_datosRaw,14)
+df_mcm <- UnirDataFrames(list_datosRaw,15)
+
+
+#MODELOS
+#
+model_aaf <- glm(formula= correctas ~ Separacion * Condicion, data=df_aaf, family=binomial)
+model_afb <- glm(formula= correctas ~ Separacion * Condicion, data=df_afb, family=binomial)
+model_agm <- glm(formula= correctas ~ Separacion * Condicion, data=df_agm, family=binomial)
+model_cic <- glm(formula= correctas ~ Separacion * Condicion, data=df_cic, family=binomial)
+model_jjr <- glm(formula= correctas ~ Separacion * Condicion, data=df_jjr, family=binomial)
+model_lrc <- glm(formula= correctas ~ Separacion * Condicion, data=df_lrc, family=binomial)
+model_mab <- glm(formula= correctas ~ Separacion * Condicion, data=df_mab, family=binomial)
+model_mdn <- glm(formula= correctas ~ Separacion * Condicion, data=df_mdn, family=binomial)
+model_msz <- glm(formula= correctas ~ Separacion * Condicion, data=df_msz, family=binomial)
+model_nga <- glm(formula= correctas ~ Separacion * Condicion, data=df_nga, family=binomial)
+model_pab <- glm(formula= correctas ~ Separacion * Condicion, data=df_pab, family=binomial)
+model_at  <- glm(formula= correctas ~ Separacion * Condicion, data=df_at, family=binomial)
+model_lfa <- glm(formula= correctas ~ Separacion * Condicion, data=df_lfa, family=binomial)
+model_lms <- glm(formula= correctas ~ Separacion * Condicion, data=df_lms, family=binomial)
+model_mcm <- glm(formula= correctas ~ Separacion * Condicion, data=df_mcm, family=binomial)
+
+#CONTROL POR OBSERVADOR
+summary(model_aaf)
+summary(model_agm)
+summary(model_lrc)
+summary(model_pab)
+
+#CARGA POR OBSERVADOR
+summary(model_jjr)
+summary(model_mab)
+summary(model_mdn)
+
+#TIEMPO DE REACCION POR OBSERVADOR
+summary(model_afb)
+summary(model_cic)
+summary(model_msz)
+summary(model_nga)
+
+#COMBINADO POR OBERVADOR
+summary(model_at)
+summary(model_lfa)
+summary(model_lms)
+summary(model_mcm)
 
 
 
