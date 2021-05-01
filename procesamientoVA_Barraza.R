@@ -1844,6 +1844,23 @@ ggplot(df_datos_filtrados,
 
 
 
+#GLM CON DISTRIBUCION BINOMIAL--------------------------------------------------
+#
+UnirDataFrames <- function(ls_raw, indice){
+  
+  df_pre <- data.frame(subset(ls_raw[[indice]], select = c(5,6,9)))
+  df_pos <- data.frame(subset(ls_raw[[indice + 15]],select = c(5,6,9)))
+  df_pre$Condicion <- c('pre')
+  df_pos$Condicion <- c('pos')
+  df_obs <- rbind(df_pre,df_pos)
+  return(df_obs)
+  
+}
+
+df_prueba <- UnirDataFrames(list_datosRaw,1)
+
+
+
 # Seccion pruebas --------------------------------------------------------------
 #Comparo los datos sin eliminar los trials debido a la falta
 #de fijacion
