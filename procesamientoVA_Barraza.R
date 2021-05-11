@@ -13,6 +13,9 @@ library(reshape2)
 library(e1071)
 library(saccades)
 library(fmsb)
+require(ggiraph)
+require(ggiraphExtra)
+
 
 #Listas para guardar los datos segun la cantidad de obsevadores
 N <- 30
@@ -1846,12 +1849,13 @@ ggplot(df_datos_filtrados,
 
 #GLM CON DISTRIBUCION BINOMIAL--------------------------------------------------
 #
+
 UnirDataFrames <- function(ls_raw, indice){
   
   df_pre <- data.frame(subset(ls_raw[[indice]], select = c(5,6,9)))
   df_pos <- data.frame(subset(ls_raw[[indice + 15]],select = c(5,6,9)))
-  df_pre$Condicion <- c('pre')
-  df_pos$Condicion <- c('pos')
+  df_pre$Condicion <- as.factor(c('pre'))
+  df_pos$Condicion <- as.factor(c('pos'))
   df_obs <- rbind(df_pre,df_pos)
   return(df_obs)
   
@@ -1876,7 +1880,7 @@ df_mcm <- UnirDataFrames(list_datosRaw,15)
 
 #MODELOS
 #
-model_aaf <- glm(formula= correctas ~ Separacion * Condicion, data=df_aaf, family=binomial)
+model_aaf <- glm(correctas ~ Separacion * Condicion, family=binomial, data = df_aaf)
 model_afb <- glm(formula= correctas ~ Separacion * Condicion, data=df_afb, family=binomial)
 model_agm <- glm(formula= correctas ~ Separacion * Condicion, data=df_agm, family=binomial)
 model_cic <- glm(formula= correctas ~ Separacion * Condicion, data=df_cic, family=binomial)
@@ -1893,27 +1897,57 @@ model_lms <- glm(formula= correctas ~ Separacion * Condicion, data=df_lms, famil
 model_mcm <- glm(formula= correctas ~ Separacion * Condicion, data=df_mcm, family=binomial)
 
 #CONTROL POR OBSERVADOR
-summary(model_aaf)
-summary(model_agm)
-summary(model_lrc)
-summary(model_pab)
+ggPredict(model_aaf, show.summary = TRUE, se = TRUE, jitter = TRUE)
+ggPredict(model_agm, show.summary = TRUE, se = TRUE, jitter = TRUE)
+ggPredict(model_lrc, show.summary = TRUE, se = TRUE, jitter = TRUE)
+ggPredict(model_pab, show.summary = TRUE, se = TRUE, jitter = TRUE)
+#CONTROL GRUPO
+df_GrupoControl_bin <- rbind(df_aaf,df_agm,df_lrc, df_pab)
+df_GrupoControl_bin$Subjects <- as.factor(rep(c('aaf','agm','lrc', 'pab'), each = 670))
+model_GrupoControl_bin <- glm(correctas ~ Separacion * Condicion * Subjects , 
+                              family = binomial, 
+                              data = df_GrupoControl_bin)
+ggPredict(model_GrupoControl_bin, se = TRUE)
 
+                        
 #CARGA POR OBSERVADOR
 summary(model_jjr)
 summary(model_mab)
 summary(model_mdn)
+#GRUPO CARGA
+df_GrupoCarga_bin <- rbind(df_jjr,df_mab,df_mdn)
+df_GrupoCarga_bin$Subjects <- as.factor(rep(c('jjr','mab','mdn'), each = 670))
+model_GrupoCarga_bin <- glm(correctas ~ Separacion * Condicion * Subjects , 
+                              family = binomial, 
+                              data = df_GrupoCarga_bin)
+ggPredict(model_GrupoCarga_bin, se = TRUE)
+
 
 #TIEMPO DE REACCION POR OBSERVADOR
 summary(model_afb)
 summary(model_cic)
 summary(model_msz)
 summary(model_nga)
+#GRUPO REACCION
+df_GrupoReaccion_bin <- rbind(df_afb,df_cic,df_msz, df_nga)
+df_GrupoReaccion_bin$Subjects <- as.factor(rep(c('afb','cic','msz','nga'), each = 670))
+model_GrupoReaccion_bin <- glm(correctas ~ Separacion * Condicion * Subjects , 
+                            family = binomial, 
+                            data = df_GrupoReaccion_bin)
+ggPredict(model_GrupoReaccion_bin, se = TRUE)
 
 #COMBINADO POR OBERVADOR
 summary(model_at)
 summary(model_lfa)
 summary(model_lms)
 summary(model_mcm)
+#GRUPO COMBINADO
+df_GrupoCombinado_bin <- rbind(df_at,df_lfa,df_lms, df_mcm)
+df_GrupoCombinado_bin$Subjects <- as.factor(rep(c('at','lfa','lms','mcm'), each = 670))
+model_GrupoCombinado_bin <- glm(correctas ~ Separacion * Condicion * Subjects , 
+                               family = binomial, 
+                               data = df_GrupoCombinado_bin)
+ggPredict(model_GrupoCombinado_bin, se = TRUE)
 
 
 
