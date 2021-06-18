@@ -1849,7 +1849,6 @@ ggplot(df_datos_filtrados,
 
 #GLM CON DISTRIBUCION BINOMIAL--------------------------------------------------
 #
-
 UnirDataFrames <- function(ls_raw, indice){
   
   df_pre <- data.frame(subset(ls_raw[[indice]], select = c(5,6,9)))
@@ -1904,21 +1903,22 @@ ggPredict(model_pab, show.summary = TRUE, se = TRUE, jitter = TRUE)
 #CONTROL GRUPO
 df_GrupoControl_bin <- rbind(df_aaf,df_agm,df_lrc, df_pab)
 df_GrupoControl_bin$Subjects <- as.factor(rep(c('aaf','agm','lrc', 'pab'), each = 670))
-model_GrupoControl_bin <- glm(correctas ~ Separacion * Condicion * Subjects , 
+colnames(df_GrupoControl_bin) <- c('Direction', 'Distance', 'Response', 'Condition', 'Subjects')
+model_GrupoControl_bin <- glm(Response ~ Distance * Condition * Subjects , 
                               family = binomial, 
                               data = df_GrupoControl_bin)
-ggPredict(model_GrupoControl_bin, se = TRUE, jitter = TRUE) + 
-  scale_x_continuous("Distance", labels = as.character(sort(unique(df_GrupoCarga_bin$Separacion))), breaks = sort(unique(df_GrupoCarga_bin$Separacion))) +
+ggPredict(model_GrupoControl_bin, show.summary = TRUE, se = TRUE, jitter = TRUE) + 
+  scale_x_continuous("Distance", labels = as.character(sort(unique(df_GrupoControl_bin$Distance))), breaks = sort(unique(df_GrupoControl_bin$Distance))) +
   scale_y_continuous("Response", labels = c("0.0", "1.0"), breaks = c(0.0,1.0))
 
 #TODO EL GRUPO
-model_GrupoControl_bin_all <- glm(correctas ~ Separacion * Condicion, 
+model_GrupoControl_bin_all <- glm(Proportion ~ Distance * Condition, 
                               family = binomial, 
                               data = df_GrupoControl_bin[,-5])
 
 ggPredict(model_GrupoControl_bin_all, se = TRUE, jitter = TRUE) + 
-  scale_x_continuous("Distance", labels = as.character(sort(unique(df_GrupoCarga_bin$Separacion))), 
-                     breaks = sort(unique(df_GrupoCarga_bin$Separacion))) +
+  scale_x_continuous("Distance", labels = as.character(sort(unique(df_GrupoControl_bin$Distance))), 
+                     breaks = sort(unique(df_GrupoControl_bin$Distance))) +
   scale_y_continuous("Response", labels = c("0.0", "1.0"), breaks = c(0.0,1.0))
 
 
@@ -1933,18 +1933,20 @@ summary(model_mdn)
 #GRUPO CARGA
 df_GrupoCarga_bin <- rbind(df_jjr,df_mab,df_mdn)
 df_GrupoCarga_bin$Subjects <- as.factor(rep(c('jjr','mab','mdn'), each = 670))
-model_GrupoCarga_bin <- glm(correctas ~ Separacion * Condicion * Subjects , 
+colnames(df_GrupoCarga_bin) <- c('Direction', 'Distance', 'Response', 'Condition', 'Subjects')
+
+model_GrupoCarga_bin <- glm(Response ~ Distance * Condition * Subjects , 
                               family = binomial, 
                               data = df_GrupoCarga_bin)
-ggPredict(model_GrupoCarga_bin, se = TRUE) + theme_classic()
+ggPredict(model_GrupoCarga_bin, se = TRUE)
 #TODO EL GRUPO
-model_GrupoCarga_bin_all <- glm(correctas ~ Separacion * Condicion, 
+model_GrupoCarga_bin_all <- glm(Response ~ Distance * Condition, 
                                   family = binomial, 
                                   data = df_GrupoCarga_bin[,-5])
 
 ggPredict(model_GrupoCarga_bin_all, se = TRUE, jitter = TRUE) + 
-  scale_x_continuous("Distance", labels = as.character(sort(unique(df_GrupoCarga_bin$Separacion))), 
-                     breaks = sort(unique(df_GrupoCarga_bin$Separacion))) +
+  scale_x_continuous("Distance", labels = as.character(sort(unique(df_GrupoCarga_bin$Distance))), 
+                     breaks = sort(unique(df_GrupoCarga_bin$Distance))) +
   scale_y_continuous("Response", labels = c("0.0", "1.0"), breaks = c(0.0,1.0))
 
 
@@ -1956,18 +1958,19 @@ summary(model_nga)
 #GRUPO REACCION
 df_GrupoReaccion_bin <- rbind(df_afb,df_cic,df_msz, df_nga)
 df_GrupoReaccion_bin$Subjects <- as.factor(rep(c('afb','cic','msz','nga'), each = 670))
-model_GrupoReaccion_bin <- glm(correctas ~ Separacion * Condicion * Subjects , 
+colnames(df_GrupoReaccion_bin) <- c('Direction', 'Distance', 'Response', 'Condition', 'Subjects')
+model_GrupoReaccion_bin <- glm(Response ~ Distance * Condition * Subjects , 
                             family = binomial, 
                             data = df_GrupoReaccion_bin)
 ggPredict(model_GrupoReaccion_bin, se = TRUE)
 #TODO EL GRUPO
-model_GrupoReaccion_bin_all <- glm(correctas ~ Separacion * Condicion, 
+model_GrupoReaccion_bin_all <- glm(Proportion ~ Distance * Condition, 
                                 family = binomial, 
                                 data = df_GrupoReaccion_bin[,-5])
 
 ggPredict(model_GrupoReaccion_bin_all, se = TRUE, jitter = TRUE) + 
-  scale_x_continuous("Distance", labels = as.character(sort(unique(df_GrupoReaccion_bin$Separacion))), 
-                     breaks = sort(unique(df_GrupoReaccion_bin$Separacion))) +
+  scale_x_continuous("Distance", labels = as.character(sort(unique(df_GrupoReaccion_bin$Distance))), 
+                     breaks = sort(unique(df_GrupoReaccion_bin$Distance))) +
   scale_y_continuous("Response", labels = c("0.0", "1.0"), breaks = c(0.0,1.0))
 
 #COMBINADO POR OBERVADOR
@@ -1978,18 +1981,19 @@ summary(model_mcm)
 #GRUPO COMBINADO
 df_GrupoCombinado_bin <- rbind(df_at,df_lfa,df_lms, df_mcm)
 df_GrupoCombinado_bin$Subjects <- as.factor(rep(c('at','lfa','lms','mcm'), each = 670))
-model_GrupoCombinado_bin <- glm(correctas ~ Separacion * Condicion * Subjects , 
+colnames(df_GrupoCombinado_bin) <- c('Direction', 'Distance', 'Response', 'Condition', 'Subjects')
+model_GrupoCombinado_bin <- glm(Response ~ Distance * Condition * Subjects , 
                                family = binomial, 
                                data = df_GrupoCombinado_bin)
 ggPredict(model_GrupoCombinado_bin, se = TRUE) + scale_y_continuous(labels = c("0.0", "0.5", "1.0"), breaks = c(0.0,0.5,1.0))
 #TODO EL GRUPO
-model_GrupoCombinado_bin_all <- glm(correctas ~ Separacion * Condicion, 
+model_GrupoCombinado_bin_all <- glm(Response ~ Distance * Condition, 
                                 family = binomial, 
                                 data = df_GrupoCombinado_bin[,-5])
 
 ggPredict(model_GrupoCombinado_bin_all, se = TRUE, jitter = TRUE) + 
-  scale_x_continuous("Distance", labels = as.character(sort(unique(df_GrupoCarga_bin$Separacion))), 
-                     breaks = sort(unique(df_GrupoCombinado_bin$Separacion))) +
+  scale_x_continuous("Distance", labels = as.character(sort(unique(df_GrupoCarga_bin$Distance))), 
+                     breaks = sort(unique(df_GrupoCombinado_bin$Distance))) +
   scale_y_continuous("Response", labels = c("0.0", "1.0"), breaks = c(0.0,1.0))
 
 
