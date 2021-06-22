@@ -1996,6 +1996,24 @@ ggPredict(model_GrupoCombinado_bin_all, se = TRUE, jitter = TRUE) +
                      breaks = sort(unique(df_GrupoCombinado_bin$Distance))) +
   scale_y_continuous("Response", labels = c("0.0", "1.0"), breaks = c(0.0,1.0))
 
+#GLMM CON DISTRIBUCION BINOMIAL-------------------------------------------------
+library(lme4)
+
+#GRUPO CONTROL
+gmmGrupoControl_model <- lmer(Response ~ Distance * Condition + (1 | Subjects),
+                               family = binomial, data = df_GrupoControl_bin)
+ggPredict(gmmGrupoControl_model, show.summary = TRUE, se = TRUE, jitter = TRUE) + 
+  scale_x_continuous("Distance", labels = as.character(sort(unique(df_GrupoControl_bin$Distance))), breaks = sort(unique(df_GrupoControl_bin$Distance))) +
+  scale_y_continuous("Response", labels = c("0.0", "1.0"), breaks = c(0.0,1.0))
+
+#GRUPO CARGA
+gmmGrupoCarga_model <- lmer(Response ~ Distance + Condition + (1 | Subjects),
+                               family = binomial, data = df_GrupoCarga_bin)
+ggPredict(gmmGrupoCarga_model, show.summary = TRUE, se = TRUE, jitter = TRUE) + 
+  scale_x_continuous("Distance", labels = as.character(sort(unique(df_GrupoCarga_bin$Distance))), breaks = sort(unique(df_GrupoCarga_bin$Distance))) +
+  scale_y_continuous("Response", labels = c("0.0", "1.0"), breaks = c(0.0,1.0))
+
+#GRUPO TIEMPO DE REACCION
 
 
 
