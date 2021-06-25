@@ -2004,15 +2004,15 @@ gmmGrupoControl_model <- glmer(Response ~ Distance * Condition + (1 | Subjects),
                                family = binomial, data = df_GrupoControl_bin)
 
 #GRUPO CARGA
-gmmGrupoCarga_model <- glmer(Response ~ Distance + Condition + (1 | Subjects),
+gmmGrupoCarga_model <- glmer(Response ~ Distance * Condition + (1 | Subjects),
                                family = binomial, data = df_GrupoCarga_bin)
 
 #GRUPO TIEMPO DE REACCION
-gmmGrupoReacccion_model <- glmer(Response ~ Distance + Condition + (1 | Subjects),
+gmmGrupoReacccion_model <- glmer(Response ~ Distance * Condition + (1 | Subjects),
                              family = binomial, data = df_GrupoReaccion_bin)
 
 #GRUPO COMBINADO
-gmmGrupoCombinado_model <- glmer(Response ~ Distance + Condition + (1 | Subjects),
+gmmGrupoCombinado_model <- glmer(Response ~ Distance * Condition + (1 | Subjects),
                                  family = binomial, data = df_GrupoCombinado_bin)
 
 
