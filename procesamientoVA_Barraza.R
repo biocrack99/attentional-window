@@ -15,6 +15,7 @@ library(saccades)
 library(fmsb)
 require(ggiraph)
 require(ggiraphExtra)
+library(lme4)
 
 
 #Listas para guardar los datos segun la cantidad de obsevadores
@@ -1997,8 +1998,6 @@ ggPredict(model_GrupoCombinado_bin_all, se = TRUE, jitter = TRUE) +
   scale_y_continuous("Response", labels = c("0.0", "1.0"), breaks = c(0.0,1.0))
 
 #GLMM CON DISTRIBUCION BINOMIAL-------------------------------------------------
-library(lme4)
-
 #GRUPO CONTROL
 gmmGrupoControl_model <- glmer(Response ~ Distance * Condition + (1 | Subjects),
                                family = binomial, data = df_GrupoControl_bin)
@@ -2015,6 +2014,7 @@ gmmGrupoReacccion_model <- glmer(Response ~ Distance * Condition + (1 | Subjects
 gmmGrupoCombinado_model <- glmer(Response ~ Distance * Condition + (1 | Subjects),
                                  family = binomial, data = df_GrupoCombinado_bin)
 
+plot_model(gmmGrupoCombinado_model, type = "int", show.data = T)
 
 # Seccion pruebas --------------------------------------------------------------
 #Comparo los datos sin eliminar los trials debido a la falta
