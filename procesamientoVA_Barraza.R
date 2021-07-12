@@ -16,6 +16,8 @@ library(fmsb)
 require(ggiraph)
 require(ggiraphExtra)
 library(lme4)
+library(sjPlot)
+library(ggeffects)
 
 
 #Listas para guardar los datos segun la cantidad de obsevadores
@@ -2000,21 +2002,171 @@ ggPredict(model_GrupoCombinado_bin_all, se = TRUE, jitter = TRUE) +
 #GLMM CON DISTRIBUCION BINOMIAL-------------------------------------------------
 #GRUPO CONTROL
 gmmGrupoControl_model <- glmer(Response ~ Distance * Condition + (1 | Subjects),
-                               family = binomial, data = df_GrupoControl_bin)
+                               family = binomial(), data = df_GrupoControl_bin)
+
+gmmGrupoControl_model_Dir <- glmer(Response ~ Distance * Direction * Condition + (1 | Subjects),
+                                    family = binomial, data = df_GrupoControl_bin)
+
+df_GrupoControl_plot <- df_GrupoControl_bin %>%
+  group_by(Subjects,Distance, Condition) %>% 
+  summarise(n = n(), p = sum(Response)/n)
+
+df_GrupoControl_predict <- ggpredict(gmmGrupoControl_model, terms = c("Distance", "Condition"))
+
+
+##GRAFICOS
+ggplot(data = df_GrupoControl_plot) + 
+  geom_point(aes(Distance,p*100, 
+                 colour = Condition, 
+                 shape = Subjects),
+             size = 3) +
+  geom_line(data=df_GrupoControl_predict, 
+            aes(df_GrupoControl_predict$x, 
+                df_GrupoControl_predict$predicted*100, 
+                colour = df_GrupoControl_predict$group))+
+  geom_ribbon(data=df_GrupoControl_predict, 
+              aes(df_GrupoControl_predict$x, 
+                  df_GrupoControl_predict$predicted*100, 
+                  colour = df_GrupoControl_predict$group,
+                  ymin = df_GrupoControl_predict$conf.low*100, 
+                  ymax = df_GrupoControl_predict$conf.high*100), 
+              alpha = 0.1,
+              linetype=0) +
+  scale_x_continuous("Distance [°]", 
+                     labels = as.character(c(3,5,8,11,14,17,20)), 
+                     breaks = c(3,5,8,11,14,17,20)) +
+  scale_y_continuous("Percentage correct [-]", 
+                     labels = as.character(c(0,25,50,75,100)), 
+                     breaks = c(0,25,50,75,100)) 
+##TABLA
+tab_model(gmmGrupoControl_model, show.est = T, file = "D:/Dropbox/Posdoc/Percepcion Deporte/Experimento MOT VA/Graficos/Ajuste GLMM/tabla.pdf")
+
+
+
 
 #GRUPO CARGA
 gmmGrupoCarga_model <- glmer(Response ~ Distance * Condition + (1 | Subjects),
                                family = binomial, data = df_GrupoCarga_bin)
 
+gmmGrupoCarga_model_Dir <- glmer(Response ~ Distance*Direction * Condition + (1 | Subjects),
+                                   family = binomial, data = df_GrupoCarga_bin)
+
+df_GrupoCarga_plot <- df_GrupoCarga_bin %>%
+  group_by(Subjects,Distance, Condition) %>% 
+  summarise(n = n(), p = sum(Response)/n)
+
+df_GrupoCarga_predict <- ggpredict(gmmGrupoCarga_model, terms = c("Distance", "Condition"))
+
+##GRAFICOS
+ggplot(data = df_GrupoCarga_plot) + 
+  geom_point(aes(Distance,p*100, 
+                 colour = Condition, 
+                 shape = Subjects),
+             size = 3) +
+  geom_line(data=df_GrupoCarga_predict, 
+            aes(df_GrupoCarga_predict$x, 
+                df_GrupoCarga_predict$predicted*100, 
+                colour = df_GrupoCarga_predict$group))+
+  geom_ribbon(data=df_GrupoCarga_predict, 
+              aes(df_GrupoCarga_predict$x, 
+                  df_GrupoCarga_predict$predicted*100, 
+                  colour = df_GrupoCarga_predict$group,
+                  ymin = df_GrupoCarga_predict$conf.low*100, 
+                  ymax = df_GrupoCarga_predict$conf.high*100), 
+              alpha = 0.1,
+              linetype=0) +
+  scale_x_continuous("Distance [°]", 
+                     labels = as.character(c(3,5,8,11,14,17,20)), 
+                     breaks = c(3,5,8,11,14,17,20)) +
+  scale_y_continuous("Percentage correct [-]", 
+                     labels = as.character(c(0,25,50,75,100)), 
+                     breaks = c(0,25,50,75,100)) 
+##TABLA
+tab_model(gmmGrupoCarga_model, show.est = T)
+
+
+
 #GRUPO TIEMPO DE REACCION
-gmmGrupoReacccion_model <- glmer(Response ~ Distance * Condition + (1 | Subjects),
+gmmGrupoReaccion_model <- glmer(Response ~ Distance * Condition + (1 | Subjects),
                              family = binomial, data = df_GrupoReaccion_bin)
+
+gmmGrupoReaccion_model_Dir <- glmer(Response ~ Distance*Direction * Condition + (1 | Subjects),
+                                 family = binomial, data = df_GrupoReaccion_bin)
+
+df_GrupoReaccion_plot <- df_GrupoReaccion_bin %>%
+  group_by(Subjects,Distance, Condition) %>% 
+  summarise(n = n(), p = sum(Response)/n)
+
+df_GrupoReaccion_predict <- ggpredict(gmmGrupoReaccion_model, terms = c("Distance", "Condition"))
+
+##GRAFICOS
+ggplot(data = df_GrupoReaccion_plot) + 
+  geom_point(aes(Distance,p*100, 
+                 colour = Condition, 
+                 shape = Subjects),
+             size = 3) +
+  geom_line(data=df_GrupoReaccion_predict, 
+            aes(df_GrupoReaccion_predict$x, 
+                df_GrupoReaccion_predict$predicted*100, 
+                colour = df_GrupoReaccion_predict$group))+
+  geom_ribbon(data=df_GrupoReaccion_predict, 
+              aes(df_GrupoReaccion_predict$x, 
+                  df_GrupoReaccion_predict$predicted*100, 
+                  colour = df_GrupoReaccion_predict$group,
+                  ymin = df_GrupoReaccion_predict$conf.low*100, 
+                  ymax = df_GrupoReaccion_predict$conf.high*100), 
+              alpha = 0.1,
+              linetype=0) +
+  scale_x_continuous("Distance [°]", 
+                     labels = as.character(c(3,5,8,11,14,17,20)), 
+                     breaks = c(3,5,8,11,14,17,20)) +
+  scale_y_continuous("Percentage correct [-]", 
+                     labels = as.character(c(0,25,50,75,100)), 
+                     breaks = c(0,25,50,75,100)) 
+##TABLA
+tab_model(gmmGrupoReaccion_model, show.est = T)
+
 
 #GRUPO COMBINADO
 gmmGrupoCombinado_model <- glmer(Response ~ Distance * Condition + (1 | Subjects),
                                  family = binomial, data = df_GrupoCombinado_bin)
 
-plot_model(gmmGrupoCombinado_model, type = "int", show.data = T)
+gmmGrupoCombinado_model_Dir <- glmer(Response ~ Distance*Direction * Condition + (1 | Subjects),
+                                 family = binomial, data = df_GrupoCombinado_bin)
+
+df_GrupoCombinado_plot <- df_GrupoCombinado_bin %>%
+  group_by(Subjects,Distance, Condition) %>% 
+  summarise(n = n(), p = sum(Response)/n)
+
+df_GrupoCombinado_predict <- ggpredict(gmmGrupoCombinado_model, terms = c("Distance", "Condition"))
+
+##GRAFICOS
+ggplot(data = df_GrupoCombinado_plot) + 
+  geom_point(aes(Distance,p*100, 
+                 colour = Condition, 
+                 shape = Subjects),
+             size = 3) +
+  geom_line(data=df_GrupoCombinado_predict, 
+            aes(df_GrupoCombinado_predict$x, 
+                df_GrupoCombinado_predict$predicted*100, 
+                colour = df_GrupoCombinado_predict$group))+
+  geom_ribbon(data=df_GrupoCombinado_predict, 
+              aes(df_GrupoCombinado_predict$x, 
+                  df_GrupoCombinado_predict$predicted*100, 
+                  colour = df_GrupoCombinado_predict$group,
+                  ymin = df_GrupoCombinado_predict$conf.low*100, 
+                  ymax = df_GrupoCombinado_predict$conf.high*100), 
+              alpha = 0.1,
+              linetype=0) +
+  scale_x_continuous("Distance [°]", 
+                     labels = as.character(c(3,5,8,11,14,17,20)), 
+                     breaks = c(3,5,8,11,14,17,20)) +
+  scale_y_continuous("Percentage correct [-]", 
+                     labels = as.character(c(0,25,50,75,100)), 
+                     breaks = c(0,25,50,75,100)) 
+##TABLA
+tab_model(gmmGrupoCombinado_model, show.est = T)
+
 
 # Seccion pruebas --------------------------------------------------------------
 #Comparo los datos sin eliminar los trials debido a la falta
