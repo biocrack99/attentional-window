@@ -2035,11 +2035,10 @@ ggplot(data = df_GrupoControl_plot) +
   scale_x_continuous("Distance [°]", 
                      labels = as.character(c(3,5,8,11,14,17,20)), 
                      breaks = c(3,5,8,11,14,17,20)) +
-  scale_y_continuous("Percentage correct [-]", 
-                     labels = as.character(c(0,25,50,75,100)), 
-                     breaks = c(0,25,50,75,100)) 
+  ylim(0, 100) + ylab("Correct answers [%]")
+
 ##TABLA
-tab_model(gmmGrupoControl_model, show.est = T, file = "D:/Dropbox/Posdoc/Percepcion Deporte/Experimento MOT VA/Graficos/Ajuste GLMM/tabla.pdf")
+tab_model(gmmGrupoControl_model, show.est = T,  p.threshold = c(0.1, 0.05, 0.01, 0.001))
 
 
 
@@ -2080,9 +2079,11 @@ ggplot(data = df_GrupoCarga_plot) +
                      breaks = c(3,5,8,11,14,17,20)) +
   scale_y_continuous("Percentage correct [-]", 
                      labels = as.character(c(0,25,50,75,100)), 
-                     breaks = c(0,25,50,75,100)) 
+                     breaks = c(0,25,50,75,100)) +
+  ylim(0, 100) + ylab("Correct answers [%]")
+
 ##TABLA
-tab_model(gmmGrupoCarga_model, show.est = T)
+tab_model(gmmGrupoCarga_model, transform = NULL, show.est = T,  p.threshold = c(0.1, 0.05, 0.01, 0.001))
 
 
 
@@ -2120,9 +2121,8 @@ ggplot(data = df_GrupoReaccion_plot) +
   scale_x_continuous("Distance [°]", 
                      labels = as.character(c(3,5,8,11,14,17,20)), 
                      breaks = c(3,5,8,11,14,17,20)) +
-  scale_y_continuous("Percentage correct [-]", 
-                     labels = as.character(c(0,25,50,75,100)), 
-                     breaks = c(0,25,50,75,100)) 
+  ylim(0, 100) + ylab("Correct answers [%]") 
+
 ##TABLA
 tab_model(gmmGrupoReaccion_model, show.est = T)
 
@@ -2161,9 +2161,7 @@ ggplot(data = df_GrupoCombinado_plot) +
   scale_x_continuous("Distance [°]", 
                      labels = as.character(c(3,5,8,11,14,17,20)), 
                      breaks = c(3,5,8,11,14,17,20)) +
-  scale_y_continuous("Percentage correct [-]", 
-                     labels = as.character(c(0,25,50,75,100)), 
-                     breaks = c(0,25,50,75,100)) 
+  ylim(0, 100) + ylab("Correct answers [%]")
 ##TABLA
 tab_model(gmmGrupoCombinado_model, show.est = T)
 
