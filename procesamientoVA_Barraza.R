@@ -26,6 +26,7 @@ list_datosRaw <- vector("list", N)
 list_datos <- vector("list", N)
 list_gaze <- vector ("list", N)
 list_fixations <- vector("list", N)
+list_fixations_raw <- list()
 Ntrials <- 336
 
 # CARGO DATOS ILAV PRE ENTRENAMIENTO --------------------------------------
@@ -106,15 +107,15 @@ for (i in seq_along(files))  {
     
     if (k == 1) {
       
-      df_gaze$XGaze.mm[[k]] <-  ls_gaze_x[[k]][101:184]
-      df_gaze$YGaze.mm[[k]] <-  ls_gaze_y[[k]][101:184]
+      df_gaze$XGaze.mm[[k]] <-  ls_gaze_x[[k]][169:184]#101
+      df_gaze$YGaze.mm[[k]] <-  ls_gaze_y[[k]][169:184]
       
     }
     
     else{
       
-      df_gaze$XGaze.mm[[k]] <-  ls_gaze_x[[k]][1:84]
-      df_gaze$YGaze.mm[[k]] <-  ls_gaze_y[[k]][1:84]
+      df_gaze$XGaze.mm[[k]] <-  ls_gaze_x[[k]][69:84]
+      df_gaze$YGaze.mm[[k]] <-  ls_gaze_y[[k]][69:84]
       
     }
     
@@ -199,15 +200,15 @@ for (i in seq_along(files))  {
     
     if (k == 1) {
       
-      datos$XGaze.mm[[k]] <-  datos$XGaze.mm[[k]][101:184]
-      datos$YGaze.mm[[k]] <-  datos$YGaze.mm[[k]][101:184]
+      datos$XGaze.mm[[k]] <-  datos$XGaze.mm[[k]][169:184]
+      datos$YGaze.mm[[k]] <-  datos$YGaze.mm[[k]][169:184]
       
     }
     
     else{
       
-      datos$XGaze.mm[[k]] <-  datos$XGaze.mm[[k]][1:84]
-      datos$YGaze.mm[[k]] <-  datos$YGaze.mm[[k]][1:84]
+      datos$XGaze.mm[[k]] <-  datos$XGaze.mm[[k]][69:84]
+      datos$YGaze.mm[[k]] <-  datos$YGaze.mm[[k]][69:84]
       
     }
   }
@@ -339,15 +340,15 @@ for (i in seq_along(files))  {
     
     if (k == 1) {
       
-      df_gaze$XGaze.mm[[k]] <-  ls_gaze_x[[k]][101:184]
-      df_gaze$YGaze.mm[[k]] <-  ls_gaze_y[[k]][101:184]
+      df_gaze$XGaze.mm[[k]] <-  ls_gaze_x[[k]][169:184]
+      df_gaze$YGaze.mm[[k]] <-  ls_gaze_y[[k]][169:184]
       
     }
     
     else{
       
-      df_gaze$XGaze.mm[[k]] <-  ls_gaze_x[[k]][1:84]
-      df_gaze$YGaze.mm[[k]] <-  ls_gaze_y[[k]][1:84]
+      df_gaze$XGaze.mm[[k]] <-  ls_gaze_x[[k]][69:84]
+      df_gaze$YGaze.mm[[k]] <-  ls_gaze_y[[k]][69:84]
       
     }
     
@@ -429,15 +430,15 @@ for (i in seq_along(files))  {
     
     if (k == 1) {
       
-      datos$XGaze.mm[[k]] <-  datos$XGaze.mm[[k]][101:184]
-      datos$YGaze.mm[[k]] <-  datos$YGaze.mm[[k]][101:184]
+      datos$XGaze.mm[[k]] <-  datos$XGaze.mm[[k]][169:184]
+      datos$YGaze.mm[[k]] <-  datos$YGaze.mm[[k]][169:184]
       
     }
     
     else{
       
-      datos$XGaze.mm[[k]] <-  datos$XGaze.mm[[k]][1:84]
-      datos$YGaze.mm[[k]] <-  datos$YGaze.mm[[k]][1:84]
+      datos$XGaze.mm[[k]] <-  datos$XGaze.mm[[k]][69:84]
+      datos$YGaze.mm[[k]] <-  datos$YGaze.mm[[k]][69:84]
       
     }
   }
@@ -489,7 +490,7 @@ for (i in seq_along(files))  {
 }
 
 #Elimino las variables
-rm(list=setdiff(ls(), c("list_datos", "list_gaze", "Ntrials", "list_datosRaw", "list_fixations"))) 
+rm(list=setdiff(ls(), c("list_datos", "list_gaze", "Ntrials", "list_datosRaw", "list_fixations", "list_fixations_raw"))) 
 
 
 
@@ -562,23 +563,30 @@ obs <- c("pre_aaf", "pre_afb", "pre_agm", "pre_cic",
 names(list_gaze) <- obs 
 
 
+
 # GAZE LIBRERIA saccades ------------------------------------------
 #6- Libreria saccades
 #Creo una lista para preparar los datos según la libreria saccades
 #usando a los datos de todos los observadores 
 for (i in seq_along(list_gaze)){
   
-  gaze <- data.frame(time = rep(c(0:0.02:83*0.02), 336), 
+
+  gaze <- data.frame(#time = rep(c(0:0.02:83*0.02), 336), 
+                     time = rep(seq(1.38,1.68, by = 0.02),336),
                      x = unlist(list_gaze[[i]]$XGaze.mm), 
                      y = unlist(list_gaze[[i]]$YGaze.mm), 
-                     trial = rep(c(1:336), each = 84)
+                     trial = rep(c(1:336), each = 16)#84
                      )
+  
+  
   
   fixationsraw <- detect.fixations(gaze, 
                                 lambda = 10, 
                                 smooth.coordinates = TRUE, 
                                 smooth.saccades = FALSE
                                 )
+  #sin filtrar
+  list_fixations_raw[i] <- list(fixationsraw)
   #Elimino las fijaciones que detecta el algoritmo con 
   #duracion menor a 0.28
   
@@ -624,7 +632,10 @@ for (i in seq_along(list_gaze)){
   #ordeno las fijaciones por trial
   fixationsraw <- fixationsraw[order(fixationsraw$trial),]
   
+  #filtradas
   list_fixations[i] <- list(fixationsraw)
+  
+  
 
   }
 
@@ -750,8 +761,8 @@ for (i in seq_along(list_datos_filtrados)){
     
   }
   
-  list_datos_filtrados[[i]]$observadores <- list_datos[[i]]$observadores 
-  
+  #list_datos_filtrados[[i]]$observadores <- list_datos[[i]]$observadores 
+  list_datos_filtrados[[i]]$observadores <- list_datos[[i]]$observadores[1]
 }
 
 #6.6 Agrego columna con los grupos en la lista donde se encuentras los datos
@@ -789,6 +800,67 @@ df_media_porcentaje <- df_porcetaje_trials %>%
   group_by(condicion) %>% summarise(media = median(porcentaje),
                                     desviacion = sd(porcentaje),
                                     mediana = median(porcentaje))
+
+#6.8 Gráfico gaze y fijaciones
+
+#Creo data.frame con los datos de fijaciones crudas y las fijaciones filtradas
+df_fixation_raw <- as.data.frame(do.call(rbind, list_fixations_raw))
+nfixationsraw <- unlist(lapply(list_fixations_raw,nrow))
+df_fixation_raw$observadores <- rep(c('aaf', 'afb', 'agm',
+                                      'cic', 'jjr', 'lrc',
+                                      'mab', 'mdn', 'msz',
+                                      'nga', 'pab', 'at',
+                                      'lfa','lms', 'mcm',
+                                      'aaf', 'afb', 'agm',
+                                      'cic', 'jjr', 'lrc',
+                                      'mab', 'mdn', 'msz',
+                                      'nga', 'pab', 'at',
+                                      'lfa','lms', 'mcm'), nfixationsraw)
+
+df_fixation_raw <- df_fixation_raw[,c(1,4,5,11)]
+
+#Agrego condicion
+df_fixation_raw$condicion <- rep(c('pre', 'pos'), 
+                                 c(sum(nfixationsraw[1:15]),
+                                  sum(nfixationsraw[16:30])))
+#Agrego tipo
+df_fixation_raw$tipo <- 'raw'
+    
+  
+
+
+#Data frame fijaciones filtradas
+df_fixation <- data.frame()
+nfixations <- c()
+for (i in seq_along(list_fixations)){
+  
+  #df_temp <- data.frame()
+  df_temp <- list_fixations[[i]][[1]]
+  nfixations <- append(nfixations, length(list_fixations[[i]][[1]]$trial))
+  df_fixation <- rbind(df_fixation, df_temp)
+}
+df_fixation <- df_fixation[,c(1,4,5,12)]
+df_fixation$observadores <- rep(c('aaf', 'afb', 'agm',
+                                      'cic', 'jjr', 'lrc',
+                                      'mab', 'mdn', 'msz',
+                                      'nga', 'pab', 'at',
+                                      'lfa','lms', 'mcm',
+                                      'aaf', 'afb', 'agm',
+                                      'cic', 'jjr', 'lrc',
+                                      'mab', 'mdn', 'msz',
+                                      'nga', 'pab', 'at',
+                                      'lfa','lms', 'mcm'), nfixations)
+
+df_fixation$tipo <- 'filter'
+
+#Dataframe final
+df_fixations_total <- rbind(df_fixation_raw,df_fixation)
+
+
+#Graficos
+
+ggplot(df_fixations_total) + geom_point(aes(x,y, color= tipo)) +
+  facet_wrap(~observadores + condicion)
 
 
 # #PROCESAMIENTO GRUPO CONTROL ----------------------------------------------------
@@ -2054,8 +2126,15 @@ ggPredict(model_GrupoCombinado_bin_all, se = TRUE, jitter = TRUE) +
 df_GrupoControl_bin <- df_GrupoControl_bin %>%
   mutate(Condition = if_else(Condition == "pre","pretest", "posttest"))
 
+df_GrupoControl_bin$Direction <- as.numeric(df_GrupoControl_bin$Direction)
+
+
 gmmGrupoControl_model <- glmer(Response ~ Distance * Condition + (1 | Subjects),
                                family = binomial, data = df_GrupoControl_bin)
+
+gmmGrupoControl_model_Dir <- glmer(Response ~ Direction + (Distance * Condition) + (1 | Subjects),
+                                 family = binomial, data = df_GrupoControl_bin)
+
 
 df_GrupoControl_plot <- df_GrupoControl_bin %>%
   group_by(Subjects,Distance, Condition) %>% 
@@ -2089,6 +2168,7 @@ ggplot(data = df_GrupoControl_plot) +
 
 ##TABLA
 tab_model(gmmGrupoControl_model, show.est = T,  p.threshold = c(0.1, 0.05, 0.01, 0.001))
+tab_model(gmmGrupoControl_model_Dir, show.est = T,  p.threshold = c(0.1, 0.05, 0.01, 0.001))
 
 
 
@@ -2097,12 +2177,14 @@ tab_model(gmmGrupoControl_model, show.est = T,  p.threshold = c(0.1, 0.05, 0.01,
 df_GrupoCarga_bin <- df_GrupoCarga_bin %>%
   mutate(Condition = if_else(Condition == "pre","pretest", "posttest"))
 
+df_GrupoCarga_bin$Direction <- as.numeric(df_GrupoCarga_bin$Direction)
+ 
 gmmGrupoCarga_model <- glmer(Response ~ Distance * Condition + (1 | Subjects),
                                family = binomial, data = df_GrupoCarga_bin)
 
 
 
-gmmGrupoCarga_model_Dir <- glmer(Response ~ Distance*Direction * Condition + (1 | Subjects),
+gmmGrupoCarga_model_Dir <- glmer(Response ~ Direction + (Distance * Condition) + (1 | Subjects),
                                    family = binomial, data = df_GrupoCarga_bin)
 
 df_GrupoCarga_plot <- df_GrupoCarga_bin %>%
@@ -2139,6 +2221,7 @@ ggplot(data = df_GrupoCarga_plot) +
 
 ##TABLA
 tab_model(gmmGrupoCarga_model, transform = NULL, show.est = T,  p.threshold = c(0.1, 0.05, 0.01, 0.001))
+tab_model(gmmGrupoCarga_model_Dir, transform = NULL, show.est = T,  p.threshold = c(0.1, 0.05, 0.01, 0.001))
 
 
 
@@ -2146,10 +2229,12 @@ tab_model(gmmGrupoCarga_model, transform = NULL, show.est = T,  p.threshold = c(
 df_GrupoReaccion_bin <- df_GrupoReaccion_bin %>%
   mutate(Condition = if_else(Condition == "pre","pretest", "posttest"))
 
+df_GrupoReaccion_bin$Direction <- as.numeric(df_GrupoReaccion_bin$Direction)
+
 gmmGrupoReaccion_model <- glmer(Response ~ Distance * Condition + (1 | Subjects),
                              family = binomial, data = df_GrupoReaccion_bin)
 
-gmmGrupoReaccion_model_Dir <- glmer(Response ~ Distance*Direction * Condition + (1 | Subjects),
+gmmGrupoReaccion_model_Dir <- glmer(Response ~ Direction + (Distance * Condition) + (1 | Subjects),
                                  family = binomial, data = df_GrupoReaccion_bin)
 
 df_GrupoReaccion_plot <- df_GrupoReaccion_bin %>%
@@ -2183,16 +2268,19 @@ ggplot(data = df_GrupoReaccion_plot) +
 
 ##TABLA
 tab_model(gmmGrupoReaccion_model, show.est = T)
+tab_model(gmmGrupoReaccion_model_Dir, transform = NULL, show.est = T,  p.threshold = c(0.1, 0.05, 0.01, 0.001))
 
 
 #GRUPO COMBINADO
 df_GrupoCombinado_bin <- df_GrupoCombinado_bin %>%
   mutate(Condition = if_else(Condition == "pre","pretest", "posttest"))
 
+df_GrupoCombinado_bin$Direction <- as.numeric(df_GrupoCombinado_bin$Direction)
+
 gmmGrupoCombinado_model <- glmer(Response ~ Distance * Condition + (1 | Subjects),
                                  family = binomial, data = df_GrupoCombinado_bin)
 
-gmmGrupoCombinado_model_Dir <- glmer(Response ~ Distance*Direction * Condition + (1 | Subjects),
+gmmGrupoCombinado_model_Dir <- glmer(Response ~ Direction + (Distance * Condition) + (1 | Subjects),
                                  family = binomial, data = df_GrupoCombinado_bin)
 
 df_GrupoCombinado_plot <- df_GrupoCombinado_bin %>%
@@ -2225,6 +2313,7 @@ ggplot(data = df_GrupoCombinado_plot) +
   ylim(0, 100) + ylab("Correct answers [%]")
 ##TABLA
 tab_model(gmmGrupoCombinado_model, show.est = T)
+tab_model(gmmGrupoCombinado_model_Dir, transform = NULL, show.est = T,  p.threshold = c(0.1, 0.05, 0.01, 0.001))
 
 ##TABLA TOTAL
 tab_model(
@@ -2244,6 +2333,22 @@ tab_model(
   #file = "D:/Dropbox/Posdoc/Percepcion Deporte/Experimento MOT VA/Graficos/Ajuste GLMM/Tabla.html"
 )
 
+tab_model(
+  gmmGrupoControl_model_Dir, gmmGrupoCarga_model_Dir, gmmGrupoReaccion_model_Dir, gmmGrupoCombinado_model_Dir,
+  show.intercept = F,
+  show.est = T,
+  show.se = F,
+  show.re.var = T,
+  show.aic = F,
+  show.icc = F,
+  #pred.labels = c("Distance", "Condition[Posttest]", "Distance*Condition"),
+  dv.labels = c("Control", "Attentional load", "Reaction time", "Combined task"),
+  string.pred = "Coefficient",
+  string.ci = "CI(95%)",
+  string.p = "P-Value",
+  p.style = "numeric"
+  #file = "D:/Dropbox/Posdoc/Percepcion Deporte/Experimento MOT VA/Graficos/Ajuste GLMM/Tabla.html"
+)
 
 
 
