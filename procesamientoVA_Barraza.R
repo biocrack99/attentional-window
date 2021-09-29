@@ -616,13 +616,27 @@ for (i in seq_along(list_gaze)){
                         (fixationsraw$y-fixationsraw$y[1])^2
                         ) 
   
+  #fixationsraw$distrela <- sqrt((fixationsraw$x - lag(fixationsraw$x, default = NA))^2 + 
+  #                               (fixationsraw$y - lag(fixationsraw$y, default = NA))^2)
+  
+  #Calculo los valores outliers de las fijacinones en x e y 
+  outliersx <- boxplot.stats(fixationsraw$x)$out
+  outliersy <- boxplot.stats(fixationsraw$y)$out
+  
+  #Encuentro y elimino los trials donde se producen esos valores
+  #de fijaciones
+  #Para x
+  fixationsraw <- fixationsraw[-which(fixationsraw$x %in% outliersx),] 
+  #Para y
+  fixationsraw <- fixationsraw[-which(fixationsraw$y %in% outliersy),] 
+  
   #ordeno las fijaciones de mayor a menor distancia a la fijacion
   #del primer trial
-  fixationsraw <- fixationsraw[order(-fixationsraw$dist),]
+  #fixationsraw <- fixationsraw[order(-fixationsraw$dist),]
   
   #elimino el 10% de las fijaciones mas alejadas
-  #
-  fixationsraw <- fixationsraw[-c(1:round(0.1*nrow(fixationsraw))),]
+  #fixationsraw <- fixationsraw[-c(1:round(0.1*nrow(fixationsraw))),]
+  
   #elimino las fijaciones detectadas con duracion 0
   fixationsraw <- filter(fixationsraw, dur != 0)
   
@@ -630,7 +644,7 @@ for (i in seq_along(list_gaze)){
   
   #Agrego a la lista de fijaciones
   #ordeno las fijaciones por trial
-  fixationsraw <- fixationsraw[order(fixationsraw$trial),]
+  #fixationsraw <- fixationsraw[order(fixationsraw$trial),]
   
   #filtradas
   list_fixations[i] <- list(fixationsraw)
@@ -665,8 +679,7 @@ names(list_fixations) <- obs
 
 #6.3
 #Lazo para detectar la cantidad de trials aceptados
-#para el post-procesamiento. Cuento los trials donde no
-#hay ningna fijacion para luego eliminarlos.
+#para el post-procesamiento. 
 vr_index_trial <- 1:336
 porcentajeTrialFinal <- NA
 trialDescartar <- NA
@@ -862,6 +875,10 @@ df_fixations_total <- rbind(df_fixation_raw,df_fixation)
 ggplot(df_fixations_total) + geom_point(aes(x,y, color= tipo)) +
   facet_wrap(~observadores + condicion)
 
+ggplot(df_fixations_total) + 
+  geom_path(data = subset(df_fixations_total,tipo == "raw"), aes(x,y,color = trial)) + 
+  geom_point(data=subset(df_fixations_total, tipo == "filter"), aes(x,y), color="red", size = 0.1) + 
+  facet_wrap(~observadores + condicion)
 
 # #PROCESAMIENTO GRUPO CONTROL ----------------------------------------------------
 # 
@@ -2126,8 +2143,22 @@ ggPredict(model_GrupoCombinado_bin_all, se = TRUE, jitter = TRUE) +
 df_GrupoControl_bin <- df_GrupoControl_bin %>%
   mutate(Condition = if_else(Condition == "pre","pretest", "posttest"))
 
-df_GrupoControl_bin$Direction <- as.numeric(df_GrupoControl_bin$Direction)
+df_GrupoControl_bin$Direction <- as.factor(df_GrupoControl_bin$Direction)
 
+gmmGrupoControl_model_1 <- glmer(Response ~ Distance + Direction + Condition +  (1 | Subjects),
+                                 family = binomial, data = df_GrupoControl_bin)
+
+#gmmGrupoControl_model_2 <- glmer(Response ~ Distance + Direction + (1 | Subjects),
+#                                 family = binomial, data = df_GrupoControl_bin)
+
+#gmmGrupoControl_model_3 <- glmer(Response ~ Distance + (1 | Subjects),
+#                                 family = binomial, data = df_GrupoControl_bin)
+
+gmmGrupoControl_model_4 <- glmer(Response ~ Distance * Condition + Direction + (1 | Subjects),
+                                 family = binomial, data = df_GrupoControl_bin)
+
+gmmGrupoControl_model_5 <- glmer(Response ~ Distance + Direction*Condition + (1 | Subjects),
+                                 family = binomial, data = df_GrupoControl_bin)
 
 gmmGrupoControl_model <- glmer(Response ~ Distance * Condition + (1 | Subjects),
                                family = binomial, data = df_GrupoControl_bin)
@@ -2181,7 +2212,6 @@ df_GrupoCarga_bin$Direction <- as.numeric(df_GrupoCarga_bin$Direction)
  
 gmmGrupoCarga_model <- glmer(Response ~ Distance * Condition + (1 | Subjects),
                                family = binomial, data = df_GrupoCarga_bin)
-
 
 
 gmmGrupoCarga_model_Dir <- glmer(Response ~ Direction + (Distance * Condition) + (1 | Subjects),
