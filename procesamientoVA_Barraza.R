@@ -32,7 +32,7 @@ Ntrials <- 336
 # CARGO DATOS ILAV PRE ENTRENAMIENTO --------------------------------------
 #Cargo los datos de la ventana atencional antes del entrenamiento del ILAV
 #ubico el directorio donde se encuentran los archivos
-setwd(paste("D:/Dropbox/Posdoc",
+setwd(paste("B:/Dropbox/Posdoc",
             "/Percepcion Deporte",
             "/Experimento MOT VA",
             "/Archivos Computadora Vision",
@@ -173,7 +173,7 @@ rm(averages, df_datos_filtrados, df_gaze, ls_gaze_x, ls_gaze_y, tbl, tbl_gaze, t
 
 # CARGO DATOS HOCKEY PRE ENTRENAMIENTO ------------------------------
 #Cargo los datos de la ventana atencional antes del entrenamiento de Hockey
-setwd(paste("D:/Dropbox/Posdoc",
+setwd(paste("B:/Dropbox/Posdoc",
             "/Percepcion Deporte",
             "/Experimento MOT VA",
             "/Archivos Computadora Vision",
@@ -266,7 +266,7 @@ rm(averages, data_mat, datList, df_datos_filtrados, datos_sin_Gaze, matlabFile, 
 
 # CARGO DATOS ILAV POS ENTRENAMIENTO --------------------------------------
 #Cargo los datos de la ventana atencional despues del entrenamiento del ILAV
-setwd(paste("D:/Dropbox/Posdoc",
+setwd(paste("B:/Dropbox/Posdoc",
             "/Percepcion Deporte",
             "/Experimento MOT VA",
             "/Archivos Computadora Vision",
@@ -405,7 +405,7 @@ rm(averages, df_datos_filtrados, df_gaze, ls_gaze_x, ls_gaze_y, tbl, tbl_gaze, t
 # CARGO DATOS HOCKEY POS ENTRENAMIENTO ------------------------------------
 #Cargo los datos de la ventana atencional despues del entrenamiento Hockey 
 #ubico el directorio donde se encuentran los archivos
-setwd(paste("D:/Dropbox/Posdoc",
+setwd(paste("B:/Dropbox/Posdoc",
             "/Percepcion Deporte",
             "/Experimento MOT VA",
             "/Archivos Computadora Vision",
@@ -872,13 +872,14 @@ df_fixations_total <- rbind(df_fixation_raw,df_fixation)
 
 #Graficos
 
-ggplot(df_fixations_total) + geom_point(aes(x,y, color= tipo)) +
-  facet_wrap(~observadores + condicion)
+ggplot(df_fixations_total) + geom_point(aes(x,y, color= condicion)) +
+  facet_wrap(~observadores + tipo)
 
 ggplot(df_fixations_total) + 
-  geom_path(data = subset(df_fixations_total,tipo == "raw"), aes(x,y,color = trial)) + 
-  geom_point(data=subset(df_fixations_total, tipo == "filter"), aes(x,y), color="red", size = 0.1) + 
-  facet_wrap(~observadores + condicion)
+  geom_path(aes(x,y, alpha = trial)) + 
+  geom_point(aes(x,y, alpha = trial, size = 0.1)) +
+  facet_wrap(~tipo + condicion + observadores["aaf"])
+
 
 # #PROCESAMIENTO GRUPO CONTROL ----------------------------------------------------
 # 
@@ -2143,9 +2144,9 @@ ggPredict(model_GrupoCombinado_bin_all, se = TRUE, jitter = TRUE) +
 df_GrupoControl_bin <- df_GrupoControl_bin %>%
   mutate(Condition = if_else(Condition == "pre","pretest", "posttest"))
 
-df_GrupoControl_bin$Direction <- as.factor(df_GrupoControl_bin$Direction)
+df_GrupoControl_bin$Direction <- as.numeric(df_GrupoControl_bin$Direction)
 
-gmmGrupoControl_model_1 <- glmer(Response ~ Distance + Direction + Condition +  (1 | Subjects),
+gmmGrupoControl_model <- glmer(Response ~ Distance + Direction + Condition +  (1 | Subjects),
                                  family = binomial, data = df_GrupoControl_bin)
 
 #gmmGrupoControl_model_2 <- glmer(Response ~ Distance + Direction + (1 | Subjects),
@@ -2154,17 +2155,17 @@ gmmGrupoControl_model_1 <- glmer(Response ~ Distance + Direction + Condition +  
 #gmmGrupoControl_model_3 <- glmer(Response ~ Distance + (1 | Subjects),
 #                                 family = binomial, data = df_GrupoControl_bin)
 
-gmmGrupoControl_model_4 <- glmer(Response ~ Distance * Condition + Direction + (1 | Subjects),
-                                 family = binomial, data = df_GrupoControl_bin)
+#gmmGrupoControl_model_4 <- glmer(Response ~ Distance * Condition + Direction + (1 | Subjects),
+#                                 family = binomial, data = df_GrupoControl_bin)
 
-gmmGrupoControl_model_5 <- glmer(Response ~ Distance + Direction*Condition + (1 | Subjects),
-                                 family = binomial, data = df_GrupoControl_bin)
-
-gmmGrupoControl_model <- glmer(Response ~ Distance * Condition + (1 | Subjects),
-                               family = binomial, data = df_GrupoControl_bin)
-
-gmmGrupoControl_model_Dir <- glmer(Response ~ Direction + (Distance * Condition) + (1 | Subjects),
-                                 family = binomial, data = df_GrupoControl_bin)
+#gmmGrupoControl_model_5 <- glmer(Response ~ Distance + Direction*Condition + (1 | Subjects),
+#                                  family = binomial, data = df_GrupoControl_bin)
+# 
+# gmmGrupoControl_model <- glmer(Response ~ Distance * Condition + (1 | Subjects),
+#                                family = binomial, data = df_GrupoControl_bin)
+# 
+# gmmGrupoControl_model_Dir <- glmer(Response ~ Direction + (Distance * Condition) + (1 | Subjects),
+#                                  family = binomial, data = df_GrupoControl_bin)
 
 
 df_GrupoControl_plot <- df_GrupoControl_bin %>%
@@ -2199,7 +2200,6 @@ ggplot(data = df_GrupoControl_plot) +
 
 ##TABLA
 tab_model(gmmGrupoControl_model, show.est = T,  p.threshold = c(0.1, 0.05, 0.01, 0.001))
-tab_model(gmmGrupoControl_model_Dir, show.est = T,  p.threshold = c(0.1, 0.05, 0.01, 0.001))
 
 
 
