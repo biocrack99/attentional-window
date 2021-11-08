@@ -25,7 +25,7 @@ Ntrials <- 336
 # CARGO DATOS ILAV PRE ENTRENAMIENTO --------------------------------------
 #Cargo los datos de la ventana atencional antes del entrenamiento del ILAV
 #ubico el directorio donde se encuentran los archivos
-setwd(paste("D:/Dropbox/Posdoc",
+setwd(paste("B:/Dropbox/Posdoc",
             "/Percepcion Deporte",
             "/Experimento MOT VA",
             "/Archivos Computadora Vision",
