@@ -875,10 +875,18 @@ df_fixations_total <- rbind(df_fixation_raw,df_fixation)
 ggplot(df_fixations_total) + geom_point(aes(x,y, color= condicion)) +
   facet_wrap(~observadores + tipo)
 
-ggplot(df_fixations_total) + 
-  geom_path(aes(x,y, alpha = trial)) + 
-  geom_point(aes(x,y, alpha = trial, size = 0.1)) +
-  facet_wrap(~tipo + condicion + observadores["aaf"])
+#Selecciono los observadores para el gráfico
+facets <- c("aaf", "jjr", "afb", "at")
+colnames(df_fixations_total)[c(4,5,6)] <- c("Subjects", "Condition","Type")
+ggplot(df_fixations_total[ df_fixations_total$Subjects %in% facets,]) + 
+  geom_path(data = filter(df_fixations_total[ df_fixations_total$Subjects %in% facets,], Type =="raw"),
+            aes(x,y,color = Condition)) + 
+  geom_point(data = filter(df_fixations_total[ df_fixations_total$Subjects %in% facets,], Type =="raw"),
+            aes(x,y,color = Condition)) + 
+  
+  geom_point(data = filter(df_fixations_total[ df_fixations_total$Subjects %in% facets,], Type =="filter"),
+             aes(x,y,color = Condition)) +
+  facet_wrap(~Subjects+Type, ncol = 4)
 
 
 # #PROCESAMIENTO GRUPO CONTROL ----------------------------------------------------
