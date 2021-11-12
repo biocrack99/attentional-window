@@ -878,15 +878,41 @@ ggplot(df_fixations_total) + geom_point(aes(x,y, color= condicion)) +
 #Selecciono los observadores para el gráfico
 facets <- c("aaf", "jjr", "afb", "at")
 colnames(df_fixations_total)[c(4,5,6)] <- c("Subjects", "Condition","Type")
-ggplot(df_fixations_total[ df_fixations_total$Subjects %in% facets,]) + 
-  geom_path(data = filter(df_fixations_total[ df_fixations_total$Subjects %in% facets,], Type =="raw"),
-            aes(x,y,color = Condition)) + 
-  geom_point(data = filter(df_fixations_total[ df_fixations_total$Subjects %in% facets,], Type =="raw"),
-            aes(x,y,color = Condition)) + 
+ggplot(transform(df_fixations_total[ df_fixations_total$Subjects %in% facets,],
+                 Type = factor(Type, levels = c("raw", "filter")))) + 
   
-  geom_point(data = filter(df_fixations_total[ df_fixations_total$Subjects %in% facets,], Type =="filter"),
-             aes(x,y,color = Condition)) +
-  facet_wrap(~Subjects+Type, ncol = 4)
+  geom_point(data = filter(transform(df_fixations_total[ df_fixations_total$Subjects %in% facets,],
+                                     Type = factor(Type, levels = c("raw", "filter"))),
+                           Type =="raw"),
+             aes(x,y,alpha = Condition, color = Condition)) + 
+  
+  geom_point(data = filter(transform(df_fixations_total[ df_fixations_total$Subjects %in% facets,],
+                                     Type = factor(Type, levels = c("raw", "filter"))), 
+                           Type =="filter"),
+             aes(x,y,alpha = Condition, color = Condition)) +
+  
+  scale_alpha_discrete(range = c(0.35, 0.9)) +
+  
+  facet_wrap(~Subjects+Type, ncol = 4) +
+  
+  theme_bw() +
+  
+  labs(x ="Coordinate X (mm)", y = "Coordinate Y (mm)") +
+  
+  scale_x_continuous(labels = c("-400","-200", "0", "200", "400"), breaks = c(-400, -200,0,200,400))
+
+
+# #Sample de fijaciones en algunos trials y sujetos
+# facets_trials <- sample(1:336, 4, replace = F) 
+# ggplot(df_fixations_total[ df_fixations_total$trial %in% facets_trials & df_fixations_total$Subjects %in% facets,]) + 
+#   # geom_path(data = filter(df_fixations_total[ df_fixations_total$Subjects %in% facets,], Type =="raw"),
+#   #           aes(x,y,alpha = trial)) + 
+#   geom_path(data = filter(df_fixations_total[ df_fixations_total$trial %in% facets_trials & df_fixations_total$Subjects %in% facets,], Type =="raw"),
+#              aes(x,y,color = Condition)) + 
+#   geom_point(data = filter(df_fixations_total[ df_fixations_total$trial %in% facets_trials & df_fixations_total$Subjects %in% facets,], Type =="filter"),
+#              aes(x,y,color = Condition)) +
+#   facet_wrap(~trial+ Subjects , ncol = 4)
+
 
 
 # #PROCESAMIENTO GRUPO CONTROL ----------------------------------------------------
