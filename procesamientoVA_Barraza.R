@@ -884,24 +884,24 @@ p1 <- ggplot(transform(df_fixations_total[ df_fixations_total$Subjects %in% face
   geom_point(data = filter(transform(df_fixations_total[ df_fixations_total$Subjects %in% facets,],
                                      Type = factor(Type, levels = c("raw", "filter"))),
                            Type =="raw"),
-             aes(x,y,alpha = Condition, color = Condition), size = 5) + 
+             aes(x,y,alpha = Condition, fill = Condition), colour = "black", size = 5, pch=21) + 
   
   geom_point(data = filter(transform(df_fixations_total[ df_fixations_total$Subjects %in% facets,],
                                      Type = factor(Type, levels = c("raw", "filter"))), 
                            Type =="filter"),
-             aes(x,y,alpha = Condition, color = Condition), size = 5) +
+             aes(x,y,alpha = Condition, fill = Condition), colour = "black", size = 5, pch=21) +
   
-  scale_alpha_discrete(range = c(0.35, 0.35)) +
+  scale_alpha_discrete(range = c(0.5, 0.5)) +
   
   facet_wrap(~Subjects+Type, ncol = 4) +
   
   theme_bw() +
   
-  labs(x ="Gaza Coordinate X (mm)", y = "Gaze Coordinate Y (mm)") +
+  labs(x ="Gaze X Coordinate [mm]", y = "Gaze Y Coordinate [mm]") +
   
   scale_x_continuous(labels = c("-400","-200", "0", "200", "400"), breaks = c(-400, -200,0,200,400))
 
-p1 + theme(axis.text = element_text(size = 15),
+p1 + theme(axis.text = element_text(size = 23),
            axis.title = element_text(size = 20),
            legend.text = element_text(size = 20),
            legend.title = element_blank(),
