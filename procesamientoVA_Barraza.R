@@ -878,6 +878,7 @@ ggplot(df_fixations_total) + geom_point(aes(x,y, color= condicion)) +
 #Selecciono los observadores para el gráfico
 facets <- c("aaf", "jjr", "afb", "at")
 colnames(df_fixations_total)[c(4,5,6)] <- c("Subjects", "Condition","Type")
+#Grafico 1
 p1 <- ggplot(transform(df_fixations_total[ df_fixations_total$Subjects %in% facets,],
                  Type = factor(Type, levels = c("raw", "filter")))) + 
   
@@ -901,6 +902,7 @@ p1 <- ggplot(transform(df_fixations_total[ df_fixations_total$Subjects %in% face
   
   scale_x_continuous(labels = c("-400","-200", "0", "200", "400"), breaks = c(-400, -200,0,200,400))
 
+#Algunos cambios de diseño
 p1 + theme(axis.text = element_text(size = 23),
            axis.title = element_text(size = 20),
            legend.text = element_text(size = 20),
