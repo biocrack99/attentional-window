@@ -1409,7 +1409,7 @@ overdisp_fun <- function(model) {
   c(chisq = Pearson.chisq, ratio = prat, rdf = rdf, p = pval)
 }
 
-overdisp_fun(gmmGrupoControl_model)
+  overdisp_fun(gmmGrupoControl_model)
 
 
 
