@@ -1409,14 +1409,6 @@ overdisp_fun <- function(model) {
   c(chisq = Pearson.chisq, ratio = prat, rdf = rdf, p = pval)
 }
 
-<<<<<<< HEAD
-=======
-  overdisp_fun(gmmGrupoControl_model)
-
->>>>>>> e31673257269be531d28b7e09f378bf7c5cbd55d
-
-
-
 
 # Seccion pruebas --------------------------------------------------------------
 #Comparo los datos sin eliminar los trials debido a la falta
