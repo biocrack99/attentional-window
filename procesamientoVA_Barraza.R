@@ -1185,9 +1185,9 @@ df_GrupoControl_predict <- ggpredict(gmmGrupoControl_model, terms = c("Distance"
 ##GRAFICOS
 ggplot(data = df_GrupoControl_plot) + 
   geom_point(aes(Distance,p*100, 
-                 colour = Condition, 
+                 colour = Condition,
                  shape = Subjects),
-             size = 3) +
+             size = 6) +
   geom_line(data=df_GrupoControl_predict, 
             aes(df_GrupoControl_predict$x, 
                 df_GrupoControl_predict$predicted*100, 
@@ -1203,7 +1203,15 @@ ggplot(data = df_GrupoControl_plot) +
   scale_x_continuous("Distance [°]", 
                      labels = as.character(c(3,5,8,11,14,17,20)), 
                      breaks = c(3,5,8,11,14,17,20)) +
-  ylim(0, 100) + ylab("Correct answers [%]")
+  ylim(0, 100) + ylab("Correct answers [%]") +
+  theme_bw() +
+  theme(axis.text = element_text(size = 23),
+        axis.title = element_text(size = 20),
+        legend.text = element_text(size = 20),
+        legend.title = element_text(size = 20),
+        strip.text = element_text(size = 25)) 
+  
+  
 
 ##TABLA
 tab_model(gmmGrupoControl_model, show.est = T,  p.threshold = c(0.1, 0.05, 0.01, 0.001))
@@ -1217,8 +1225,10 @@ df_GrupoCarga_bin <- df_GrupoCarga_bin %>%
 
 df_GrupoCarga_bin$Direction <- as.numeric(df_GrupoCarga_bin$Direction)
  
+
 gmmGrupoCarga_model <- glmer(Response ~ Distance + Direction + Condition + (1 | Subjects),
                                family = binomial, data = df_GrupoCarga_bin)
+
 
 df_GrupoCarga_plot <- df_GrupoCarga_bin %>%
   group_by(Subjects,Distance, Condition) %>% 
@@ -1231,7 +1241,7 @@ ggplot(data = df_GrupoCarga_plot) +
   geom_point(aes(Distance,p*100, 
                  colour = Condition, 
                  shape = Subjects),
-             size = 3) +
+             size = 6) +
   geom_line(data=df_GrupoCarga_predict, 
             aes(df_GrupoCarga_predict$x, 
                 df_GrupoCarga_predict$predicted*100, 
@@ -1250,7 +1260,14 @@ ggplot(data = df_GrupoCarga_plot) +
   scale_y_continuous("Percentage correct [-]", 
                      labels = as.character(c(0,25,50,75,100)), 
                      breaks = c(0,25,50,75,100)) +
-  ylim(0, 100) + ylab("Correct answers [%]")
+  ylim(0, 100) + ylab("Correct answers [%]") +
+  theme_bw() +
+  theme(axis.text = element_text(size = 23),
+        axis.title = element_text(size = 20),
+        legend.text = element_text(size = 20),
+        legend.title = element_text(size = 20),
+        strip.text = element_text(size = 25)) 
+
 
 ##TABLA
 tab_model(gmmGrupoCarga_model, transform = NULL, show.est = T,  p.threshold = c(0.1, 0.05, 0.01, 0.001))
@@ -1278,7 +1295,7 @@ ggplot(data = df_GrupoReaccion_plot) +
   geom_point(aes(Distance,p*100, 
                  colour = Condition, 
                  shape = Subjects),
-             size = 3) +
+             size = 6) +
   geom_line(data=df_GrupoReaccion_predict, 
             aes(df_GrupoReaccion_predict$x, 
                 df_GrupoReaccion_predict$predicted*100, 
@@ -1294,7 +1311,14 @@ ggplot(data = df_GrupoReaccion_plot) +
   scale_x_continuous("Distance [°]", 
                      labels = as.character(c(3,5,8,11,14,17,20)), 
                      breaks = c(3,5,8,11,14,17,20)) +
-  ylim(0, 100) + ylab("Correct answers [%]") 
+  ylim(0, 100) + ylab("Correct answers [%]") +
+  theme_bw() +
+  theme(axis.text = element_text(size = 23),
+        axis.title = element_text(size = 20),
+        legend.text = element_text(size = 20),
+        legend.title = element_text(size = 20),
+        strip.text = element_text(size = 25)) 
+
 
 ##TABLA
 tab_model(gmmGrupoReaccion_model, show.est = T)
@@ -1321,7 +1345,7 @@ ggplot(data = df_GrupoCombinado_plot) +
   geom_point(aes(Distance,p*100, 
                  colour = Condition, 
                  shape = Subjects),
-             size = 3) +
+             size = 6) +
   geom_line(data=df_GrupoCombinado_predict, 
             aes(df_GrupoCombinado_predict$x, 
                 df_GrupoCombinado_predict$predicted*100, 
@@ -1337,7 +1361,14 @@ ggplot(data = df_GrupoCombinado_plot) +
   scale_x_continuous("Distance [°]", 
                      labels = as.character(c(3,5,8,11,14,17,20)), 
                      breaks = c(3,5,8,11,14,17,20)) +
-  ylim(0, 100) + ylab("Correct answers [%]")
+  ylim(0, 100) + ylab("Correct answers [%]") +
+  theme_bw() +
+  theme(axis.text = element_text(size = 23),
+        axis.title = element_text(size = 20),
+        legend.text = element_text(size = 20),
+        legend.title = element_text(size = 20),
+        strip.text = element_text(size = 25)) 
+
 ##TABLA
 tab_model(gmmGrupoCombinado_model, show.est = T)
 tab_model(gmmGrupoCombinado_model_Dir, transform = NULL, show.est = T,  p.threshold = c(0.1, 0.05, 0.01, 0.001))
@@ -1356,26 +1387,29 @@ tab_model(
   string.pred = "Coefficient",
   string.ci = "CI(95%)",
   string.p = "P-Value",
-  p.style = "numeric"
-  #file = "D:/Dropbox/Posdoc/Percepcion Deporte/Experimento MOT VA/Graficos/Ajuste GLMM/Tabla.html"
+  p.style = "numeric",
+  file = "B:/Dropbox/Posdoc/Percepcion Deporte/Experimento MOT VA/Graficos/Ajuste GLMM/Tabla.html"
 )
 
-tab_model(
-  gmmGrupoControl_model_Dir, gmmGrupoCarga_model_Dir, gmmGrupoReaccion_model_Dir, gmmGrupoCombinado_model_Dir,
-  show.intercept = F,
-  show.est = T,
-  show.se = F,
-  show.re.var = T,
-  show.aic = F,
-  show.icc = F,
-  #pred.labels = c("Distance", "Condition[Posttest]", "Distance*Condition"),
-  dv.labels = c("Control", "Attentional load", "Reaction time", "Combined task"),
-  string.pred = "Coefficient",
-  string.ci = "CI(95%)",
-  string.p = "P-Value",
-  p.style = "numeric"
-  #file = "D:/Dropbox/Posdoc/Percepcion Deporte/Experimento MOT VA/Graficos/Ajuste GLMM/Tabla.html"
-)
+
+overdisp_fun <- function(model) {
+  ## number of variance parameters in an n-by-n variance-covariance matrix
+  vpars <- function(m) {
+    nrow(m) * (nrow(m) + 1)/2
+  }
+  # The next two lines calculate the residual degrees of freedom
+  model.df <- sum(sapply(VarCorr(model), vpars)) + length(fixef(model))
+  rdf <- nrow(model.frame(model)) - model.df
+  # extracts the Pearson residuals
+  rp <- residuals(model, type = "pearson")
+  Pearson.chisq <- sum(rp^2)
+  prat <- Pearson.chisq/rdf
+  # Generates a p-value. If less than 0.05, the data are overdispersed.
+  pval <- pchisq(Pearson.chisq, df = rdf, lower.tail = FALSE)
+  c(chisq = Pearson.chisq, ratio = prat, rdf = rdf, p = pval)
+}
+
+overdisp_fun(gmmGrupoControl_model)
 
 
 
