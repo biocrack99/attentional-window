@@ -19,7 +19,7 @@ nu_sesion <- 6
 # Grupo LT ----------------------------------------------------------------
 ## JJR ---------------------------------------------------------------------
 # Ubico directorio donde de ecuentras los archivos .mat
-setwd("D:/Dropbox/Posdoc/Percepcion Deporte/Experimento MOT VA/Archivos Computadora Vision/Experimento Anibal/MATLAB_Diciembre/MOT/LT MOT/Datos/JJR/")
+setwd("B:/Dropbox/Posdoc/Percepcion Deporte/Experimento MOT VA/Archivos Computadora Vision/Experimento Anibal/MATLAB_Diciembre/MOT/LT MOT/Datos/JJR/")
 # Nombre de los archivos en la carpeta con extension .mat
 files <- list.files(pattern = "*.mat", full.names = T)
 # Cargo los datos
@@ -40,7 +40,7 @@ for (i in seq_along (files)){
 }
 ## MAB ---------------------------------------------------------------------
 # Ubico directorio donde de ecuentras los archivos .mat
-setwd("D:/Dropbox/Posdoc/Percepcion Deporte/Experimento MOT VA/Archivos Computadora Vision/Experimento Anibal/MATLAB_Diciembre/MOT/LT MOT/Datos/MAB/")
+setwd("B:/Dropbox/Posdoc/Percepcion Deporte/Experimento MOT VA/Archivos Computadora Vision/Experimento Anibal/MATLAB_Diciembre/MOT/LT MOT/Datos/MAB/")
 # Nombre de los archivos en la carpeta con extension .mat
 files <- list.files(pattern = "*.mat", full.names = T)
 # Cargo los datos
@@ -62,7 +62,7 @@ for (i in seq_along (files)){
 
 ## MDN ---------------------------------------------------------------------
 # Ubico directorio donde de ecuentras los archivos .mat
-setwd("D:/Dropbox/Posdoc/Percepcion Deporte/Experimento MOT VA/Archivos Computadora Vision/Experimento Anibal/MATLAB_Diciembre/MOT/LT MOT/Datos/MDN/")
+setwd("B:/Dropbox/Posdoc/Percepcion Deporte/Experimento MOT VA/Archivos Computadora Vision/Experimento Anibal/MATLAB_Diciembre/MOT/LT MOT/Datos/MDN/")
 # Nombre de los archivos en la carpeta con extension .mat
 files <- list.files(pattern = "*.mat", full.names = T)
 # Cargo los datos
@@ -87,7 +87,7 @@ for (i in seq_along (files)){
 ## Concentrado 
 ## AT----------------------------------------------------------------------
 # Ubico directorio donde de ecuentras los archivos .mat
-setwd("D:/Dropbox/Posdoc/Percepcion Deporte/Experimento MOT VA/Archivos Computadora Vision/Experimento Anibal/MATLAB_Diciembre/MOT/LT MOT/Datos/Hockey/Concentrado/AT")
+setwd("B:/Dropbox/Posdoc/Percepcion Deporte/Experimento MOT VA/Archivos Computadora Vision/Experimento Anibal/MATLAB_Diciembre/MOT/LT MOT/Datos/Hockey/Concentrado/AT")
 # Nombre de los archivos en la carpeta con extension .mat
 files <- list.files(pattern = "*.mat", full.names = T)
 # Cargo los datos
@@ -115,7 +115,7 @@ for (i in seq_along (files)){
 ## Expandido 
 ## LFA ---------------------------------------------------------------------
 # Ubico directorio donde se encuentran los archivos .mat
-setwd("D:/Dropbox/Posdoc/Percepcion Deporte/Experimento MOT VA/Archivos Computadora Vision/Experimento Anibal/MATLAB_Diciembre/MOT/LT MOT/Datos/Hockey/Expandido/LFA")
+setwd("B:/Dropbox/Posdoc/Percepcion Deporte/Experimento MOT VA/Archivos Computadora Vision/Experimento Anibal/MATLAB_Diciembre/MOT/LT MOT/Datos/Hockey/Expandido/LFA")
 # Nombre de los archivos en la carpeta con extension .mat
 files <- list.files(pattern = "*.mat", full.names = T)
 # Cargo los datos
@@ -142,7 +142,7 @@ for (i in seq_along (files)){
 }
 ## LMS ---------------------------------------------------------------------
 # Ubico directorio donde se encuentran los archivos .mat
-setwd("D:/Dropbox/Posdoc/Percepcion Deporte/Experimento MOT VA/Archivos Computadora Vision/Experimento Anibal/MATLAB_Diciembre/MOT/LT MOT/Datos/Hockey/Expandido/LMS")
+setwd("B:/Dropbox/Posdoc/Percepcion Deporte/Experimento MOT VA/Archivos Computadora Vision/Experimento Anibal/MATLAB_Diciembre/MOT/LT MOT/Datos/Hockey/Expandido/LMS")
 # Nombre de los archivos en la carpeta con extension .mat
 files <- list.files(pattern = "*.mat", full.names = T)
 # Cargo los datos
@@ -170,7 +170,7 @@ for (i in seq_along (files)){
 
 ## MCM ---------------------------------------------------------------------
 # Ubico directorio donde se encuentran los archivos .mat
-setwd("D:/Dropbox/Posdoc/Percepcion Deporte/Experimento MOT VA/Archivos Computadora Vision/Experimento Anibal/MATLAB_Diciembre/MOT/LT MOT/Datos/Hockey/Expandido/MCM")
+setwd("B:/Dropbox/Posdoc/Percepcion Deporte/Experimento MOT VA/Archivos Computadora Vision/Experimento Anibal/MATLAB_Diciembre/MOT/LT MOT/Datos/Hockey/Expandido/MCM")
 # Nombre de los archivos en la carpeta con extension .mat
 files <- list.files(pattern = "*.mat", full.names = T)
 # Cargo los datos
@@ -200,7 +200,7 @@ for (i in seq_along (files)){
 ## Concentrado 
 ## AT----------------------------------------------------------------------
 # Ubico directorio donde de ecuentras los archivos .mat
-setwd("D:/Dropbox/Posdoc/Percepcion Deporte/Experimento MOT VA/Archivos Computadora Vision/Experimento Anibal/MATLAB_Diciembre/MOT/RT MOT/Datos/Hockey/Concentrado/AT")
+setwd("B:/Dropbox/Posdoc/Percepcion Deporte/Experimento MOT VA/Archivos Computadora Vision/Experimento Anibal/MATLAB_Diciembre/MOT/RT MOT/Datos/Hockey/Concentrado/AT")
 # Nombre de los archivos en la carpeta con extension .mat
 files <- list.files(pattern = "*.mat", full.names = T)
 # Cargo los datos
@@ -229,7 +229,7 @@ for (i in seq_along (files)){
 ## Expandido 
 ## LFA ---------------------------------------------------------------------
 # Ubico directorio donde se encuentran los archivos .mat
-setwd("D:/Dropbox/Posdoc/Percepcion Deporte/Experimento MOT VA/Archivos Computadora Vision/Experimento Anibal/MATLAB_Diciembre/MOT/RT MOT/Datos/Hockey/Expandido/LFA")
+setwd("B:/Dropbox/Posdoc/Percepcion Deporte/Experimento MOT VA/Archivos Computadora Vision/Experimento Anibal/MATLAB_Diciembre/MOT/RT MOT/Datos/Hockey/Expandido/LFA")
 # Nombre de los archivos en la carpeta con extension .mat
 files <- list.files(pattern = "*.mat", full.names = T)
 # Cargo los datos
@@ -256,7 +256,7 @@ for (i in seq_along (files)){
 }
 ## LMS ---------------------------------------------------------------------
 # Ubico directorio donde se encuentran los archivos .mat
-setwd("D:/Dropbox/Posdoc/Percepcion Deporte/Experimento MOT VA/Archivos Computadora Vision/Experimento Anibal/MATLAB_Diciembre/MOT/RT MOT/Datos/Hockey/Expandido/LMS")
+setwd("B:/Dropbox/Posdoc/Percepcion Deporte/Experimento MOT VA/Archivos Computadora Vision/Experimento Anibal/MATLAB_Diciembre/MOT/RT MOT/Datos/Hockey/Expandido/LMS")
 # Nombre de los archivos en la carpeta con extension .mat
 files <- list.files(pattern = "*.mat", full.names = T)
 # Cargo los datos
@@ -284,7 +284,7 @@ for (i in seq_along (files)){
 
 ## MCM ---------------------------------------------------------------------
 # Ubico directorio donde se encuentran los archivos .mat
-setwd("D:/Dropbox/Posdoc/Percepcion Deporte/Experimento MOT VA/Archivos Computadora Vision/Experimento Anibal/MATLAB_Diciembre/MOT/RT MOT/Datos/Hockey/Expandido/MCM")
+setwd("B:/Dropbox/Posdoc/Percepcion Deporte/Experimento MOT VA/Archivos Computadora Vision/Experimento Anibal/MATLAB_Diciembre/MOT/RT MOT/Datos/Hockey/Expandido/MCM")
 # Nombre de los archivos en la carpeta con extension .mat
 files <- list.files(pattern = "*.mat", full.names = T)
 # Cargo los datos
@@ -322,7 +322,7 @@ for (i in seq_along (files)){
 # Grupo RT ----------------------------------------------------------------
 ## AFB ---------------------------------------------------------------------
 # Ubico directorio donde de ecuentras los archivos .mat
-setwd("D:/Dropbox/Posdoc/Percepcion Deporte/Experimento MOT VA/Archivos Computadora Vision/Experimento Anibal/MATLAB_Diciembre/MOT/RT MOT/Datos/AFB/")
+setwd("B:/Dropbox/Posdoc/Percepcion Deporte/Experimento MOT VA/Archivos Computadora Vision/Experimento Anibal/MATLAB_Diciembre/MOT/RT MOT/Datos/AFB/")
 # Nombre de los archivos en la carpeta con extension .mat
 files <- list.files(pattern = "*.mat", full.names = T)
 # Cargo los datos
@@ -343,7 +343,7 @@ for (i in seq_along (files)){
 }
 ## CIC ---------------------------------------------------------------------
 # Ubico directorio donde de ecuentras los archivos .mat
-setwd("D:/Dropbox/Posdoc/Percepcion Deporte/Experimento MOT VA/Archivos Computadora Vision/Experimento Anibal/MATLAB_Diciembre/MOT/RT MOT/Datos/CIC/")
+setwd("B:/Dropbox/Posdoc/Percepcion Deporte/Experimento MOT VA/Archivos Computadora Vision/Experimento Anibal/MATLAB_Diciembre/MOT/RT MOT/Datos/CIC/")
 # Nombre de los archivos en la carpeta con extension .mat
 files <- list.files(pattern = "*.mat", full.names = T)
 # Cargo los datos
@@ -364,7 +364,7 @@ for (i in seq_along (files)){
 }
 ## MSZ ---------------------------------------------------------------------
 # Ubico directorio donde de ecuentras los archivos .mat
-setwd("D:/Dropbox/Posdoc/Percepcion Deporte/Experimento MOT VA/Archivos Computadora Vision/Experimento Anibal/MATLAB_Diciembre/MOT/RT MOT/Datos/MSZ/")
+setwd("B:/Dropbox/Posdoc/Percepcion Deporte/Experimento MOT VA/Archivos Computadora Vision/Experimento Anibal/MATLAB_Diciembre/MOT/RT MOT/Datos/MSZ/")
 # Nombre de los archivos en la carpeta con extension .mat
 files <- list.files(pattern = "*.mat", full.names = T)
 # Cargo los datos
@@ -385,7 +385,7 @@ for (i in seq_along (files)){
 }
 ## NGA ---------------------------------------------------------------------
 # Ubico directorio donde de ecuentras los archivos .mat
-setwd("D:/Dropbox/Posdoc/Percepcion Deporte/Experimento MOT VA/Archivos Computadora Vision/Experimento Anibal/MATLAB_Diciembre/MOT/RT MOT/Datos/NGA/")
+setwd("B:/Dropbox/Posdoc/Percepcion Deporte/Experimento MOT VA/Archivos Computadora Vision/Experimento Anibal/MATLAB_Diciembre/MOT/RT MOT/Datos/NGA/")
 # Nombre de los archivos en la carpeta con extension .mat
 files <- list.files(pattern = "*.mat", full.names = T)
 # Cargo los datos
