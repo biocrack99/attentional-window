@@ -567,3 +567,26 @@ ggplot(data = filter(df_prueba, Sesion == "Sesion 6")) +
          
 ggplot(data=df_prueba, aes(x=Sesion, y=Media, fill=Expertisia)) +
   geom_bar(stat="identity", position=position_dodge())
+
+
+# Procesamiento InVision 2021------------------------------------------------------
+
+#Coordenadas de las pelotas del primer trial de MOT con carga atencional que se presentaron
+#a un observador
+df_coordenadas_trial <- data.frame(Pelotas = rep(c("P1","P2","P3","P4","P5","P6","P7","P8","P9","P10","P11","P12"), each = 160), 
+                                   x = as.vector(ls_datos[[1]][["coordenadas"]][["1.3"]][,,1,]), 
+                                   y = as.vector(ls_datos[[1]][["coordenadas"]][["1.3"]][,,2,]),
+                                   time = rep(seq(0,8-0.05, by = 0.05), 12))
+
+plot_coor <- ggplot() + 
+  geom_point(data = df_coordenadas_trial, aes(x,y,  color = time)) +
+  geom_line(aes(x = as.vector(ls_datos[[1]][["XGaze.mm"]][["1.3"]])*(1024/1650) + 512,
+                 y = as.vector(ls_datos[[1]][["YGaze.mm"]][["1.3"]])*(1024/1650) + 768/2)) 
+
+plot_coor 
+
+  
+  
+
+#
+
