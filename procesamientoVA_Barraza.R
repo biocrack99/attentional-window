@@ -1332,9 +1332,9 @@ df_GrupoCombinado_bin <- df_GrupoCombinado_bin %>%
 df_GrupoCombinado_bin$Direction <- as.numeric(df_GrupoCombinado_bin$Direction)
 
 gmmGrupoCombinado_model <- glmer(Response ~ Distance + Direction + Condition + (1 | Subjects),
-                                 family = binomial, data = df_GrupoCombinado_bin)
+                                 family = binomial, data = filter(df_GrupoCombinado_bin, Subjects != "at"))
 
-df_GrupoCombinado_plot <- df_GrupoCombinado_bin %>%
+df_GrupoCombinado_plot <- filter(df_GrupoCombinado_bin, Subjects != "at") %>%
   group_by(Subjects,Distance, Condition) %>% 
   summarise(n = n(), p = sum(Response)/n)
 
@@ -1383,7 +1383,7 @@ tab_model(
   show.aic = F,
   show.icc = F,
   #pred.labels = c("Distance", "Condition[Posttest]", "Distance*Condition"),
-  dv.labels = c("Control", "Attentional load", "Reaction time", "Combined task"),
+  dv.labels = c("Control", "CA Group", "RT Group", "EI Group"),
   string.pred = "Coefficient",
   string.ci = "CI(95%)",
   string.p = "P-Value",
