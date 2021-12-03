@@ -430,24 +430,51 @@ ggplot() +
   geom_col(data = df_obs, 
            aes( x = Observador, y = Media, fill = Sesion), 
            position = "dodge"
-  )
+  ) +
+  xlab("Subject") + 
+  ylab("Mean target id [%]")
+
 
 
 #Grupo LT en promedio 
 df_obs <- df_obs_lt %>% 
                   group_by(Sesion) %>% 
-                  summarise(Media = mean(Porcentaje))
+                  summarise(Media = mean(Porcentaje)) 
 
 #Gráfico de barras para comparar el rendimiento en el primer y el ultimo entrenamiento con MOT para todos los sujetos del grupo LT
 ggplot() + 
   geom_col(data = df_obs, 
            aes( x = Sesion, y = Media), 
            position = "dodge"
-  )
+  ) 
+
+#Test t apareado
+TestT <- function(df, name, sesionpre, sesionpos) {
+  
+  pre <- subset(df, Observador == name & Sesion == sesionpre, select = c(Porcentaje))
+  pre <- pre[,1]
+  pos <- subset(df, Observador == name & Sesion == sesionpos , select = c(Porcentaje))
+  pos <- pos[,1]
+  test <- t.test(pre, pos, paired = T, alternative = "two.sided")
+  print(test$p.value)
+  
+}
+
+#JJR
+testjjr <- TestT(df_obs_lt, 'jjr', 'Sesion 1', 'Sesion 6')
+#MAB
+testmab <- TestT(df_obs_lt, 'mab', 'Sesion 1', 'Sesion 6')
+#MDN
+testmab <- TestT(df_obs_lt, 'mdn', 'Sesion 1', 'Sesion 6')
 
 #Grupo RT--------------------------------------------------------
-df_obs_rt <- data.frame(Observador = rep(c("afb", "cic", "msz",                                             "nga"), each = 300), 
-                        Porcentaje = c( ls_datos[[19]]$Porcentaje,                                                    ls_datos[[25]]$Porcentaje,                                                    ls_datos[[26]]$Porcentaje,                                                    ls_datos[[32]]$Porcentaje,                                                    ls_datos[[33]]$Porcentaje,                                                    ls_datos[[38]]$Porcentaje,
+df_obs_rt <- data.frame(Observador = rep(c("afb", "cic", "msz", "nga"), each = 300), 
+                        Porcentaje = c( ls_datos[[19]]$Porcentaje,
+                                        ls_datos[[25]]$Porcentaje,                                                    
+                                        ls_datos[[26]]$Porcentaje,                                                    
+                                        ls_datos[[32]]$Porcentaje,                                                    
+                                        ls_datos[[33]]$Porcentaje,                                                    
+                                        ls_datos[[38]]$Porcentaje,
                                         ls_datos[[37]]$Porcentaje,
                                         ls_datos[[42]]$Porcentaje
                                        ), 
@@ -463,7 +490,9 @@ ggplot() +
   geom_col(data = df_obs, 
            aes( x = Observador, y = Media, fill = Sesion), 
            position = "dodge"
-  )
+  ) +
+  xlab("Subject") + 
+  ylab("Mean target id [%]")
 
 #Grupo RT en promedio 
 df_obs <- df_obs_lt %>% 
@@ -476,6 +505,21 @@ ggplot() +
            aes( x = Sesion, y = Media), 
            position = "dodge"
   )
+#AFB
+testjjr <- TestT(df_obs_rt, 'afb', 'Sesion 1', 'Sesion 6')
+#CIC
+testmab <- TestT(df_obs_rt, 'cic', 'Sesion 1', 'Sesion 6')
+#MSZ
+testmab <- TestT(df_obs_rt, 'msz', 'Sesion 1', 'Sesion 6')
+#NGA
+testmab <- TestT(df_obs_rt, 'nga', 'Sesion 1', 'Sesion 6')
+
+
+
+
+
+
+
 
 #Grupo CT--------------------------------------------------------
 #AT
@@ -502,13 +546,13 @@ df_obs_ct_lt <- ldply(ls_datos_ct[c(2:19)], rbind)
 
 df_ct_lt <- df_obs_ct_lt %>% 
   group_by(Observador, Sesion) %>% 
-  summarise(Media = mean(Porcentaje)) %>%
-  mutate(Proporcion = Media/100, Transformacion=asin(sqrt(Proporcion)))
+  summarise(Media = mean(Porcentaje)) #%>%
+  # mutate(Proporcion = Media/100, Transformacion=asin(sqrt(Proporcion)))
             
+df_ct_lt$Sesion <- as.factor(df_ct_lt$Sesion)
 
-ggplot() + 
-  geom_col(data = df_ct_lt%>%filter(Sesion == c("1","6")), 
-           aes( x = as.factor(Sesion), y = Media, fill = Observador), 
+ggplot(filter(df_ct_lt, Sesion == c("1","6"))) + 
+  geom_col(aes( x = Observador, y = Media, fill = Sesion), 
            position = "dodge"
   )
 
@@ -517,14 +561,40 @@ df_obs_ct_rt <- ldply(ls_datos_ct[c(21:38)], rbind)
 
 df_ct_rt <- df_obs_ct_rt %>% 
   group_by(Observador, Sesion) %>% 
-  summarise(Media = mean(Porcentaje)) %>%
-  mutate(Proporcion = Media/100, Transformacion=asin(sqrt(Proporcion)))
+  summarise(Media = mean(Porcentaje)) #%>%
+  #mutate(Proporcion = Media/100, Transformacion=asin(sqrt(Proporcion)))
+
+df_ct_rt$Sesion <- as.factor(df_ct_rt$Sesion)
 
 ggplot() + 
   geom_col(data = df_ct_rt%>%filter(Sesion == c("1","6")), 
-           aes( x = as.factor(Sesion), y = Media, fill = Observador), 
+           aes( x = Observador, y = Media, fill = Sesion), 
            position = "dodge"
   )
+
+ggplot() + 
+  geom_col(data = df_ct_rt%>%filter(Sesion == c("1","6")), 
+           aes( x = Observador, y = Media, fill = Sesion), 
+           position = "dodge"
+  )
+
+#Dataframe total
+
+df_ct <- rbind(df_ct_lt, df_ct_rt)
+df_ct <- df_ct %>% 
+  group_by(Observador, Sesion) %>% 
+  summarise(Media = mean(Media))
+
+ggplot() + 
+  geom_col(data = df_ct%>%filter(Sesion == c("1","6")), 
+           aes( x = Observador, y = Media, fill = Sesion), 
+           position = "dodge"
+  ) +
+  xlab("Subject") + 
+  ylab("Mean target id [%]")
+
+  
+
 
 
 # Procesamiento Marzo 2021------------------------------------------------------
@@ -573,15 +643,18 @@ ggplot(data=df_prueba, aes(x=Sesion, y=Media, fill=Expertisia)) +
 
 #Coordenadas de las pelotas del primer trial de MOT con carga atencional que se presentaron
 #a un observador
-df_coordenadas_trial <- data.frame(Pelotas = rep(c("P1","P2","P3","P4","P5","P6","P7","P8","P9","P10","P11","P12"), each = 160), 
-                                   x = as.vector(ls_datos[[1]][["coordenadas"]][["1.3"]][,,1,]), 
-                                   y = as.vector(ls_datos[[1]][["coordenadas"]][["1.3"]][,,2,]),
+df_coordenadas_trial <- data.frame(Pelotas = rep(c("P1","P2","P3","P4","P5","P6","P7","P8"), each = 160), 
+                                   x = as.vector(ls_datos[[6]][["coordenadas"]][["1.120"]][,,1,]), 
+                                   y = as.vector(ls_datos[[6]][["coordenadas"]][["1.120"]][,,2,]),
                                    time = rep(seq(0,8-0.05, by = 0.05), 12))
 
 plot_coor <- ggplot() + 
   geom_point(data = df_coordenadas_trial, aes(x,y,  color = time)) +
-  geom_line(aes(x = as.vector(ls_datos[[1]][["XGaze.mm"]][["1.3"]])*(1024/1650) + 512,
-                 y = as.vector(ls_datos[[1]][["YGaze.mm"]][["1.3"]])*(1024/1650) + 768/2)) 
+  geom_line(aes(x = as.vector(ls_datos[[6]][["XGaze.mm"]][["1.120"]])*(1024/1650) + 512,
+                 y = as.vector(ls_datos[[6]][["YGaze.mm"]][["1.120"]])*(1024/1650) + 768/2))+
+  geom_smooth(aes(x = as.vector(ls_datos[[6]][["XGaze.mm"]][["1.120"]])*(1024/1650) + 512,
+                y = as.vector(ls_datos[[6]][["YGaze.mm"]][["1.120"]])*(1024/1650) + 768/2)) 
+
 
 plot_coor 
 
