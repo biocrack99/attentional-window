@@ -9,6 +9,8 @@ library(tidyverse)
 library(R.matlab)
 library(readr)
 library(reshape2)
+library(ggpval)
+library(ggprism)
 
 # Cargar datos por Grupo y por Observador
 # Existe una carpeta por Observador
@@ -419,53 +421,74 @@ df_obs_lt <- data.frame(Observador = rep(c("jjr", "mab", "mdn"), each = 300),
                                        ls_datos[[12]]$Porcentaje, 
                                        ls_datos[[13]]$Porcentaje, 
                                        ls_datos[[18]]$Porcentaje ), 
-                        Sesion = rep(c("Sesion 1", "Sesion 6"), 3, each=150))
+                        Session = rep(c("Session 1", "Session 6"), 3, each=150))
  
 df_obs <- df_obs_lt %>% 
-                      group_by(Observador, Sesion) %>% 
-                      summarise(Media = mean(Porcentaje))
-
-#Gráfico de barras para comparar el rendimiento en el primer y el ultimo entrenamiento con MOT para los sujetos del grupo LT
-ggplot() + 
-  geom_col(data = df_obs, 
-           aes( x = Observador, y = Media, fill = Sesion), 
-           position = "dodge"
-  ) +
-  xlab("Subject") + 
-  ylab("Mean target id [%]")
-
-
-
-#Grupo LT en promedio 
-df_obs <- df_obs_lt %>% 
-                  group_by(Sesion) %>% 
-                  summarise(Media = mean(Porcentaje)) 
-
-#Gráfico de barras para comparar el rendimiento en el primer y el ultimo entrenamiento con MOT para todos los sujetos del grupo LT
-ggplot() + 
-  geom_col(data = df_obs, 
-           aes( x = Sesion, y = Media), 
-           position = "dodge"
-  ) 
+                      group_by(Observador, Session) %>% 
+                      summarise(Media = mean(Porcentaje), SD = sd(Porcentaje))
 
 #Test t apareado
 TestT <- function(df, name, sesionpre, sesionpos) {
   
-  pre <- subset(df, Observador == name & Sesion == sesionpre, select = c(Porcentaje))
+  pre <- subset(df, Observador == name & Session == sesionpre, select = c(Porcentaje))
   pre <- pre[,1]
-  pos <- subset(df, Observador == name & Sesion == sesionpos , select = c(Porcentaje))
+  pos <- subset(df, Observador == name & Session == sesionpos , select = c(Porcentaje))
   pos <- pos[,1]
-  test <- t.test(pre, pos, paired = T, alternative = "two.sided")
+  test <- t.test(pre, pos, paired = T, alternative = "less")
   print(test$p.value)
   
 }
 
 #JJR
-testjjr <- TestT(df_obs_lt, 'jjr', 'Sesion 1', 'Sesion 6')
+testjjr <- TestT(df_obs_lt, 'jjr', 'Session 1', 'Session 6')
 #MAB
-testmab <- TestT(df_obs_lt, 'mab', 'Sesion 1', 'Sesion 6')
+testmab <- TestT(df_obs_lt, 'mab', 'Session 1', 'Session 6')
 #MDN
-testmab <- TestT(df_obs_lt, 'mdn', 'Sesion 1', 'Sesion 6')
+testmdn <- TestT(df_obs_lt, 'mdn', 'Session 1', 'Session 6')
+
+
+#Gráfico de barras para comparar el rendimiento en el primer y el ultimo entrenamiento con MOT para los sujetos del grupo LT
+
+p_lt <- ggplot(df_obs, aes(x=Session, y=Media)) + 
+  geom_bar(stat="identity", color="black", 
+           position=position_dodge()) +
+  geom_linerange(aes(ymin=Media, ymax=Media+SD), width=.2, size = 1,
+                position=position_dodge(.9)) +
+  facet_wrap(~ Observador)
+
+p_lt + labs(y = "Mean Target id [%]")+
+  theme_bw() +
+  scale_fill_manual(values=c('#999999','#E69F00')) +
+  theme(axis.text = element_text(size = 23),
+        axis.title = element_blank(),
+        legend.text = element_text(size = 20),
+        legend.title = element_blank(),
+        strip.text = element_text(size = 25)) 
+
+#Valores p
+two.means.grouped1 <- tibble::tribble(
+  ~group1, ~group2, ~p.adj,  ~y.position, ~Observador,
+  "Session 1","Session 6",    "****",  110,          "jjr",
+  "Session 1","Session 6",    "***", 110,          "mab",
+  "Session 1","Session 6",    "NS",  110,        "mdn"
+)
+
+p_lt + add_pvalue(two.means.grouped1)
+
+p_lt + labs(y = "Mean Target id [%]")+
+  theme_bw() +
+  scale_fill_manual(values=c('#999999','#E69F00')) +
+  theme(axis.text = element_text(size = 23),
+        axis.title = element_blank(),
+        legend.text = element_text(size = 20),
+        legend.title = element_blank(),
+        strip.text = element_text(size = 25)) +
+  add_pvalue(two.means.grouped1)
+  
+
+
+
+
 
 #Grupo RT--------------------------------------------------------
 df_obs_rt <- data.frame(Observador = rep(c("afb", "cic", "msz", "nga"), each = 300), 
@@ -478,17 +501,17 @@ df_obs_rt <- data.frame(Observador = rep(c("afb", "cic", "msz", "nga"), each = 3
                                         ls_datos[[37]]$Porcentaje,
                                         ls_datos[[42]]$Porcentaje
                                        ), 
-                        Sesion = rep(c("Sesion 1", "Sesion 6"), 4, each=150)
+                        Session = rep(c("Session 1", "Session 6"), 4, each=150)
               )
 
 df_obs <- df_obs_rt %>% 
-                  group_by(Observador, Sesion) %>% 
-                  summarise(Media = mean(Porcentaje))
+                  group_by(Observador, Session) %>% 
+                  summarise(Media = mean(Porcentaje), SD = sd(Porcentaje))
 
 #Gráfico de barras para comparar el rendimiento en el primer y el ultimo entrenamiento con MOT para los sujetos del grupo LT
 ggplot() + 
   geom_col(data = df_obs, 
-           aes( x = Observador, y = Media, fill = Sesion), 
+           aes( x = Observador, y = Media, fill = Session), 
            position = "dodge"
   ) +
   xlab("Subject") + 
@@ -500,24 +523,29 @@ df_obs <- df_obs_lt %>%
           summarise(Media = mean(Porcentaje))
 
 #Gráfico de barras para comparar el rendimiento en el primer y el ultimo entrenamiento con MOT para todos los sujetos del grupo LT
-ggplot() + 
-  geom_col(data = df_obs, 
-           aes( x = Sesion, y = Media), 
-           position = "dodge"
-  )
+p_lt <- ggplot(df_obs, aes(x=Observador, y=Media, fill=Session)) + 
+  geom_bar(stat="identity", color="black", 
+           position=position_dodge()) +
+  geom_linerange(aes(ymin=Media, ymax=Media+SD), width=.2, size = 1,
+                 position=position_dodge(.9)) 
+
+p_lt + labs(x="Subject", y = "Mean Target id [%]")+
+  theme_bw() +
+  scale_fill_manual(values=c('#999999','#E69F00')) +
+  theme(axis.text = element_text(size = 23),
+        axis.title = element_text(size = 20),
+        legend.text = element_text(size = 20),
+        legend.title = element_blank(),
+        strip.text = element_text(size = 25))
+
 #AFB
-testjjr <- TestT(df_obs_rt, 'afb', 'Sesion 1', 'Sesion 6')
+testjjr <- TestT(df_obs_rt, 'afb', 'Sesison 1', 'Session 6')
 #CIC
-testmab <- TestT(df_obs_rt, 'cic', 'Sesion 1', 'Sesion 6')
+testmab <- TestT(df_obs_rt, 'cic', 'Session 1', 'Session 6')
 #MSZ
-testmab <- TestT(df_obs_rt, 'msz', 'Sesion 1', 'Sesion 6')
+testmab <- TestT(df_obs_rt, 'msz', 'Session 1', 'Session 6')
 #NGA
-testmab <- TestT(df_obs_rt, 'nga', 'Sesion 1', 'Sesion 6')
-
-
-
-
-
+testmab <- TestT(df_obs_rt, 'nga', 'Session 1', 'Session 6')
 
 
 
