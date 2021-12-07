@@ -450,42 +450,46 @@ testmdn <- TestT(df_obs_lt, 'mdn', 'Session 1', 'Session 6')
 #Gráfico de barras para comparar el rendimiento en el primer y el ultimo entrenamiento con MOT para los sujetos del grupo LT
 
 p_lt <- ggplot(df_obs, aes(x=Session, y=Media)) + 
-  geom_bar(stat="identity", color="black", 
+  geom_bar(aes(fill = Session), stat="identity", color="black", 
            position=position_dodge()) +
   geom_linerange(aes(ymin=Media, ymax=Media+SD), width=.2, size = 1,
                 position=position_dodge(.9)) +
-  facet_wrap(~ Observador)
+  facet_wrap(~ Observador) +
+  labs(y = "Mean Percentage Target Id [%]")
 
-p_lt + labs(y = "Mean Target id [%]")+
-  theme_bw() +
-  scale_fill_manual(values=c('#999999','#E69F00')) +
-  theme(axis.text = element_text(size = 23),
-        axis.title = element_blank(),
-        legend.text = element_text(size = 20),
-        legend.title = element_blank(),
-        strip.text = element_text(size = 25)) 
+# p_lt + labs(y = "Mean Target id [%]")+
+#   theme_bw() +
+#   scale_fill_manual(values=c('#999999','#E69F00')) +
+#   theme(axis.text = element_text(size = 23),
+#         axis.title = element_blank(),
+#         legend.text = element_text(size = 20),
+#         legend.title = element_blank(),
+#         strip.text = element_text(size = 25)) 
+
+#fucion para elimar el cero de la izquierda en los valores p
+numformat <- function(val) { sub("^(-?)0.", "\\1.", sprintf("%.3f", val)) }
 
 #Valores p
-two.means.grouped1 <- tibble::tribble(
+valores_p_lt <- tibble::tribble(
   ~group1, ~group2, ~p.adj,  ~y.position, ~Observador,
-  "Session 1","Session 6",    "****",  110,          "jjr",
-  "Session 1","Session 6",    "***", 110,          "mab",
-  "Session 1","Session 6",    "NS",  110,        "mdn"
-)
+  "Session 1","Session 6",    "<.001",  110, "jjr",
+  "Session 1","Session 6",    "<.001", 110,  "mab",
+  "Session 1","Session 6",    paste("p =", numformat(signif(testmdn, digits = 3)), sep =" "),  110, "mdn"
+  )
 
-p_lt + add_pvalue(two.means.grouped1)
-
-p_lt + labs(y = "Mean Target id [%]")+
-  theme_bw() +
-  scale_fill_manual(values=c('#999999','#E69F00')) +
-  theme(axis.text = element_text(size = 23),
+#Diseño del gráfico agregando valores de significancia
+p_lt + theme_bw() +
+  theme(axis.title.y = element_text(size = 23),
+        legend.position = "none",
+        #axis.text = element_text(size = 23),
         axis.title = element_blank(),
-        legend.text = element_text(size = 20),
+        legend.text = element_blank(),
         legend.title = element_blank(),
-        strip.text = element_text(size = 25)) +
-  add_pvalue(two.means.grouped1)
+        strip.text = element_text(size = 20)) +
+  add_pvalue(valores_p_lt)
   
 
+  
 
 
 
