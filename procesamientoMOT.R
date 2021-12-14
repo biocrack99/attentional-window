@@ -571,68 +571,80 @@ in_errados <- (sum(is.na(ls_datos_ct[[20]]$RT)))/150
 
 #Sujetos con entrenamiento expandido LFA, LMS, MCM
 #Modo LT
-df_obs_ct_lt <- ldply(ls_datos_ct[c(2:19)], rbind)
+df_obs_ct_lt <- data.frame(Observador = rep(c("lfa", "lms", "mcm"), each = 100), 
+                        Media = c(ls_datos_ct[[2]]$Porcentaje, 
+                                       ls_datos_ct[[7]]$Porcentaje, 
+                                       ls_datos_ct[[8]]$Porcentaje, 
+                                       ls_datos_ct[[13]]$Porcentaje, 
+                                       ls_datos_ct[[14]]$Porcentaje, 
+                                       ls_datos_ct[[19]]$Porcentaje ), 
+                        Session = rep(c("Session 1", "Session 6"), 3, each=50))
 
 df_ct_lt <- df_obs_ct_lt %>% 
-  group_by(Observador, Sesion) %>% 
-  summarise(Media = mean(Porcentaje), SD = sd(Porcentaje)) #%>%
-  # mutate(Proporcion = Media/100, Transformacion=asin(sqrt(Proporcion)))
-            
-# df_ct_lt$Sesion <- as.factor(df_ct_lt$Sesion)
-# 
-# ggplot(filter(df_ct_lt, Sesion == c("1","6"))) + 
-#   geom_col(aes( x = Observador, y = Media, fill = Sesion), 
-#            position = "dodge"
-#   )
-
+  group_by(Observador, Session) %>% 
+  summarise(Porcentaje = mean(Media), SD = sd(Media)) #%>%
+  
 #Modo RT
-df_obs_ct_rt <- ldply(ls_datos_ct[c(21:38)], rbind)
+df_obs_ct_rt <- data.frame(Observador = rep(c("lfa", "lms", "mcm"), each = 100), 
+                           Media = c(ls_datos_ct[[21]]$Porcentaje, 
+                                          ls_datos_ct[[26]]$Porcentaje, 
+                                          ls_datos_ct[[27]]$Porcentaje, 
+                                          ls_datos_ct[[32]]$Porcentaje, 
+                                          ls_datos_ct[[33]]$Porcentaje, 
+                                          ls_datos_ct[[38]]$Porcentaje ), 
+                           Session = rep(c("Session 1", "Session 6"), 3, each=50))
+
 
 df_ct_rt <- df_obs_ct_rt %>% 
-  group_by(Observador, Sesion) %>% 
-  summarise(Media = mean(Porcentaje), SD = sd(Porcentaje)) #%>%
-  #mutate(Proporcion = Media/100, Transformacion=asin(sqrt(Proporcion)))
-
-# df_ct_rt$Sesion <- as.factor(df_ct_rt$Sesion)
-# 
-# ggplot() + 
-#   geom_col(data = df_ct_rt%>%filter(Sesion == c("1","6")), 
-#            aes( x = Observador, y = Media, fill = Sesion), 
-#            position = "dodge"
-#   )
-# 
-# ggplot() + 
-#   geom_col(data = df_ct_rt%>%filter(Sesion == c("1","6")), 
-#            aes( x = Observador, y = Media, fill = Sesion), 
-#            position = "dodge"
-#   )
-
-#Dataframe total
-
+  group_by(Observador, Session) %>% 
+  summarise(Porcentaje = mean(Media), SD = sd(Media))
+  
+#Dataframe total 
+#Unidos los modos lt y rt
+df_ct <- rbind(df_obs_ct_lt, df_obs_ct_rt)
+df_ct <- rename(df_ct, Porcentaje = Media) 
 
 #Test t apareado
-#
 testlfa <- TestT(df_ct, 'lfa', 'Session 1', 'Session 6')
-#CIC
+
 testlms <- TestT(df_ct, 'lms', 'Session 1', 'Session 6')
-#MSZ
+
 testmcm <- TestT(df_ct, 'mcm', 'Session 1', 'Session 6')
 
+df_ct <- rename(df_ct, Media = Porcentaje) 
+
+df_ct <- df_ct %>% 
+  group_by(Observador, Session) %>% 
+  summarise(Porcentaje = mean(Media), SD = sd(Media))
+
+p_ct <- ggplot(df_ct, aes(x=Session, y=Porcentaje)) + 
+  geom_bar(aes(fill = Session), stat="identity", color="black", 
+           position=position_dodge()) +
+  geom_linerange(aes(ymin=Porcentaje, ymax=Porcentaje+SD), width=.2, size = 1,
+                 position=position_dodge(.9)) +
+  facet_wrap(~ Observador) +
+  labs(y = "Mean Percentage Target Id [%]")
+
+#Valores p
+valores_p_ct <- tibble::tribble(
+  ~group1, ~group2, ~p.adj,  ~y.position, ~Observador,
+  "Session 1","Session 6", paste("p =", numformat(signif(testlfa, digits = 3)), sep =" "),  110, "lfa",
+  "Session 1","Session 6", paste("p =", numformat(signif(testlms, digits = 3)), sep =" "),  110, "lms",
+  "Session 1","Session 6", paste("p =", numformat(signif(testmcm, digits = 3)), sep =" "),  110, "mcm")
+
+#Diseño del gráfico agregando valores de significancia
+p_ct + theme_bw() +
+  theme(axis.title.y = element_text(size = 23),
+        legend.position = "none",
+        axis.text.x = element_text(size = 15),
+        axis.text.y = element_text(size = 23),
+        axis.title = element_blank(),
+        legend.text = element_blank(),
+        legend.title = element_blank(),
+        strip.text = element_text(size = 20)) +
+  add_pvalue(valores_p_ct, label.size = 5)
 
 
-
-# ggplot() + 
-#   geom_col(data = df_ct%>%filter(Sesion == c("1","6")), 
-#            aes( x = Observador, y = Media, fill = Sesion), 
-#            position = "dodge"
-#   ) +
-#   xlab("Subject") + 
-#   ylab("Mean target id [%]")
-# 
-#   
-# df_obs <- df_obs_rt %>% 
-#   group_by(Observador, Session) %>% 
-#   summarise(Media = mean(Porcentaje), SD = sd(Porcentaje))
 
 
 # Procesamiento Marzo 2021------------------------------------------------------
