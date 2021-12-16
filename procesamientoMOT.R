@@ -430,13 +430,29 @@ df_obs <- df_obs_lt %>%
 #Test t apareado
 TestT <- function(df, name, sesionpre, sesionpos) {
   
-  pre <- subset(df, Observador == name & Session == sesionpre, select = c(Porcentaje))
-  pre <- pre[,1]
-  pos <- subset(df, Observador == name & Session == sesionpos , select = c(Porcentaje))
-  pos <- pos[,1]
-  test <- t.test(pre, pos, paired = T, alternative = "two.sided")
-  print(test$p.value)
+  if("Porcentaje" %in% colnames(df)){
   
+    pre <- subset(df, Observador == name & Session == sesionpre, select = c(Porcentaje))
+    pre <- pre[,1]
+    pos <- subset(df, Observador == name & Session == sesionpos , select = c(Porcentaje))
+    
+  }
+  else {
+    pre <- subset(df, Observador == name & Session == sesionpre, select = c(Media))
+    pre <- pre[,1]
+    pos <- subset(df, Observador == name & Session == sesionpos , select = c(Media))
+    
+    
+  }
+  
+  
+    
+    pos <- pos[,1]
+    test <- t.test(pre, pos, paired = T, alternative = "two.sided")
+    print(test$p.value)
+    
+    
+    
 }
 
 #JJR
@@ -549,6 +565,51 @@ p_rt + theme_bw() +
         strip.text = element_text(size = 20)) +
   add_pvalue(valores_p_rt, label.size = 5)
 
+#Tiempo de reaccion
+
+unlisted <- function(ls, ind){
+  #Devuelve los tiempos de reaccion de la lista" 
+  
+  output <- c()
+  
+  for (i in ind){
+    
+    output <- append(output, unlist(ls[[i]]$RT))
+      
+  }
+  
+  return(output) 
+  
+}
+
+df_rt <- data.frame(Observador = rep(c("afb", "cic", "msz", "nga"), each = 900), 
+                        Tiempo = unlisted(ls_datos, c(19:42)), 
+                        Session = rep(c("Session 1", "Session 2", "Session 3",  
+                                        "Session 4", "Session 5", "Session 6"), 4, each=150))
+df_rt <- df_rt %>% 
+  group_by(Observador, Session) %>%
+  summarise(Media = mean(Tiempo, na.rm = TRUE), SD = sd(Tiempo, na.rm = T), NS = sum(is.na(Tiempo))  )
+
+p_time <- ggplot(df_rt, aes(x=Session, y=Media)) + 
+  geom_point(aes(fill = Session), stat="identity", color="black", 
+             position=position_dodge(), size = 3) +
+  geom_linerange(aes(ymin=Media-SD, ymax=Media+SD), width=.2, size = 1,
+                 position=position_dodge(.9)) +
+  facet_wrap(~ Observador, ncol = 4) +
+  labs(y = "Mean Reaction Time [sec]") 
+
+p_time + theme_bw() +
+  theme(axis.title.y = element_text(size = 23),
+        legend.position = "none",
+        axis.text.x = element_text(size = 15),
+        axis.text.y = element_text(size = 23),
+        axis.title = element_blank(),
+        legend.text = element_blank(),
+        legend.title = element_blank(),
+        strip.text = element_text(size = 20)) +
+  scale_x_discrete(breaks=c("Session 1","Session 2","Session 3", "Session 4", "Session 5", "Session 6"),
+                   labels=c("S1", "S2","S3", "S4", "S5","S6"))
+
 
 #Grupo CT--------------------------------------------------------
 #AT
@@ -599,6 +660,119 @@ df_ct_rt <- df_obs_ct_rt %>%
   group_by(Observador, Session) %>% 
   summarise(Porcentaje = mean(Media), SD = sd(Media))
   
+#Graficos
+#LT
+#Test t apareado
+testlfa_lt <- TestT(df_obs_ct_lt, 'lfa', 'Session 1', 'Session 6')
+
+testlms_lt <- TestT(df_obs_ct_lt, 'lms', 'Session 1', 'Session 6')
+
+testmcm_lt <- TestT(df_obs_ct_lt, 'mcm', 'Session 1', 'Session 6')
+
+
+p_ct_lt <- ggplot(df_ct_lt, aes(x=Session, y=Porcentaje)) + 
+  geom_bar(aes(fill = Session), stat="identity", color="black", 
+           position=position_dodge()) +
+  geom_linerange(aes(ymin=Porcentaje, ymax=Porcentaje+SD), width=.2, size = 1,
+                 position=position_dodge(.9)) +
+  facet_wrap(~ Observador) +
+  labs(y = "Mean Percentage Target Id [%]")
+
+#Valores p
+valores_p_ct_lt <- tibble::tribble(
+  ~group1, ~group2, ~p.adj,  ~y.position, ~Observador,
+  "Session 1","Session 6", paste("p =", numformat(signif(testlfa_lt, digits = 3)), sep =" "),  110, "lfa",
+  "Session 1","Session 6", paste("p =", numformat(signif(testlms_lt, digits = 3)), sep =" "),  110, "lms",
+  "Session 1","Session 6", paste("p =", numformat(signif(testmcm_lt, digits = 3)), sep =" "),  110, "mcm")
+
+#Diseño del gráfico agregando valores de significancia
+p_ct_lt + theme_bw() +
+  theme(axis.title.y = element_text(size = 23),
+        legend.position = "none",
+        axis.text.x = element_text(size = 15),
+        axis.text.y = element_text(size = 23),
+        axis.title = element_blank(),
+        legend.text = element_blank(),
+        legend.title = element_blank(),
+        strip.text = element_text(size = 20)) +
+  add_pvalue(valores_p_ct_lt, label.size = 5)
+
+#RT
+#Test t apareado
+testlfa_rt <- TestT(df_obs_ct_rt, 'lfa', 'Session 1', 'Session 6')
+
+testlms_rt <- TestT(df_obs_ct_rt, 'lms', 'Session 1', 'Session 6')
+
+testmcm_rt <- TestT(df_obs_ct_rt, 'mcm', 'Session 1', 'Session 6')
+
+
+p_ct_rt <- ggplot(df_ct_rt, aes(x=Session, y=Porcentaje)) + 
+  geom_bar(aes(fill = Session), stat="identity", color="black", 
+           position=position_dodge()) +
+  geom_linerange(aes(ymin=Porcentaje, ymax=Porcentaje+SD), width=.2, size = 1,
+                 position=position_dodge(.9)) +
+  facet_wrap(~ Observador) +
+  labs(y = "Mean Percentage Target Id [%]")
+
+#Valores p
+valores_p_ct_rt <- tibble::tribble(
+  ~group1, ~group2, ~p.adj,  ~y.position, ~Observador,
+  "Session 1","Session 6", paste("p =", numformat(signif(testlfa_rt, digits = 3)), sep =" "),  110, "lfa",
+  "Session 1","Session 6", paste("p =", numformat(signif(testlms_rt, digits = 3)), sep =" "),  110, "lms",
+  "Session 1","Session 6", paste("p =", numformat(signif(testmcm_rt, digits = 3)), sep =" "),  110, "mcm")
+
+#Diseño del gráfico agregando valores de significancia
+p_ct_rt + theme_bw() +
+  theme(axis.title.y = element_text(size = 23),
+        legend.position = "none",
+        axis.text.x = element_text(size = 15),
+        axis.text.y = element_text(size = 23),
+        axis.title = element_blank(),
+        legend.text = element_blank(),
+        legend.title = element_blank(),
+        strip.text = element_text(size = 20)) +
+  add_pvalue(valores_p_ct_rt, label.size = 5)
+
+
+#Tiempo de reaccion
+
+df_ct_tiempo <- data.frame(Observador = rep(c("lfa", "lms", "mcm"), each = 300), 
+                    Tiempo = unlisted(ls_datos_ct, c(21:38)), 
+                    Session = rep(c("Session 1", "Session 2", "Session 3",  
+                                    "Session 4", "Session 5", "Session 6"), 3, each=50))
+
+df_ct_tiempo <- df_ct_tiempo %>% 
+  group_by(Observador, Session) %>%
+  summarise(Media = mean(Tiempo, na.rm = TRUE), SD = sd(Tiempo, na.rm = T), NS = sum(is.na(Tiempo))  )
+
+p_ct_time <- ggplot(df_ct_tiempo, aes(x=Session, y=Media)) + 
+  geom_point(aes(fill = Session), stat="identity", color="black", 
+             position=position_dodge(), size = 3) +
+  geom_linerange(aes(ymin=Media-SD, ymax=Media+SD), width=.2, size = 1,
+                  position=position_dodge(.9)) +
+  facet_wrap(~ Observador, ncol = 3) +
+  labs(y = "Mean Reaction Time [sec]") 
+
+p_ct_time + theme_bw() +
+  theme(axis.title.y = element_text(size = 23),
+        legend.position = "none",
+        axis.text.x = element_text(size = 15),
+        axis.text.y = element_text(size = 23),
+        axis.title = element_blank(),
+        legend.text = element_blank(),
+        legend.title = element_blank(),
+        strip.text = element_text(size = 20)) +
+  scale_x_discrete(breaks=c("Session 1","Session 2","Session 3", "Session 4", "Session 5", "Session 6"),
+                   labels=c("S1", "S2","S3", "S4", "S5","S6"))
+
+
+
+
+
+
+
+
+
 #Dataframe total 
 #Unidos los modos lt y rt
 df_ct <- rbind(df_obs_ct_lt, df_obs_ct_rt)
