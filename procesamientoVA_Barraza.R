@@ -1391,6 +1391,117 @@ tab_model(
   file = "B:/Dropbox/Posdoc/Percepcion Deporte/Experimento MOT VA/Graficos/Ajuste GLMM/Tabla.html"
 )
 
+##Datos obtenidos del último experimento
+##Fecha: 28/05/2022
+##Objetivo: Tiempo de entrenamiento de dos semanas. Probar sí el entrenamiento
+##con MOT es dependiente del tiempo de entrenamiento.
+
+
+
+##Carga de los datos
+#Listas para guardar los datos segun la cantidad de obsevadores
+N <- 7
+list_datosRaw_new <- vector("list", N)
+list_datos_new <- vector("list", N)
+list_gaze_new <- vector ("list", N)
+list_fixations_new <- vector("list", N)
+list_fixations_new <- list()
+
+#Datos
+setwd("C:\\Users\\USUARIO\\Desktop\\Datos Exp Anibal\\Ventana\\Feb2022\\Pre")
+#Leo los nombres de los de archivos que contienen la extenxion .csv
+files <- list.files(pattern = "*.mat", full.names = T)
+#Cargo los datos de esos archivos en una tabla y uno las filas
+for (i in seq_along(files))  {
+  
+  matlabFile  <- readMat(files[i])
+  varNames    <- names(matlabFile$estructura.datos[,,1])
+  datList     <- matlabFile$estructura.datos
+  #datList    <- lapply(datList, unlist, use.names=FALSE)
+  data_mat    <- as.data.frame(datList)
+  #names(data_mat) <- varNames
+  datos <- as.data.frame(t(data_mat))
+  
+  # GAZE --------------------------------------------------------------------
+  #corto los datos del gaze 
+  for (k in seq_along(1:Ntrials)){
+    
+    if (k == 1) {
+      
+      datos$XGaze.mm[[k]] <-  datos$XGaze.mm[[k]][169:184]
+      datos$YGaze.mm[[k]] <-  datos$YGaze.mm[[k]][169:184]
+      
+    }
+    
+    else{
+      
+      datos$XGaze.mm[[k]] <-  datos$XGaze.mm[[k]][69:84]
+      datos$YGaze.mm[[k]] <-  datos$YGaze.mm[[k]][69:84]
+      
+    }
+  }
+  #convierto de list a numeric
+  datos[c(varNames[1:6])] <-sapply(datos[c(varNames[1:6])], as.numeric)
+  #redondeo los datos de la separacion
+  datos$Separacion <- round(datos$Separacion, digits = 0)
+  #creo data frame sin los datos del gaze
+  datos_sin_Gaze <- datos[,-(7:ncol(datos))]
+  #convierto a tabla
+  tabla <- tbl_df(datos_sin_Gaze)
+  
+  #obtengo nuevas variables
+  tabla_total <- mutate(tabla, 
+                        correctas_A = Cantidad.TGC.1 ==  Respuesta.A, 
+                        correctas_B = Cantidad.TGC.2 == Respuesta.B)
+  
+  
+  #obtengo las respuesta correctas
+  #tabla_total <- mutate(tabla_total, correctas = correctas_A == correctas_B)
+  tabla_total <- mutate(tabla_total, 
+                        correctas = (correctas_A == TRUE & correctas_B == TRUE))
+  
+  
+  #convierto a numero variables logicas
+  tabla_total[c(7:9)] <- sapply(tabla_total[c(7:9)], as.numeric)
+  #Elimino la primer fila de los datos debido a que se usa para
+  #enseñar el estimulo al obsevador y para tener una referencia a la 
+  #hora de la fijacion en los demas trials
+  tabla_total = tabla_total[-1,]
+  #Cambio nombres de columnas
+  colnames(tabla_total)[c(1,2,3,4)] <- c("Cantidad_TGC_1", "Cantidad_TGC_2", "Respuesta_A", "Respuesta_B")
+  
+  #promedios de las respuesta
+  averages <- tabla_total %>% group_by( Direccion, Separacion) %>% 
+    dplyr::summarise(n = n(), nYes = sum(correctas), nNo = n - nYes, p = nYes / n)
+  #genero columna para los observadores
+  averages$observadores <- substr(files[i], 3,5) 
+  
+  #lista de los datos crudos
+  list_datosRaw_new[i] <- list(data.frame(tabla_total))
+  
+  
+  #lista de los datos
+  list_datos_new[i] <- list(averages)
+  
+  #lista del gaze
+  list_gaze_new[i] <- list(datos[,-(1:4)]) 
+  
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 overdisp_fun <- function(model) {
   ## number of variance parameters in an n-by-n variance-covariance matrix
