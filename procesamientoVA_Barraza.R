@@ -497,7 +497,6 @@ rm(list=setdiff(ls(), c("list_datos", "list_gaze", "Ntrials", "list_datosRaw", "
 
 
 # PROCESAMIENTO -----------------------------------------------------------
-
 #1- Agrego columna pre y pos en la lista donde se encuentras los datos
 
 for (i in seq_along(list_datos)){
@@ -1398,18 +1397,20 @@ tab_model(
 
 
 
-##Carga de los datos
-#Listas para guardar los datos segun la cantidad de obsevadores
+##CARGAR LOS DATOS
+#Listas para guardar los datos segun la cantidad de obsevadores<
 N <- 7
 list_datosRaw_new <- vector("list", N)
 list_datos_new <- vector("list", N)
 list_gaze_new <- vector ("list", N)
 list_fixations_new <- vector("list", N)
-list_fixations_new <- list()
+list_fixations_raw_new <- list()
+Ntrials <- 336
 
-#Datos
+
+#Ubico directorio pre entrenamiento 
 setwd("C:\\Users\\USUARIO\\Desktop\\Datos Exp Anibal\\Ventana\\Feb2022\\Pre")
-#Leo los nombres de los de archivos que contienen la extenxion .csv
+#Leo los nombres de los de archivos que contienen la extenxion .mat
 files <- list.files(pattern = "*.mat", full.names = T)
 #Cargo los datos de esos archivos en una tabla y uno las filas
 for (i in seq_along(files))  {
@@ -1487,14 +1488,434 @@ for (i in seq_along(files))  {
   list_gaze_new[i] <- list(datos[,-(1:4)]) 
   
 }
+#Ubico directorio pos entrenamiento
+setwd("C:\\Users\\USUARIO\\Desktop\\Datos Exp Anibal\\Ventana\\Feb2022\\Pos")
+#Leo los nombres de los de archivos que contienen la extenxion .mat
+files <- list.files(pattern = "*.mat", full.names = T)
+#Cargo los datos de esos archivos en una tabla y uno las filas
+for (i in seq_along(files))  {
+  
+  matlabFile  <- readMat(files[i])
+  varNames    <- names(matlabFile$estructura.datos[,,1])
+  datList     <- matlabFile$estructura.datos
+  #datList    <- lapply(datList, unlist, use.names=FALSE)
+  data_mat    <- as.data.frame(datList)
+  #names(data_mat) <- varNames
+  datos <- as.data.frame(t(data_mat))
+  
+  # GAZE --------------------------------------------------------------------
+  #corto los datos del gaze 
+  for (k in seq_along(1:Ntrials)){
+    
+    if (k == 1) {
+      
+      datos$XGaze.mm[[k]] <-  datos$XGaze.mm[[k]][169:184]
+      datos$YGaze.mm[[k]] <-  datos$YGaze.mm[[k]][169:184]
+      
+    }
+    
+    else{
+      
+      datos$XGaze.mm[[k]] <-  datos$XGaze.mm[[k]][69:84]
+      datos$YGaze.mm[[k]] <-  datos$YGaze.mm[[k]][69:84]
+      
+    }
+  }
+  #convierto de list a numeric
+  datos[c(varNames[1:6])] <-sapply(datos[c(varNames[1:6])], as.numeric)
+  #redondeo los datos de la separacion
+  datos$Separacion <- round(datos$Separacion, digits = 0)
+  #creo data frame sin los datos del gaze
+  datos_sin_Gaze <- datos[,-(7:ncol(datos))]
+  #convierto a tabla
+  tabla <- tbl_df(datos_sin_Gaze)
+  
+  #obtengo nuevas variables
+  tabla_total <- mutate(tabla, 
+                        correctas_A = Cantidad.TGC.1 ==  Respuesta.A, 
+                        correctas_B = Cantidad.TGC.2 == Respuesta.B)
+  
+  
+  #obtengo las respuesta correctas
+  #tabla_total <- mutate(tabla_total, correctas = correctas_A == correctas_B)
+  tabla_total <- mutate(tabla_total, 
+                        correctas = (correctas_A == TRUE & correctas_B == TRUE))
+  
+  
+  #convierto a numero variables logicas
+  tabla_total[c(7:9)] <- sapply(tabla_total[c(7:9)], as.numeric)
+  #Elimino la primer fila de los datos debido a que se usa para
+  #enseñar el estimulo al obsevador y para tener una referencia a la 
+  #hora de la fijacion en los demas trials
+  tabla_total = tabla_total[-1,]
+  #Cambio nombres de columnas
+  colnames(tabla_total)[c(1,2,3,4)] <- c("Cantidad_TGC_1", "Cantidad_TGC_2", "Respuesta_A", "Respuesta_B")
+  
+  #promedios de las respuesta
+  averages <- tabla_total %>% group_by( Direccion, Separacion) %>% 
+    dplyr::summarise(n = n(), nYes = sum(correctas), nNo = n - nYes, p = nYes / n)
+  #genero columna para los observadores
+  averages$observadores <- substr(files[i], 3,5) 
+  
+  #lista de los datos crudos
+  list_datosRaw_new[7+i] <- list(data.frame(tabla_total))
+  
+  
+  #lista de los datos
+  list_datos_new[7+i] <- list(averages)
+  
+  #lista del gaze
+  list_gaze_new[7+i] <- list(datos[,-(1:4)]) 
+  
+}
+
+##PROCESAMIENTO-----------------------------------------------------------------
+#1- Agrego columna pre y pos en la lista donde se encuentras los datos
+for (i in seq_along(list_datos_new)){
+  
+  if (i <= (length(list_datos_new)/2)){
+    
+    list_datos_new[[i]]$condicion <- c("pre")
+    
+  }
+  
+  else {
+    
+    list_datos_new[[i]]$condicion <- c("pos")
+    
+  }
+  
+  
+}
+
+#2- Agrego columna con los grupos en la lista donde se encuentras los datos
+for (i in seq_along(list_datos_new)){
+  
+  if ((list_datos_new[[i]]$observadores == "lmc" )||(list_datos_new[[i]]$observadores == "adp" )||(list_datos_new[[i]]$observadores == "oup"))
+    {
+    
+    list_datos_new[[i]]$grupo <- c("rt")
+    
+    }
+  
+  else #((list_datos_new[[i]]$observadores == "lms" )||(list_datos_new[[i]]$observadores == "sh")|| (list_datos_new[[i]]$observadores == "vba")|| (list_datos_new[[i]]$observadores == "jfb") )
+    {
+    
+    list_datos_new[[i]]$grupo <- c("lt")
+    
+    }
+    
+}
+
+#3- Creo un dataframe con la lista de datos
+
+df_datos_new <- ldply (list_datos_new, data.frame)
+
+#4- Agrego los nombres de los observadores a la lista del gaze
+
+obs <- c("pre_adp", "pre_jbf", "pre_lmc", "pre_mls", 
+         "pre_oup", "pre_sh", "pre_vba", "pos_adp", 
+         "pos_jbf", "pos_lmc", "pos_mls", "pos_oup", 
+         "pos_sh", "pos_vba")
+
+names(list_gaze_new) <- obs 
+
+##GAZE LIBRERIA saccades ------------------------------------------
+#6- Libreria saccades
+#Creo una lista para preparar los datos según la libreria saccades
+#usando a los datos de todos los observadores 
+for (i in seq_along(list_gaze_new)){
+  
+  
+  gaze <- data.frame(#time = rep(c(0:0.02:83*0.02), 336), 
+    time = rep(seq(1.38,1.68, by = 0.02),336),
+    x = unlist(list_gaze_new[[i]]$XGaze.mm), 
+    y = unlist(list_gaze_new[[i]]$YGaze.mm), 
+    trial = rep(c(1:336), each = 16)#84
+  )
+  
+  
+  
+  fixationsraw <- detect.fixations(gaze, 
+                                   lambda = 10, 
+                                   smooth.coordinates = TRUE, 
+                                   smooth.saccades = FALSE
+  )
+  #sin filtrar
+  list_fixations_raw_new[i] <- list(fixationsraw)
+  
+  #Calculo la distancia de las fijaciones detectadas a
+  #la fijacion del primer trial
+  fixationsraw$dist <- sqrt((fixationsraw$x-fixationsraw$x[1])^2 +
+                              (fixationsraw$y-fixationsraw$y[1])^2
+  ) 
+  
+  #fixationsraw$distrela <- sqrt((fixationsraw$x - lag(fixationsraw$x, default = NA))^2 + 
+  #                               (fixationsraw$y - lag(fixationsraw$y, default = NA))^2)
+  
+  #Calculo los valores outliers de las fijacinones en x e y 
+  outliersx <- boxplot.stats(fixationsraw$x)$out
+  outliersy <- boxplot.stats(fixationsraw$y)$out
+  
+  #Encuentro y elimino los trials donde se producen esos valores
+  #de fijaciones
+  #Para x
+  fixationsraw <- fixationsraw[-which(fixationsraw$x %in% outliersx),] 
+  #Para y
+  fixationsraw <- fixationsraw[-which(fixationsraw$y %in% outliersy),] 
+  
+  #ordeno las fijaciones de mayor a menor distancia a la fijacion
+  #del primer trial
+  #fixationsraw <- fixationsraw[order(-fixationsraw$dist),]
+  
+  #elimino el 10% de las fijaciones mas alejadas
+  #fixationsraw <- fixationsraw[-c(1:round(0.1*nrow(fixationsraw))),]
+  
+  #elimino las fijaciones detectadas con duracion 0
+  fixationsraw <- filter(fixationsraw, dur != 0)
+  
+  
+  
+  #Agrego a la lista de fijaciones
+  #ordeno las fijaciones por trial
+  #fixationsraw <- fixationsraw[order(fixationsraw$trial),]
+  
+  #filtradas
+  list_fixations_new[i] <- list(fixationsraw)
+  
+  
+  
+}
+
+#6.1
+#Agrego columna pre y pos en la lista donde 
+#se encuentras los datos de la fijaciones
+for (i in seq_along(list_fixations_new)){
+  
+  if (i <= (length(list_fixations_new)/2)){
+    
+    list_fixations_new[[i]]$condicion <- c("pre")
+    
+  }
+  
+  else {
+    
+    list_fixations_new[[i]]$condicion <- c("pos")
+    
+  }
+  
+  
+}
+
+#6.2
+#Variable para el nombre de los observadores
+names(list_fixations_new) <- obs 
+
+#6.3
+#Lazo para detectar la cantidad de trials aceptados
+#para el post-procesamiento. 
+vr_index_trial <- 1:336
+porcentajeTrialFinal_new <- NA
+trialDescartar <- NA
+df_porcetaje_trials_new <- 1:14
+for (i in seq_along(list_fixations_new)){
+  
+  n <- list_fixations_new[[i]] %>% 
+    group_by(trial) %>%
+    dplyr::summarise (n=n())
+  # Vector con la cantidad de trials eliminados
+  porcentajeTrialFinal_new <-  nrow(n)/336
+  #list_fixations[[i]]$porcentajeTrialOk <- porcentajeTrialFinal  
+  # Busco los trials para descartar
+  trialDescartar <- which(is.na(match(vr_index_trial,n$trial)))               
+  list_fixations_new[[i]] <- list(list_fixations_new[[i]], 
+                              porcentajeTrialFinal_new, 
+                              trialDescartar)
+  df_porcetaje_trials_new[i] <- porcentajeTrialFinal_new
+}
+
+df_porcetaje_trials_new <- data.frame(obs, 
+                                  porcentaje = df_porcetaje_trials_new,
+                                  condicion = c('pre', 'pre', 'pre',
+                                                'pre', 'pre', 'pre',
+                                                'pre', 'pos', 'pos',
+                                                'pos', 'pos', 'pos',
+                                                'pos', 'pos'))
+
+#6.4 Elimino los trials donde no hay fijacion de la lista 
+#de datos crudos para cada observador y creo una lista con 
+#variables nuevas para las respuesta del observador 
+list_datos_filtrados_new <- vector("list", 14)
+for (i in seq_along(list_datosRaw_new)){
+  
+  list_datos_filtrados_new[[i]] <- list_datosRaw_new[[i]]
+  
+  if (!is_empty(list_fixations_new[[i]][[3]])){
+    
+    
+    list_datos_filtrados_new[[i]] <-list_datos_filtrados_new[[i]][-list_fixations_new[[i]][[3]], ]
+    
+  }
+  
+  else {
+    
+    list_datos_filtrados_new[[i]] <- list_datos_filtrados_new[[i]]
+    
+  }
+  
+  
+  
+  list_datos_filtrados_new[[i]] <- mutate(list_datos_filtrados_new[[i]], 
+                                      correctas_A = Cantidad_TGC_1 == Respuesta_A, 
+                                      correctas_B = Cantidad_TGC_2 == Respuesta_B
+  )
+  #Obtengo las respuesta correctas
+  list_datos_filtrados_new[[i]] <- mutate(list_datos_filtrados_new[[i]], 
+                                      correctas = (correctas_A == 1 & 
+                                                     correctas_B == 1
+                                                   
+                                      )
+                                      
+  )
+  #list_datos_filtrados[[i]] <- list_datos_filtrados[[i]] %>% 
+  #  group_by( Direccion, Separacion) %>% 
+  #  dplyr::summarise(n = n(), 
+  #                   nYes = sum(correctas), 
+  #                   nNo = n - nYes, 
+  #                   p = nYes / n)  
+  
+  
+}
+names(list_datos_filtrados_new) <- obs 
+
+#6.5 Agrego columna pre y pos en la lista donde se encuentras los datos
+for (i in seq_along(list_datos_filtrados_new)){
+  
+  if (i <= (length(list_datos_filtrados_new)/2)){
+    
+    list_datos_filtrados_new[[i]]$condicion <- c("pre")
+    
+  }
+  
+  else {
+    
+    list_datos_filtrados_new[[i]]$condicion <- c("pos")
+    
+  }
+  
+  #list_datos_filtrados[[i]]$observadores <- list_datos[[i]]$observadores 
+  list_datos_filtrados_new[[i]]$observadores <- list_datos_new[[i]]$observadores[1]
+}
+
+#6.6 Agrego columna con los grupos en la lista donde se encuentras los datos
+for (i in seq_along(list_datos_filtrados_new)){
+  
+  if ((list_datos_new[[i]]$observadores == "lmc" )||(list_datos_new[[i]]$observadores == "adp" )||(list_datos_new[[i]]$observadores == "oup"))
+  {
+    
+    list_datos_new[[i]]$grupo <- c("rt")
+    
+  }
+  
+  else #((list_datos_new[[i]]$observadores == "lms" )||(list_datos_new[[i]]$observadores == "sh")|| (list_datos_new[[i]]$observadores == "vba")|| (list_datos_new[[i]]$observadores == "jfb") )
+  {
+    
+    list_datos_new[[i]]$grupo <- c("lt")
+    
+  }
+  
+}
+
+#6.7 Summarize para el data frame de los porcentajes, quiero ver
+# si hay cambio o no entre pre y pos
+
+df_media_porcentaje_new <- df_porcetaje_trials_new %>%
+  
+  group_by(condicion) %>% summarise(media = median(porcentaje),
+                                    desviacion = sd(porcentaje),
+                                    mediana = median(porcentaje))
+
+#6.8 Gráfico gaze y fijaciones
+
+#Creo data.frame con los datos de fijaciones crudas y las fijaciones filtradas
+df_fixation_raw_new <- as.data.frame(do.call(rbind, list_fixations_raw_new))
+nfixationsraw_new <- unlist(lapply(list_fixations_raw_new,nrow))
+df_fixation_raw_new$observadores <- rep(c('adp', 'jbf', 'lmc','mls','oup',
+                                      'sh', 'vba', 'adp', 'jbf', 'lmc','mls','oup',
+                                      'sh', 'vba' ), nfixationsraw_new)
+
+df_fixation_raw_new <- df_fixation_raw_new[,c(1,4,5,11)]
+
+#Agrego condicion
+df_fixation_raw_new$condicion <- rep(c('pre', 'pos'), 
+                                 c(sum(nfixationsraw_new[1:7]),
+                                   sum(nfixationsraw_new[8:14])))
+#Agrego tipo
+df_fixation_raw_new$tipo <- 'raw'
 
 
 
 
+#Data frame fijaciones filtradas
+df_fixation_new <- data.frame()
+nfixations_new <- c()
+for (i in seq_along(list_fixations_new)){
+  
+  #df_temp <- data.frame()
+  df_temp_new <- list_fixations_new[[i]][[1]]
+  nfixations_new <- append(nfixations_new, length(list_fixations_new[[i]][[1]]$trial))
+  df_fixation_new <- rbind(df_fixation_new, df_temp_new)
+}
+
+df_fixation_new <- df_fixation_new[,c(1,4,5,12)]
+df_fixation_new$observadores <- rep(c('adp', 'jbf', 'lmc','mls','oup',
+                                  'sh', 'vba', 'adp', 'jbf', 'lmc','mls','oup',
+                                  'sh', 'vba' ), nfixations_new)
+df_fixation_new$tipo <- 'filter'
+
+#Dataframe final
+df_fixations_total_new <- rbind(df_fixation_raw_new,df_fixation_new)
 
 
+#Graficos
+
+ggplot(df_fixations_total_new) + geom_point(aes(x,y, color= condicion)) +
+  facet_wrap(~observadores + tipo)
+
+#Selecciono los observadores para el gráfico
+facets <- c("adp", "jbf", "lmc", "vba")
+colnames(df_fixations_total_new)[c(4,5,6)] <- c("Subjects", "Condition","Type")
+#Grafico 1
+p1 <- ggplot(transform(df_fixations_total_new[ df_fixations_total_new$Subjects %in% facets,],
+                       Type = factor(Type, levels = c("raw", "filter")))) + 
+  
+  geom_point(data = filter(transform(df_fixations_total_new[ df_fixations_total_new$Subjects %in% facets,],
+                                     Type = factor(Type, levels = c("raw", "filter"))),
+                           Type =="raw"),
+             aes(x,y,alpha = Condition, fill = Condition), colour = "black", size = 5, pch=21) + 
+  
+  geom_point(data = filter(transform(df_fixations_total_new[ df_fixations_total_new$Subjects %in% facets,],
+                                     Type = factor(Type, levels = c("raw", "filter"))), 
+                           Type =="filter"),
+             aes(x,y,alpha = Condition, fill = Condition), colour = "black", size = 5, pch=21) +
+  
+  scale_alpha_discrete(range = c(0.5, 0.5)) +
+  
+  facet_wrap(~Subjects+Type, ncol = 4) 
 
 
+#Algunos cambios de diseño
+p1 + theme_bw() +
+  labs(x ="Gaze X Coordinate [mm]", y = "Gaze Y Coordinate [mm]") +
+  
+  scale_x_continuous(labels = c("-400","-200", "0", "200", "400"), 
+                     breaks = c(-400, -200,0,200,400)) + 
+  
+  theme(axis.text = element_text(size = 23),
+        axis.title = element_text(size = 20),
+        legend.text = element_text(size = 20),
+        legend.title = element_blank(),
+        strip.text = element_text(size = 25))
 
 
 
